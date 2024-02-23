@@ -35,6 +35,7 @@ import fr.gouv.vitam.collect.internal.core.helpers.CollectHelper;
 import fr.gouv.vitam.collect.internal.core.helpers.builders.DbVersionsModelBuilder;
 import fr.gouv.vitam.collect.internal.core.repository.MetadataRepository;
 import fr.gouv.vitam.common.PropertiesUtils;
+import fr.gouv.vitam.common.VitamConfiguration;
 import fr.gouv.vitam.common.format.identification.FormatIdentifier;
 import fr.gouv.vitam.common.format.identification.FormatIdentifierFactory;
 import fr.gouv.vitam.common.format.identification.model.FormatIdentifierResponse;
@@ -49,9 +50,9 @@ import fr.gouv.vitam.common.thread.RunWithCustomExecutor;
 import fr.gouv.vitam.common.thread.RunWithCustomExecutorRule;
 import fr.gouv.vitam.common.thread.VitamThreadPoolExecutor;
 import fr.gouv.vitam.common.thread.VitamThreadUtils;
+import fr.gouv.vitam.common.tmp.TempFolderRule;
 import fr.gouv.vitam.workspace.client.WorkspaceClient;
 import fr.gouv.vitam.workspace.client.WorkspaceClientFactory;
-import org.assertj.core.api.Assertions;
 import org.junit.Rule;
 import org.junit.Test;
 import org.mockito.InjectMocks;
@@ -61,11 +62,13 @@ import org.mockito.junit.MockitoRule;
 
 import javax.ws.rs.core.Response;
 import java.io.ByteArrayInputStream;
+import java.io.File;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 
 import static fr.gouv.vitam.common.model.administration.DataObjectVersionType.BINARY_MASTER;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -84,6 +87,8 @@ public class CollectServiceTest {
         new RunWithCustomExecutorRule(VitamThreadPoolExecutor.getDefaultExecutor());
     @Rule public MockitoRule mockitoRule = MockitoJUnit.rule();
 
+    @Rule public TempFolderRule tempFolder = new TempFolderRule();
+
     @InjectMocks private CollectService collectService;
 
     @Mock private MetadataRepository metadataRepository;
@@ -100,8 +105,8 @@ public class CollectServiceTest {
         // When
         CollectUnitModel archiveUnitModel = collectService.getArchiveUnitModel(unitId);
         // Then
-        Assertions.assertThat(archiveUnitModel).isNotNull();
-        Assertions.assertThat(archiveUnitModel.getId()).isEqualTo(unitId);
+        assertThat(archiveUnitModel).isNotNull();
+        assertThat(archiveUnitModel.getId()).isEqualTo(unitId);
     }
 
     @Test
@@ -114,8 +119,8 @@ public class CollectServiceTest {
         // When
         InputStream inputStreamFromWorkspace = collectService.getInputStreamFromWorkspace("containerName", "fileName");
         // Then
-        Assertions.assertThat(inputStreamFromWorkspace).isNotNull();
-        Assertions.assertThat(inputStreamFromWorkspace.readAllBytes()).isEqualTo("ResponseOK".getBytes());
+        assertThat(inputStreamFromWorkspace).isNotNull();
+        assertThat(inputStreamFromWorkspace.readAllBytes()).isEqualTo("ResponseOK".getBytes());
     }
 
     @Test
@@ -132,9 +137,9 @@ public class CollectServiceTest {
         // When
         Response binaryByUsageAndVersion = collectService.getBinaryByUsageAndVersion(unitModel, BINARY_MASTER, 1);
         // Then
-        Assertions.assertThat(binaryByUsageAndVersion).isNotNull();
-        Assertions.assertThat(binaryByUsageAndVersion.getStatus()).isEqualTo(200);
-        Assertions.assertThat(binaryByUsageAndVersion.readEntity(InputStream.class).readAllBytes())
+        assertThat(binaryByUsageAndVersion).isNotNull();
+        assertThat(binaryByUsageAndVersion.getStatus()).isEqualTo(200);
+        assertThat(binaryByUsageAndVersion.readEntity(InputStream.class).readAllBytes())
             .isEqualTo("ResponseOK".getBytes());
     }
 
@@ -152,8 +157,8 @@ public class CollectServiceTest {
         // When
         ObjectDto objectDto = collectService.updateOrSaveObjectGroup(unitModel, BINARY_MASTER, 1, myObjectDto);
         // Then
-        Assertions.assertThat(objectDto).isNotNull();
-        Assertions.assertThat(objectDto.getFileInfo()).isEqualTo(new FileInfoDto("filename", "lastname"));
+        assertThat(objectDto).isNotNull();
+        assertThat(objectDto.getFileInfo()).isEqualTo(new FileInfoDto("filename", "lastname"));
     }
 
     @Test
@@ -186,8 +191,8 @@ public class CollectServiceTest {
         // When
         ObjectDto objectDto = collectService.updateOrSaveObjectGroup(unitModel, BINARY_MASTER, 1, myObjectDto);
         // Then
-        Assertions.assertThat(objectDto).isNotNull();
-        Assertions.assertThat(objectDto.getFileInfo()).isEqualTo(new FileInfoDto("filename", "lastname"));
+        assertThat(objectDto).isNotNull();
+        assertThat(objectDto.getFileInfo()).isEqualTo(new FileInfoDto("filename", "lastname"));
     }
 
     @Test
@@ -221,8 +226,8 @@ public class CollectServiceTest {
         ObjectDto myObjectDto = new ObjectDto("1", new FileInfoDto("filename", "lastname"));
         ObjectDto objectDto = collectService.updateOrSaveObjectGroup(unitModel, BINARY_MASTER, 3, myObjectDto);
         // When
-        Assertions.assertThat(objectDto).isNotNull();
-        Assertions.assertThat(objectDto.getFileInfo()).isEqualTo(new FileInfoDto("filename", "lastname"));
+        assertThat(objectDto).isNotNull();
+        assertThat(objectDto.getFileInfo()).isEqualTo(new FileInfoDto("filename", "lastname"));
     }
 
     @Test
@@ -243,8 +248,8 @@ public class CollectServiceTest {
         // When
         DbObjectGroupModel dbObjectGroup = collectService.getDbObjectGroup(unitModel);
         // Then
-        Assertions.assertThat(dbObjectGroup).isNotNull();
-        Assertions.assertThat(dbObjectGroup.getId()).isEqualTo("aeeaaaaaacfm6tqsaa4kkamaddhfjfyaaaaq");
+        assertThat(dbObjectGroup).isNotNull();
+        assertThat(dbObjectGroup.getId()).isEqualTo("aeeaaaaaacfm6tqsaa4kkamaddhfjfyaaaaq");
     }
 
     @Test
@@ -280,8 +285,12 @@ public class CollectServiceTest {
         DbVersionsModel objectVersionsModel =
             CollectHelper.getObjectVersionsModel(dbObjectGroupModel, BINARY_MASTER, 1);
         // Then
-        Assertions.assertThat(objectVersionsModel.getMessageDigest()).isNotNull();
-        Assertions.assertThat(objectVersionsModel.getUri())
+        assertThat(objectVersionsModel.getMessageDigest()).isNotNull();
+        assertThat(objectVersionsModel.getUri())
             .isEqualTo("Content/aebbaaaaacaltpovaewckal62ukh4ml5a67q.txt");
+
+        File file = new File(VitamConfiguration.getVitamTmpFolder(),
+            VitamThreadUtils.getVitamSession().getRequestId() + ".txt");
+        assertThat(file).doesNotExist();
     }
 }
