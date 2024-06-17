@@ -27,6 +27,7 @@
 
 package fr.gouv.vitam.storage.engine.server.storagelog;
 
+import fr.gouv.vitam.common.LocalDateUtil;
 import fr.gouv.vitam.logbook.operations.client.LogbookOperationsClient;
 import fr.gouv.vitam.logbook.operations.client.LogbookOperationsClientFactory;
 import fr.gouv.vitam.storage.driver.model.StorageLogBackupResult;
@@ -46,7 +47,6 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnit;
 import org.mockito.junit.MockitoRule;
 
-import java.time.LocalDateTime;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -108,7 +108,7 @@ public class StorageLogAdministrationTest {
     @Test
     public void should_execute_storagelog_backup() throws Exception {
         when(storageService.rotateLogFile(eq(TENANT_ID), eq(true))).thenReturn(
-            List.of(new LogInformation(tempFolder.newFile().toPath(), LocalDateTime.now(), LocalDateTime.now()))
+            List.of(new LogInformation(tempFolder.newFile().toPath(), LocalDateUtil.now(), LocalDateUtil.now()))
         );
 
         final List<StorageLogBackupResult> storageLogBackupResults = storageLogAdministration.backupStorageWriteLog(
@@ -133,7 +133,7 @@ public class StorageLogAdministrationTest {
     @Test
     public void should_execute_storageaccesslog_backup() throws Exception {
         when(storageService.rotateLogFile(eq(TENANT_ID), eq(false))).thenReturn(
-            List.of(new LogInformation(tempFolder.newFile().toPath(), LocalDateTime.now(), LocalDateTime.now()))
+            List.of(new LogInformation(tempFolder.newFile().toPath(), LocalDateUtil.now(), LocalDateUtil.now()))
         );
 
         final List<StorageLogBackupResult> storageLogBackupResults = storageLogAdministration.backupStorageAccessLog(
@@ -158,7 +158,7 @@ public class StorageLogAdministrationTest {
     @Test
     public void should_delete_container_when_exception_raised() throws Exception {
         when(storageService.rotateLogFile(eq(TENANT_ID), eq(false))).thenReturn(
-            List.of(new LogInformation(tempFolder.newFile().toPath(), LocalDateTime.now(), LocalDateTime.now()))
+            List.of(new LogInformation(tempFolder.newFile().toPath(), LocalDateUtil.now(), LocalDateUtil.now()))
         );
 
         when(

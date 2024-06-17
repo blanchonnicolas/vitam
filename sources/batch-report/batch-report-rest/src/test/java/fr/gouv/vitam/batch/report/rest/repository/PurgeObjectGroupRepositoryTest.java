@@ -49,7 +49,6 @@ import org.junit.Rule;
 import org.junit.Test;
 
 import java.io.InputStream;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -205,8 +204,7 @@ public class PurgeObjectGroupRepositoryTest {
                 PurgeObjectGroupModel PurgeObjectGroupModel = new PurgeObjectGroupModel();
                 PurgeObjectGroupModel.setProcessId(reportBody.getProcessId());
                 PurgeObjectGroupModel.setTenant(0);
-                LocalDateTime localDateTime = LocalDateUtil.now();
-                PurgeObjectGroupModel.setCreationDateTime(localDateTime.toString());
+                PurgeObjectGroupModel.setCreationDateTime(LocalDateUtil.nowFormatted());
                 PurgeObjectGroupModel.setMetadata(md);
                 return PurgeObjectGroupModel;
             })

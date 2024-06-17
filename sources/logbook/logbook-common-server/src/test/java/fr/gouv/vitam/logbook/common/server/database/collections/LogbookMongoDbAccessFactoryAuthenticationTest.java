@@ -136,7 +136,7 @@ public class LogbookMongoDbAccessFactoryAuthenticationTest {
         final LogbookOperationParameters parameters = LogbookParameterHelper.newLogbookOperationParameters();
         for (final LogbookParameterName name : LogbookParameterName.values()) {
             if (LogbookParameterName.eventDateTime.equals(name)) {
-                parameters.putParameterValue(name, LocalDateUtil.now().toString());
+                parameters.putParameterValue(name, LocalDateUtil.nowFormatted());
             } else {
                 parameters.putParameterValue(name, GUIDFactory.newEventGUID(0).getId());
             }
