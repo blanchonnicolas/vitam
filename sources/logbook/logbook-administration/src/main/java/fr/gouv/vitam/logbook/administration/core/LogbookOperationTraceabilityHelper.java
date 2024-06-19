@@ -176,7 +176,7 @@ public class LogbookOperationTraceabilityHelper implements LogbookTraceabilityHe
                 "Logbook operation traceability required. " +
                 "Last traceability operation is too old. " +
                 "Max validity date " +
-                lastTraceabilityOperationValidityDateTime
+                LocalDateUtil.getFormattedDateTimeForMongo(lastTraceabilityOperationValidityDateTime)
             );
             return true;
         }
@@ -191,7 +191,7 @@ public class LogbookOperationTraceabilityHelper implements LogbookTraceabilityHe
                 LOGGER.info(
                     "Logbook operation traceability required. " +
                     "New logbook operations found since last traceability operation: " +
-                    this.traceabilityStartDate
+                    LocalDateUtil.getFormattedDateTimeForMongo(this.traceabilityStartDate)
                 );
                 return true;
             }
@@ -202,7 +202,7 @@ public class LogbookOperationTraceabilityHelper implements LogbookTraceabilityHe
         LOGGER.info(
             "Skipping Logbook operation traceability. " +
             "No activity since last traceability operation: " +
-            this.traceabilityStartDate
+            LocalDateUtil.getFormattedDateTimeForMongo(this.traceabilityStartDate)
         );
         return false;
     }
