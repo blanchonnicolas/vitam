@@ -72,6 +72,7 @@ import static fr.gouv.vitam.common.serverv2.application.ApplicationParameter.CON
  * module declaring business resource
  */
 public class BusinessApplication extends ConfigurationApplication {
+
     private static final VitamLogger LOGGER = VitamLoggerFactory.getInstance(BusinessApplication.class);
     private final Set<Object> singletons;
 
@@ -84,20 +85,23 @@ public class BusinessApplication extends ConfigurationApplication {
         String configurationFile = servletConfig.getInitParameter(CONFIGURATION_FILE_APPLICATION);
         singletons = new HashSet<>();
         try (final InputStream yamlIS = PropertiesUtils.getConfigAsStream(configurationFile)) {
-            final CollectInternalConfiguration
-                configuration = PropertiesUtils.readYaml(yamlIS, CollectInternalConfiguration.class);
+            final CollectInternalConfiguration configuration = PropertiesUtils.readYaml(
+                yamlIS,
+                CollectInternalConfiguration.class
+            );
             MongoClient mongoClient = MongoDbAccess.createMongoClient(configuration);
             SimpleMongoDBAccess mongoDbAccess = new SimpleMongoDBAccess(mongoClient, configuration.getDbName());
 
             // Vitam Clients
             WorkspaceClientFactory.changeMode(configuration.getWorkspaceUrl(), WorkspaceType.COLLECT);
-            MetaDataClientFactory metadataCollectClientFactory =
-                MetaDataClientFactory.getInstance(MetadataType.COLLECT);
-            WorkspaceClientFactory workspaceCollectClientFactory =
-                WorkspaceClientFactory.getInstance(WorkspaceType.COLLECT);
+            MetaDataClientFactory metadataCollectClientFactory = MetaDataClientFactory.getInstance(
+                MetadataType.COLLECT
+            );
+            WorkspaceClientFactory workspaceCollectClientFactory = WorkspaceClientFactory.getInstance(
+                WorkspaceType.COLLECT
+            );
             IngestInternalClientFactory ingestInternalClientFactory = IngestInternalClientFactory.getInstance();
             AccessInternalClientFactory accessInternalClientFactory = AccessInternalClientFactory.getInstance();
-
 
             // Repositories
             TransactionRepository transactionRepository = new TransactionRepository(mongoDbAccess);
@@ -107,26 +111,44 @@ public class BusinessApplication extends ConfigurationApplication {
             // Services
             MetadataService metadataService = new MetadataService(metadataRepository, projectRepository);
             ProjectService projectService = new ProjectService(projectRepository);
-            TransactionService transactionService =
-                new TransactionService(transactionRepository, projectService, metadataRepository,
-                    workspaceCollectClientFactory, accessInternalClientFactory, ingestInternalClientFactory);
+            TransactionService transactionService = new TransactionService(
+                transactionRepository,
+                projectService,
+                metadataRepository,
+                workspaceCollectClientFactory,
+                accessInternalClientFactory,
+                ingestInternalClientFactory
+            );
             SipService sipService = new SipService(workspaceCollectClientFactory, metadataRepository);
-            CollectService collectService =
-                new CollectService(metadataRepository, workspaceCollectClientFactory,
-                    FormatIdentifierFactory.getInstance());
-            FluxService fluxService = new FluxService(collectService, metadataService, projectRepository,
-                metadataRepository);
-
+            CollectService collectService = new CollectService(
+                metadataRepository,
+                workspaceCollectClientFactory,
+                FormatIdentifierFactory.getInstance()
+            );
+            FluxService fluxService = new FluxService(
+                collectService,
+                metadataService,
+                projectRepository,
+                metadataRepository
+            );
 
             // Resources
-            final TransactionInternalResource transactionInternalResource =
-                new TransactionInternalResource(transactionService, sipService,
-                    metadataService, fluxService, projectService);
-            final ProjectInternalResource projectInternalResource =
-                new ProjectInternalResource(projectService, transactionService, metadataService);
-            final CollectMetadataInternalResource collectMetadataInternalResource =
-                new CollectMetadataInternalResource(metadataService,
-                    collectService);
+            final TransactionInternalResource transactionInternalResource = new TransactionInternalResource(
+                transactionService,
+                sipService,
+                metadataService,
+                fluxService,
+                projectService
+            );
+            final ProjectInternalResource projectInternalResource = new ProjectInternalResource(
+                projectService,
+                transactionService,
+                metadataService
+            );
+            final CollectMetadataInternalResource collectMetadataInternalResource = new CollectMetadataInternalResource(
+                metadataService,
+                collectService
+            );
 
             // Threads
             new PurgeTransactionThread(configuration, transactionService);
@@ -148,5 +170,4 @@ public class BusinessApplication extends ConfigurationApplication {
     public Set<Object> getSingletons() {
         return singletons;
     }
-
 }

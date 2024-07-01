@@ -75,8 +75,9 @@ public class ReferentialAccessionRegisterSummaryUtil {
         throws InvalidCreateOperationException {
         List<Action> actions = createActions(registerDetail);
         Update update = new Update();
-        update.setQuery(QueryHelper.eq(AccessionRegisterSummary.ORIGINATING_AGENCY, registerDetail
-            .getOriginatingAgency()));
+        update.setQuery(
+            QueryHelper.eq(AccessionRegisterSummary.ORIGINATING_AGENCY, registerDetail.getOriginatingAgency())
+        );
         update.addActions(actions.toArray(new IncAction[actions.size()]));
         return update;
     }
@@ -92,33 +93,81 @@ public class ReferentialAccessionRegisterSummaryUtil {
         throws InvalidCreateOperationException {
         ArrayList<Action> actions = new ArrayList<>();
 
-        actions.add(new IncAction(AccessionRegisterSummary.TOTAL_OBJECTGROUPS + "." + AccessionRegisterSummary.INGESTED,
-            registerDetail.getTotalObjectsGroups().getIngested()));
-        actions.add(new IncAction(AccessionRegisterSummary.TOTAL_OBJECTGROUPS + "." + AccessionRegisterSummary.DELETED,
-            registerDetail.getTotalObjectsGroups().getDeleted()));
-        actions.add(new IncAction(AccessionRegisterSummary.TOTAL_OBJECTGROUPS + "." + AccessionRegisterSummary.REMAINED,
-            registerDetail.getTotalObjectsGroups().getRemained()));
+        actions.add(
+            new IncAction(
+                AccessionRegisterSummary.TOTAL_OBJECTGROUPS + "." + AccessionRegisterSummary.INGESTED,
+                registerDetail.getTotalObjectsGroups().getIngested()
+            )
+        );
+        actions.add(
+            new IncAction(
+                AccessionRegisterSummary.TOTAL_OBJECTGROUPS + "." + AccessionRegisterSummary.DELETED,
+                registerDetail.getTotalObjectsGroups().getDeleted()
+            )
+        );
+        actions.add(
+            new IncAction(
+                AccessionRegisterSummary.TOTAL_OBJECTGROUPS + "." + AccessionRegisterSummary.REMAINED,
+                registerDetail.getTotalObjectsGroups().getRemained()
+            )
+        );
 
-        actions.add(new IncAction(AccessionRegisterSummary.TOTAL_OBJECTS + "." + AccessionRegisterSummary.INGESTED,
-            registerDetail.getTotalObjects().getIngested()));
-        actions.add(new IncAction(AccessionRegisterSummary.TOTAL_OBJECTS + "." + AccessionRegisterSummary.DELETED,
-            registerDetail.getTotalObjects().getDeleted()));
-        actions.add(new IncAction(AccessionRegisterSummary.TOTAL_OBJECTS + "." + AccessionRegisterSummary.REMAINED,
-            registerDetail.getTotalObjects().getRemained()));
+        actions.add(
+            new IncAction(
+                AccessionRegisterSummary.TOTAL_OBJECTS + "." + AccessionRegisterSummary.INGESTED,
+                registerDetail.getTotalObjects().getIngested()
+            )
+        );
+        actions.add(
+            new IncAction(
+                AccessionRegisterSummary.TOTAL_OBJECTS + "." + AccessionRegisterSummary.DELETED,
+                registerDetail.getTotalObjects().getDeleted()
+            )
+        );
+        actions.add(
+            new IncAction(
+                AccessionRegisterSummary.TOTAL_OBJECTS + "." + AccessionRegisterSummary.REMAINED,
+                registerDetail.getTotalObjects().getRemained()
+            )
+        );
 
-        actions.add(new IncAction(AccessionRegisterSummary.TOTAL_UNITS + "." + AccessionRegisterSummary.INGESTED,
-            registerDetail.getTotalUnits().getIngested()));
-        actions.add(new IncAction(AccessionRegisterSummary.TOTAL_UNITS + "." + AccessionRegisterSummary.DELETED,
-            registerDetail.getTotalUnits().getDeleted()));
-        actions.add(new IncAction(AccessionRegisterSummary.TOTAL_UNITS + "." + AccessionRegisterSummary.REMAINED,
-            registerDetail.getTotalUnits().getRemained()));
+        actions.add(
+            new IncAction(
+                AccessionRegisterSummary.TOTAL_UNITS + "." + AccessionRegisterSummary.INGESTED,
+                registerDetail.getTotalUnits().getIngested()
+            )
+        );
+        actions.add(
+            new IncAction(
+                AccessionRegisterSummary.TOTAL_UNITS + "." + AccessionRegisterSummary.DELETED,
+                registerDetail.getTotalUnits().getDeleted()
+            )
+        );
+        actions.add(
+            new IncAction(
+                AccessionRegisterSummary.TOTAL_UNITS + "." + AccessionRegisterSummary.REMAINED,
+                registerDetail.getTotalUnits().getRemained()
+            )
+        );
 
-        actions.add(new IncAction(AccessionRegisterSummary.OBJECT_SIZE + "." + AccessionRegisterSummary.INGESTED,
-            registerDetail.getObjectSize().getIngested()));
-        actions.add(new IncAction(AccessionRegisterSummary.OBJECT_SIZE + "." + AccessionRegisterSummary.DELETED,
-            registerDetail.getObjectSize().getDeleted()));
-        actions.add(new IncAction(AccessionRegisterSummary.OBJECT_SIZE + "." + AccessionRegisterSummary.REMAINED,
-            registerDetail.getObjectSize().getRemained()));
+        actions.add(
+            new IncAction(
+                AccessionRegisterSummary.OBJECT_SIZE + "." + AccessionRegisterSummary.INGESTED,
+                registerDetail.getObjectSize().getIngested()
+            )
+        );
+        actions.add(
+            new IncAction(
+                AccessionRegisterSummary.OBJECT_SIZE + "." + AccessionRegisterSummary.DELETED,
+                registerDetail.getObjectSize().getDeleted()
+            )
+        );
+        actions.add(
+            new IncAction(
+                AccessionRegisterSummary.OBJECT_SIZE + "." + AccessionRegisterSummary.REMAINED,
+                registerDetail.getObjectSize().getRemained()
+            )
+        );
         return actions;
     }
 }

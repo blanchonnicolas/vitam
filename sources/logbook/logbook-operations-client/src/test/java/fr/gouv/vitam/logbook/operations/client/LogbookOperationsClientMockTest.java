@@ -60,14 +60,14 @@ import static org.junit.Assert.assertTrue;
  * Test for logbook operation client
  */
 public class LogbookOperationsClientMockTest {
+
     private static final String request = "{ $query: {} }, $projection: {}, $filter: {} }";
 
     @Test
     public void createTest() {
         LogbookOperationsClientFactory.changeMode(null);
 
-        final LogbookOperationsClient client =
-            LogbookOperationsClientFactory.getInstance().getClient();
+        final LogbookOperationsClient client = LogbookOperationsClientFactory.getInstance().getClient();
         assertNotNull(client);
 
         final LogbookOperationParameters logbookParameters = LogbookParameterHelper.newLogbookOperationParameters();
@@ -99,8 +99,7 @@ public class LogbookOperationsClientMockTest {
     public void updateTest() {
         LogbookOperationsClientFactory.changeMode(null);
 
-        final LogbookOperationsClient client =
-            LogbookOperationsClientFactory.getInstance().getClient();
+        final LogbookOperationsClient client = LogbookOperationsClientFactory.getInstance().getClient();
         assertNotNull(client);
 
         final LogbookOperationParameters logbookParameters = LogbookParameterHelper.newLogbookOperationParameters();
@@ -132,65 +131,81 @@ public class LogbookOperationsClientMockTest {
     public void statusTest() throws LogbookClientException, VitamApplicationServerException {
         LogbookOperationsClientFactory.changeMode(null);
 
-        final LogbookOperationsClient client =
-            LogbookOperationsClientFactory.getInstance().getClient();
+        final LogbookOperationsClient client = LogbookOperationsClientFactory.getInstance().getClient();
         assertNotNull(client);
         client.checkStatus();
     }
 
     private void fillLogbookParamaters(LogbookParameters logbookParamaters) {
         logbookParamaters.setTypeProcess(LogbookTypeProcess.INGEST);
-        logbookParamaters.putParameterValue(LogbookParameterName.eventIdentifier,
-            LogbookParameterName.eventIdentifier.name());
-        logbookParamaters
-            .putParameterValue(LogbookParameterName.eventType, LogbookParameterName.eventType.name());
-        logbookParamaters.putParameterValue(LogbookParameterName.eventDateTime,
-            LocalDateUtil.now().toString());
-        logbookParamaters.putParameterValue(LogbookParameterName.eventIdentifierProcess,
-            LogbookParameterName.eventIdentifierProcess.name());
+        logbookParamaters.putParameterValue(
+            LogbookParameterName.eventIdentifier,
+            LogbookParameterName.eventIdentifier.name()
+        );
+        logbookParamaters.putParameterValue(LogbookParameterName.eventType, LogbookParameterName.eventType.name());
+        logbookParamaters.putParameterValue(LogbookParameterName.eventDateTime, LocalDateUtil.now().toString());
+        logbookParamaters.putParameterValue(
+            LogbookParameterName.eventIdentifierProcess,
+            LogbookParameterName.eventIdentifierProcess.name()
+        );
         logbookParamaters.putParameterValue(LogbookParameterName.outcome, LogbookParameterName.outcome.name());
-        logbookParamaters
-            .putParameterValue(LogbookParameterName.outcomeDetail, LogbookParameterName.outcomeDetail.name());
-        logbookParamaters.putParameterValue(LogbookParameterName.outcomeDetailMessage,
-            LogbookParameterName.outcomeDetailMessage.name());
-        logbookParamaters.putParameterValue(LogbookParameterName.agentIdentifier,
-            LogbookParameterName.agentIdentifier.name());
-        logbookParamaters.putParameterValue(LogbookParameterName.agentIdentifierApplicationSession,
-            LogbookParameterName.agentIdentifierApplicationSession.name());
-        logbookParamaters.putParameterValue(LogbookParameterName.eventIdentifierRequest,
-            LogbookParameterName.eventIdentifierRequest.name());
-        logbookParamaters.putParameterValue(LogbookParameterName.agIdExt,
-            LogbookParameterName.agIdExt.name());
+        logbookParamaters.putParameterValue(
+            LogbookParameterName.outcomeDetail,
+            LogbookParameterName.outcomeDetail.name()
+        );
+        logbookParamaters.putParameterValue(
+            LogbookParameterName.outcomeDetailMessage,
+            LogbookParameterName.outcomeDetailMessage.name()
+        );
+        logbookParamaters.putParameterValue(
+            LogbookParameterName.agentIdentifier,
+            LogbookParameterName.agentIdentifier.name()
+        );
+        logbookParamaters.putParameterValue(
+            LogbookParameterName.agentIdentifierApplicationSession,
+            LogbookParameterName.agentIdentifierApplicationSession.name()
+        );
+        logbookParamaters.putParameterValue(
+            LogbookParameterName.eventIdentifierRequest,
+            LogbookParameterName.eventIdentifierRequest.name()
+        );
+        logbookParamaters.putParameterValue(LogbookParameterName.agIdExt, LogbookParameterName.agIdExt.name());
 
-        logbookParamaters.putParameterValue(LogbookParameterName.objectIdentifier,
-            LogbookParameterName.objectIdentifier.name());
-        logbookParamaters.putParameterValue(LogbookParameterName.objectIdentifierRequest,
-            LogbookParameterName.objectIdentifierRequest.name());
-        logbookParamaters.putParameterValue(LogbookParameterName.objectIdentifierIncome,
-            LogbookParameterName.objectIdentifierIncome.name());
+        logbookParamaters.putParameterValue(
+            LogbookParameterName.objectIdentifier,
+            LogbookParameterName.objectIdentifier.name()
+        );
+        logbookParamaters.putParameterValue(
+            LogbookParameterName.objectIdentifierRequest,
+            LogbookParameterName.objectIdentifierRequest.name()
+        );
+        logbookParamaters.putParameterValue(
+            LogbookParameterName.objectIdentifierIncome,
+            LogbookParameterName.objectIdentifierIncome.name()
+        );
     }
 
     @Test
     public void selectTest() throws LogbookClientException, InvalidParseOperationException {
         LogbookOperationsClientFactory.changeMode(null);
 
-        final LogbookOperationsClient client =
-            LogbookOperationsClientFactory.getInstance().getClient();
-        assertEquals("aedqaaaaacaam7mxaaaamakvhiv4rsiaaa1",
-            client.selectOperation(JsonHandler.getFromString(request)).get("$results").get(1).get("_id").asText());
-        assertEquals("aeaqaaaaaefex4j4aao2qalmjv7h24yaaaaq",
-            client.selectOperationById("eventIdentifier").get("$results").get(0)
-                .get("_id").asText());
+        final LogbookOperationsClient client = LogbookOperationsClientFactory.getInstance().getClient();
+        assertEquals(
+            "aedqaaaaacaam7mxaaaamakvhiv4rsiaaa1",
+            client.selectOperation(JsonHandler.getFromString(request)).get("$results").get(1).get("_id").asText()
+        );
+        assertEquals(
+            "aeaqaaaaaefex4j4aao2qalmjv7h24yaaaaq",
+            client.selectOperationById("eventIdentifier").get("$results").get(0).get("_id").asText()
+        );
     }
 
     @Test
     public void bulkTest()
-        throws LogbookClientAlreadyExistsException, LogbookClientBadRequestException, LogbookClientServerException,
-        LogbookClientNotFoundException {
+        throws LogbookClientAlreadyExistsException, LogbookClientBadRequestException, LogbookClientServerException, LogbookClientNotFoundException {
         LogbookOperationsClientFactory.changeMode(null);
 
-        final LogbookOperationsClient client =
-            LogbookOperationsClientFactory.getInstance().getClient();
+        final LogbookOperationsClient client = LogbookOperationsClientFactory.getInstance().getClient();
         final LogbookOperationParameters logbookParameters = LogbookParameterHelper.newLogbookOperationParameters();
         fillLogbookParamaters(logbookParameters);
         client.createDelegate(logbookParameters);
@@ -212,8 +227,7 @@ public class LogbookOperationsClientMockTest {
     public void bulkCreateEmptyQueueTest() throws Exception {
         LogbookOperationsClientFactory.changeMode(null);
 
-        final LogbookOperationsClient client =
-            LogbookOperationsClientFactory.getInstance().getClient();
+        final LogbookOperationsClient client = LogbookOperationsClientFactory.getInstance().getClient();
         client.bulkCreate(LogbookParameterName.eventIdentifierProcess.name(), null);
     }
 
@@ -221,8 +235,7 @@ public class LogbookOperationsClientMockTest {
     public void bulkUpdateEmptyQueueTest() throws Exception {
         LogbookOperationsClientFactory.changeMode(null);
 
-        final LogbookOperationsClient client =
-            LogbookOperationsClientFactory.getInstance().getClient();
+        final LogbookOperationsClient client = LogbookOperationsClientFactory.getInstance().getClient();
         client.bulkUpdate(LogbookParameterName.eventIdentifierProcess.name(), null);
     }
 
@@ -230,15 +243,13 @@ public class LogbookOperationsClientMockTest {
     public void closeExecution() {
         LogbookOperationsClientFactory.changeMode(null);
 
-        final LogbookOperationsClient client =
-            LogbookOperationsClientFactory.getInstance().getClient();
+        final LogbookOperationsClient client = LogbookOperationsClientFactory.getInstance().getClient();
         client.close();
     }
 
     @Test
     public void traceabilityTestObjectGroupLFC() throws Exception {
-        final LogbookOperationsClient client =
-            LogbookOperationsClientFactory.getInstance().getClient();
+        final LogbookOperationsClient client = LogbookOperationsClientFactory.getInstance().getClient();
         RequestResponse response = client.traceabilityLfcObjectGroup();
         assertNotNull(response);
         assertTrue(response instanceof RequestResponseOK);
@@ -246,36 +257,27 @@ public class LogbookOperationsClientMockTest {
 
     @Test
     public void traceabilityTestUnitLFC() throws Exception {
-        final LogbookOperationsClient client =
-            LogbookOperationsClientFactory.getInstance().getClient();
+        final LogbookOperationsClient client = LogbookOperationsClientFactory.getInstance().getClient();
         RequestResponse response = client.traceabilityLfcUnit();
         assertNotNull(response);
         assertTrue(response instanceof RequestResponseOK);
     }
 
-
     @Test
-    public void launchReindexationTest()
-        throws LogbookClientServerException, InvalidParseOperationException {
-        final LogbookOperationsClient client =
-            LogbookOperationsClientFactory.getInstance().getClient();
+    public void launchReindexationTest() throws LogbookClientServerException, InvalidParseOperationException {
+        final LogbookOperationsClient client = LogbookOperationsClientFactory.getInstance().getClient();
         assertNotNull(client.reindex(new IndexParameters()));
     }
 
     @Test
-    public void switchIndexesTest()
-        throws LogbookClientServerException, InvalidParseOperationException {
-        final LogbookOperationsClient client =
-            LogbookOperationsClientFactory.getInstance().getClient();
+    public void switchIndexesTest() throws LogbookClientServerException, InvalidParseOperationException {
+        final LogbookOperationsClient client = LogbookOperationsClientFactory.getInstance().getClient();
         assertNotNull(client.switchIndexes(new SwitchIndexParameters()));
     }
 
     @Test
-    public void traceabilityAuditTest()
-        throws LogbookClientServerException, InvalidParseOperationException {
-        final LogbookOperationsClient client =
-            LogbookOperationsClientFactory.getInstance().getClient();
+    public void traceabilityAuditTest() throws LogbookClientServerException, InvalidParseOperationException {
+        final LogbookOperationsClient client = LogbookOperationsClientFactory.getInstance().getClient();
         client.traceabilityAudit(0, new AuditLogbookOptions());
     }
-
 }

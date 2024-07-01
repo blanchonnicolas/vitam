@@ -110,7 +110,6 @@ public class MetadataService {
         this.projectRepository = projectRepository;
     }
 
-
     public JsonNode selectUnitById(String unitId) throws CollectInternalException {
         return metadataRepository.selectUnitById(unitId);
     }
@@ -121,8 +120,8 @@ public class MetadataService {
 
     public JsonNode saveArchiveUnit(JsonNode unit, TransactionModel transactionModel)
         throws CollectInternalException, InvalidParseOperationException {
-        ArchiveUnitModel unitModel =
-            VitamObjectMapper.buildDeserializationObjectMapper().convertValue(unit, ArchiveUnitModel.class);
+        ArchiveUnitModel unitModel = VitamObjectMapper.buildDeserializationObjectMapper()
+            .convertValue(unit, ArchiveUnitModel.class);
         String unitId = GUIDFactory.newUnitGUID(VitamThreadUtils.getVitamSession().getTenantId()).getId();
         unitModel.setId(unitId);
         unitModel.setOpi(transactionModel.getId());
@@ -141,9 +140,11 @@ public class MetadataService {
                 unitModel.setUnitups(Collections.singletonList(attachmentUnits.get(STATIC_ATTACHMENT)));
             }
             if (projectModel.getUnitUps() != null) {
-                String attachmentId =
-                    MetadataHelper.findUnitParent(((ObjectNode) unit).put(VitamFieldsHelper.id(), unitId),
-                        projectModel.getUnitUps(), attachmentUnits).getValue();
+                String attachmentId = MetadataHelper.findUnitParent(
+                    ((ObjectNode) unit).put(VitamFieldsHelper.id(), unitId),
+                    projectModel.getUnitUps(),
+                    attachmentUnits
+                ).getValue();
                 if (attachmentId != null) {
                     unitModel.setUnitups(Collections.singletonList(attachmentId));
                 }
@@ -192,7 +193,6 @@ public class MetadataService {
         }
     }
 
-
     void updateUnitsWithMetadataFile(String transactionId, InputStream is)
         throws CollectInternalException, IOException {
         Map<String, String> unitIdsByURI = buildGraphFromExistingUnits(transactionId);
@@ -205,24 +205,28 @@ public class MetadataService {
     }
 
     private void updateUnitsMetadata(InputStream is, Map<String, String> unitIdsByURI) throws CollectInternalException {
-        JsonLineGenericIterator<JsonLineModel> metadata = new JsonLineGenericIterator<>(is, new TypeReference<>() {
-        });
+        JsonLineGenericIterator<JsonLineModel> metadata = new JsonLineGenericIterator<>(is, new TypeReference<>() {});
         Iterator<List<JsonLineModel>> iterator = Iterators.partition(metadata, 100);
         boolean updated = false;
         while (iterator.hasNext()) {
             try {
                 updated = true;
                 List<JsonLineModel> next = iterator.next();
-                Map<String, JsonNode> unitsIdByURI =
-                    next.stream().map(e -> new AbstractMap.SimpleEntry<>(e.getId(), e.getParams()))
-                        .collect(Collectors.toMap(AbstractMap.SimpleEntry::getKey, AbstractMap.SimpleEntry::getValue));
+                Map<String, JsonNode> unitsIdByURI = next
+                    .stream()
+                    .map(e -> new AbstractMap.SimpleEntry<>(e.getId(), e.getParams()))
+                    .collect(Collectors.toMap(AbstractMap.SimpleEntry::getKey, AbstractMap.SimpleEntry::getValue));
                 // update unit with list
                 final List<JsonNode> updateMultiQueries = convertToQuery(unitsIdByURI, unitIdsByURI);
                 final RequestResponse<JsonNode> result = metadataRepository.atomicBulkUpdate(updateMultiQueries);
 
                 final boolean thereIsError =
-                    ((RequestResponseOK<JsonNode>) result).getResults().stream().map(e -> e.get("$results"))
-                        .map(e -> e.get(0)).map(e -> e.get("#status")).map(JsonNode::asText)
+                    ((RequestResponseOK<JsonNode>) result).getResults()
+                        .stream()
+                        .map(e -> e.get("$results"))
+                        .map(e -> e.get(0))
+                        .map(e -> e.get("#status"))
+                        .map(JsonNode::asText)
                         .anyMatch(e -> !e.equals("OK"));
 
                 if (thereIsError) {
@@ -243,10 +247,16 @@ public class MetadataService {
         try {
             SelectMultiQuery select = new SelectMultiQuery();
             select.addQueries(QueryHelper.eq(VitamFieldsHelper.initialOperation(), transactionId));
-            select.addUsedProjection(VitamFieldsHelper.id(), TITLE, VitamFieldsHelper.unitups(),
-                VitamFieldsHelper.allunitups());
-            final ScrollSpliterator<JsonNode> unitScrollSpliterator =
-                metadataRepository.selectUnits(select, transactionId);
+            select.addUsedProjection(
+                VitamFieldsHelper.id(),
+                TITLE,
+                VitamFieldsHelper.unitups(),
+                VitamFieldsHelper.allunitups()
+            );
+            final ScrollSpliterator<JsonNode> unitScrollSpliterator = metadataRepository.selectUnits(
+                select,
+                transactionId
+            );
 
             final List<JsonNode> units = new ArrayList<>();
             unitScrollSpliterator.forEachRemaining(units::add);
@@ -256,8 +266,10 @@ public class MetadataService {
             units.forEach(u -> {
                 final ArrayNode parentUnit = (ArrayNode) u.get(VitamFieldsHelper.unitups());
                 if (parentUnit.size() > 0) {
-                    hash.put(hash.inverse().get(parentUnit.get(0).asText()) + File.separator + u.get(TITLE).asText(),
-                        u.get(VitamFieldsHelper.id()).asText());
+                    hash.put(
+                        hash.inverse().get(parentUnit.get(0).asText()) + File.separator + u.get(TITLE).asText(),
+                        u.get(VitamFieldsHelper.id()).asText()
+                    );
                 } else {
                     hash.put(u.get(TITLE).asText(), u.get(VitamFieldsHelper.id()).asText());
                 }
@@ -302,7 +314,6 @@ public class MetadataService {
         BooleanQuery orQuery = QueryHelper.or();
         for (String systemId : systemIds) {
             orQuery.add(QueryHelper.eq(SYSTEM_ID_FIELD_PATH, systemId));
-
         }
         query.addQueries(orQuery);
         query.addUsedProjection(VitamFieldsHelper.id(), SYSTEM_ID_FIELD_PATH);
@@ -337,8 +348,11 @@ public class MetadataService {
 
                 if (projectModel.getUnitUp() != null) {
                     if (!savedGuidUnits.containsKey(STATIC_ATTACHMENT)) {
-                        ArchiveUnitModel unit =
-                            createAttachmentUnit(transactionId, STATIC_ATTACHMENT, projectModel.getUnitUp());
+                        ArchiveUnitModel unit = createAttachmentUnit(
+                            transactionId,
+                            STATIC_ATTACHMENT,
+                            projectModel.getUnitUp()
+                        );
                         units.add(unit);
                         savedGuidUnits.put(STATIC_ATTACHMENT, unit.getId());
                         unitsToFetchBySystemId.remove(projectModel.getUnitUp());
@@ -346,22 +360,28 @@ public class MetadataService {
                 }
 
                 if (projectModel.getUnitUps() != null) {
-                    unitsToFetchBySystemId.stream().filter(e -> {
-                        String unitTitle = String.format("%s_%s", DYNAMIC_ATTACHEMENT, e);
-                        return !savedGuidUnits.containsKey(unitTitle);
-                    }).forEach(e -> {
-                        String unitTitle = String.format("%s_%s", DYNAMIC_ATTACHEMENT, e);
-                        ArchiveUnitModel unit = createAttachmentUnit(transactionId, unitTitle, e);
-                        units.add(unit);
-                        savedGuidUnits.put(unitTitle, unit.getId());
-                    });
+                    unitsToFetchBySystemId
+                        .stream()
+                        .filter(e -> {
+                            String unitTitle = String.format("%s_%s", DYNAMIC_ATTACHEMENT, e);
+                            return !savedGuidUnits.containsKey(unitTitle);
+                        })
+                        .forEach(e -> {
+                            String unitTitle = String.format("%s_%s", DYNAMIC_ATTACHEMENT, e);
+                            ArchiveUnitModel unit = createAttachmentUnit(transactionId, unitTitle, e);
+                            units.add(unit);
+                            savedGuidUnits.put(unitTitle, unit.getId());
+                        });
                 }
 
                 if (!units.isEmpty()) {
                     ObjectMapper objectMapper = buildSerializationObjectMapper();
                     metadataRepository.saveArchiveUnits(
-                        units.stream().map(unit -> objectMapper.convertValue(unit, ObjectNode.class))
-                            .collect(Collectors.toList()));
+                        units
+                            .stream()
+                            .map(unit -> objectMapper.convertValue(unit, ObjectNode.class))
+                            .collect(Collectors.toList())
+                    );
                 }
             }
 
@@ -379,8 +399,6 @@ public class MetadataService {
         return value.asText();
     }
 
-
-
     private void resetQuery(JsonNode result, JsonNode queryDsl) {
         if (result != null && result.has(RequestResponseOK.TAG_CONTEXT)) {
             ((ObjectNode) result).set(RequestResponseOK.TAG_CONTEXT, queryDsl);
@@ -397,6 +415,5 @@ public class MetadataService {
         resetQuery(result, queryDsl);
         LOGGER.debug("DEBUG: end selectUnitsWithInheritedRules {}");
         return result;
-
     }
 }

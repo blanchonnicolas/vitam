@@ -66,7 +66,6 @@ public class DescriptiveMetadataMapperTest {
             .contains(tuple("fr", "titre"));
     }
 
-
     @Test
     public void should_fill_title_if_title_has_default_lang() {
         // Given

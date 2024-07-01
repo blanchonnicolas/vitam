@@ -71,14 +71,14 @@ public class LogbookTransformData {
             }
         }
         if (document.get(LogbookMongoDbName.rightsStatementIdentifier.getDbname()) != null) {
-            String rightsStatementIdentifier =
-                (String) document.get(LogbookMongoDbName.rightsStatementIdentifier.getDbname());
+            String rightsStatementIdentifier = (String) document.get(
+                LogbookMongoDbName.rightsStatementIdentifier.getDbname()
+            );
             LOGGER.debug(rightsStatementIdentifier);
             try {
                 JsonNode rightsStatementIdentifierNode = JsonHandler.getFromString(rightsStatementIdentifier);
                 document.remove(LogbookMongoDbName.rightsStatementIdentifier.getDbname());
-                document
-                    .put(LogbookMongoDbName.rightsStatementIdentifier.getDbname(), rightsStatementIdentifierNode);
+                document.put(LogbookMongoDbName.rightsStatementIdentifier.getDbname(), rightsStatementIdentifierNode);
             } catch (InvalidParseOperationException e) {
                 LOGGER.warn("rightsStatementIdentifier is not a json compatible field", e);
             }
@@ -87,22 +87,23 @@ public class LogbookTransformData {
         if (eventDocuments != null) {
             for (Document eventDocument : eventDocuments) {
                 if (eventDocument.getString(LogbookMongoDbName.eventDetailData.getDbname()) != null) {
-                    String eventEvDetDataString =
-                        eventDocument.getString(LogbookMongoDbName.eventDetailData.getDbname());
+                    String eventEvDetDataString = eventDocument.getString(
+                        LogbookMongoDbName.eventDetailData.getDbname()
+                    );
                     Document eventEvDetDataDocument = Document.parse(eventEvDetDataString);
                     eventDocument.remove(LogbookMongoDbName.eventDetailData.getDbname());
                     eventDocument.put(LogbookMongoDbName.eventDetailData.getDbname(), eventEvDetDataDocument);
                 }
                 if (eventDocument.getString(LogbookMongoDbName.rightsStatementIdentifier.getDbname()) != null) {
-                    String eventrightsStatementIdentifier =
-                        eventDocument.getString(LogbookMongoDbName.rightsStatementIdentifier.getDbname());
+                    String eventrightsStatementIdentifier = eventDocument.getString(
+                        LogbookMongoDbName.rightsStatementIdentifier.getDbname()
+                    );
                     Document eventEvDetDataDocument = Document.parse(eventrightsStatementIdentifier);
                     eventDocument.remove(LogbookMongoDbName.rightsStatementIdentifier.getDbname());
                     eventDocument.put(LogbookMongoDbName.rightsStatementIdentifier.getDbname(), eventEvDetDataDocument);
                 }
                 if (eventDocument.getString(LogbookMongoDbName.agIdExt.getDbname()) != null) {
-                    String eventagIdExt =
-                        eventDocument.getString(LogbookMongoDbName.agIdExt.getDbname());
+                    String eventagIdExt = eventDocument.getString(LogbookMongoDbName.agIdExt.getDbname());
                     Document eventEvDetDataDocument = Document.parse(eventagIdExt);
                     eventDocument.remove(LogbookMongoDbName.agIdExt.getDbname());
                     eventDocument.put(LogbookMongoDbName.agIdExt.getDbname(), eventEvDetDataDocument);
@@ -111,6 +112,5 @@ public class LogbookTransformData {
         }
         document.remove(LogbookDocument.EVENTS);
         document.put(LogbookDocument.EVENTS, eventDocuments);
-
     }
 }

@@ -95,8 +95,7 @@ public class LogbookMongoDbAccessTest {
     private static final String PREFIX = GUIDFactory.newGUID().getId();
 
     @ClassRule
-    public static MongoRule mongoRule =
-        new MongoRule(MongoDbAccess.getMongoClientSettingsBuilder());
+    public static MongoRule mongoRule = new MongoRule(MongoDbAccess.getMongoClientSettingsBuilder());
 
     @ClassRule
     public static ElasticsearchRule elasticsearchRule = new ElasticsearchRule();
@@ -107,37 +106,41 @@ public class LogbookMongoDbAccessTest {
     static LogbookDbAccess mongoDbAccess;
 
     @Rule
-    public RunWithCustomExecutorRule runInThread =
-        new RunWithCustomExecutorRule(VitamThreadPoolExecutor.getDefaultExecutor());
+    public RunWithCustomExecutorRule runInThread = new RunWithCustomExecutorRule(
+        VitamThreadPoolExecutor.getDefaultExecutor()
+    );
 
     private static final ElasticsearchLogbookIndexManager indexManager =
         LogbookCollectionsTestUtils.createTestIndexManager(tenantList, Collections.emptyMap());
 
     @BeforeClass
     public static void setUpBeforeClass() throws Exception {
+        List<ElasticsearchNode> esNodes = Lists.newArrayList(
+            new ElasticsearchNode(ElasticsearchRule.getHost(), ElasticsearchRule.getPort())
+        );
 
-        List<ElasticsearchNode> esNodes =
-            Lists.newArrayList(new ElasticsearchNode(ElasticsearchRule.getHost(), ElasticsearchRule.getPort()));
-
-        LogbookCollectionsTestUtils.beforeTestClass(mongoRule.getMongoDatabase(), PREFIX,
-            new LogbookElasticsearchAccess(ElasticsearchRule.VITAM_CLUSTER, esNodes, indexManager));
+        LogbookCollectionsTestUtils.beforeTestClass(
+            mongoRule.getMongoDatabase(),
+            PREFIX,
+            new LogbookElasticsearchAccess(ElasticsearchRule.VITAM_CLUSTER, esNodes, indexManager)
+        );
 
         final List<MongoDbNode> nodes = new ArrayList<>();
         nodes.add(new MongoDbNode("localhost", MongoRule.getDataBasePort()));
-        LogbookConfiguration logbookConfiguration =
-            new LogbookConfiguration(nodes, mongoRule.getMongoDatabase().getName(), ElasticsearchRule.VITAM_CLUSTER,
-                esNodes);
+        LogbookConfiguration logbookConfiguration = new LogbookConfiguration(
+            nodes,
+            mongoRule.getMongoDatabase().getName(),
+            ElasticsearchRule.VITAM_CLUSTER,
+            esNodes
+        );
         VitamConfiguration.setTenants(tenantList);
         VitamConfiguration.setAdminTenant(TENANT_ID);
 
-        mongoDbAccess =
-            LogbookMongoDbAccessFactory
-                .create(logbookConfiguration, Collections::emptyList, indexManager);
+        mongoDbAccess = LogbookMongoDbAccessFactory.create(logbookConfiguration, Collections::emptyList, indexManager);
     }
 
     @AfterClass
     public static void tearDownAfterClass() {
-
         LogbookCollectionsTestUtils.afterTestClass(indexManager, true);
 
         mongoDbAccess.close();
@@ -151,34 +154,33 @@ public class LogbookMongoDbAccessTest {
         assertNotNull(((LogbookMongoDbAccessImpl) mongoDbAccess).getEsClient());
         assertTrue(((LogbookMongoDbAccessImpl) mongoDbAccess).getEsClient().checkConnection());
 
-        assertEquals(LogbookMongoDbName.agentIdentifier,
-            LogbookMongoDbName.getLogbookMongoDbName(LogbookParameterName.agentIdentifier));
+        assertEquals(
+            LogbookMongoDbName.agentIdentifier,
+            LogbookMongoDbName.getLogbookMongoDbName(LogbookParameterName.agentIdentifier)
+        );
         for (final LogbookMongoDbName name : LogbookMongoDbName.values()) {
-            assertEquals(name,
-                LogbookMongoDbName.getFromDbname(name.getDbname()));
+            assertEquals(name, LogbookMongoDbName.getFromDbname(name.getDbname()));
         }
 
-        assertEquals(LogbookLifeCycleMongoDbName.eventDetailData,
-            LogbookLifeCycleMongoDbName.getLogbookLifeCycleMongoDbName(LogbookParameterName.eventDetailData));
+        assertEquals(
+            LogbookLifeCycleMongoDbName.eventDetailData,
+            LogbookLifeCycleMongoDbName.getLogbookLifeCycleMongoDbName(LogbookParameterName.eventDetailData)
+        );
 
         for (final LogbookLifeCycleMongoDbName name : LogbookLifeCycleMongoDbName.values()) {
-            assertEquals(name,
-                LogbookLifeCycleMongoDbName.getFromDbname(name.getDbname()));
+            assertEquals(name, LogbookLifeCycleMongoDbName.getFromDbname(name.getDbname()));
         }
 
         try {
             LogbookMongoDbName.getFromDbname("fakeValue");
             fail("Should throw an exception");
-        } catch (final IllegalArgumentException e) {
-        }
+        } catch (final IllegalArgumentException e) {}
 
         final LogbookOperationParameters parameters = LogbookParameterHelper.newLogbookOperationParameters();
         for (final LogbookParameterName name : LogbookParameterName.values()) {
-            parameters.putParameterValue(name,
-                GUIDFactory.newEventGUID(TENANT_ID).getId());
+            parameters.putParameterValue(name, GUIDFactory.newEventGUID(TENANT_ID).getId());
         }
-        parameters.putParameterValue(LogbookParameterName.eventDateTime,
-            LocalDateUtil.now().toString());
+        parameters.putParameterValue(LogbookParameterName.eventDateTime, LocalDateUtil.now().toString());
 
         final LogbookOperation operation = new LogbookOperation(parameters);
         final LogbookOperation operation1 = new LogbookOperation(parameters, true);
@@ -210,7 +212,6 @@ public class LogbookMongoDbAccessTest {
         assertEquals(LogbookLifeCycle.getIdParameterName(), LogbookParameterName.objectIdentifier);
         assertEquals(LogbookLifeCycle.getIdName(), LogbookMongoDbName.objectIdentifier);
         assertEquals(LogbookLifeCycle.getIdParameterName(), LogbookParameterName.objectIdentifier);
-
     }
 
     @Test
@@ -232,41 +233,49 @@ public class LogbookMongoDbAccessTest {
         assertEquals(0, mongoDbAccess.getLogbookOperationSize());
         final Select select = new Select();
         select.setQuery(exists("mavar1"));
-        try (VitamMongoCursor<LogbookOperation> cursorOperation =
-            mongoDbAccess.getLogbookOperations(select.getFinalSelect(), true)) {
+        try (
+            VitamMongoCursor<LogbookOperation> cursorOperation = mongoDbAccess.getLogbookOperations(
+                select.getFinalSelect(),
+                true
+            )
+        ) {
             assertFalse(cursorOperation.hasNext());
         }
-        try (MongoCursor<LogbookLifeCycle<?>> cursorOperation =
-            mongoDbAccess.getLogbookLifeCycles(select.getFinalSelect(), true, LogbookCollections.LIFECYCLE_UNIT)) {
+        try (
+            MongoCursor<LogbookLifeCycle<?>> cursorOperation = mongoDbAccess.getLogbookLifeCycles(
+                select.getFinalSelect(),
+                true,
+                LogbookCollections.LIFECYCLE_UNIT
+            )
+        ) {
             assertFalse(cursorOperation.hasNext());
         }
-        try (MongoCursor<LogbookLifeCycle<?>> cursorOperation =
-            mongoDbAccess.getLogbookLifeCycles(select.getFinalSelect(), true,
-                LogbookCollections.LIFECYCLE_OBJECTGROUP)) {
+        try (
+            MongoCursor<LogbookLifeCycle<?>> cursorOperation = mongoDbAccess.getLogbookLifeCycles(
+                select.getFinalSelect(),
+                true,
+                LogbookCollections.LIFECYCLE_OBJECTGROUP
+            )
+        ) {
             assertFalse(cursorOperation.hasNext());
         }
-        final LogbookOperationParameters params =
-            LogbookParameterHelper.newLogbookOperationParameters();
-        params.getMapParameters().put(LogbookParameterName.objectIdentifier,
-            "");
+        final LogbookOperationParameters params = LogbookParameterHelper.newLogbookOperationParameters();
+        params.getMapParameters().put(LogbookParameterName.objectIdentifier, "");
         assertFalse(mongoDbAccess.existsLogbookOperation("a"));
         assertFalse(mongoDbAccess.existsLogbookOperation(GUIDFactory.newGUID().toString()));
         assertFalse(mongoDbAccess.existsLogbookLifeCycleUnit("a"));
         assertFalse(mongoDbAccess.existsLogbookLifeCycleObjectGroup("a"));
         try {
-            JsonNode queryDsl =
-                JsonHandler.getFromString(
-                    "{ $query: { $eq: {obId: \"" + GUIDFactory.newGUID().getId() +
-                        "\"} }, $projection: {}, $filter: {} }");
+            JsonNode queryDsl = JsonHandler.getFromString(
+                "{ $query: { $eq: {obId: \"" + GUIDFactory.newGUID().getId() + "\"} }, $projection: {}, $filter: {} }"
+            );
             mongoDbAccess.getOneLogbookLifeCycle(queryDsl, false, LogbookCollections.LIFECYCLE_UNIT);
             fail("Should throw an exception");
-        } catch (final VitamException e) {
-        }
+        } catch (final VitamException e) {}
         try {
             mongoDbAccess.getLogbookOperationById(GUIDFactory.newGUID().getId());
             fail("Should throw an exception");
-        } catch (final VitamException e) {
-        }
+        } catch (final VitamException e) {}
     }
 
     @Test
@@ -281,14 +290,17 @@ public class LogbookMongoDbAccessTest {
         final LogbookOperationParameters parameters = LogbookParameterHelper.newLogbookOperationParameters();
         for (final LogbookParameterName name : LogbookParameterName.values()) {
             if (LogbookParameterName.eventDetailData.equals(name)) {
-                parameters.putParameterValue(name, "{\"value\":\"" +
-                    GUIDFactory.newEventGUID(TENANT_ID).getId() + "\"}");
+                parameters.putParameterValue(
+                    name,
+                    "{\"value\":\"" + GUIDFactory.newEventGUID(TENANT_ID).getId() + "\"}"
+                );
             } else if (LogbookParameterName.masterData.equals(name)) {
-                parameters.putParameterValue(name, " { \"eventDetailData\": {\"value\":\"" +
-                    GUIDFactory.newEventGUID(TENANT_ID).getId() + "\"}}");
+                parameters.putParameterValue(
+                    name,
+                    " { \"eventDetailData\": {\"value\":\"" + GUIDFactory.newEventGUID(TENANT_ID).getId() + "\"}}"
+                );
             } else {
-                parameters.putParameterValue(name,
-                    GUIDFactory.newEventGUID(TENANT_ID).getId());
+                parameters.putParameterValue(name, GUIDFactory.newEventGUID(TENANT_ID).getId());
             }
         }
         String agidExt =
@@ -301,52 +313,53 @@ public class LogbookMongoDbAccessTest {
         final LogbookOperationParameters parameters2 = LogbookParameterHelper.newLogbookOperationParameters();
         for (final LogbookParameterName name : LogbookParameterName.values()) {
             if (LogbookParameterName.eventDetailData.equals(name)) {
-                parameters2.putParameterValue(name, "{\"value\":\"" +
-                    GUIDFactory.newEventGUID(TENANT_ID).getId() + "\"}");
+                parameters2.putParameterValue(
+                    name,
+                    "{\"value\":\"" + GUIDFactory.newEventGUID(TENANT_ID).getId() + "\"}"
+                );
             } else if (LogbookParameterName.masterData.equals(name)) {
-                parameters2.putParameterValue(name, " { \"eventDetailData\": {\"value\":\"" +
-                    GUIDFactory.newEventGUID(TENANT_ID).getId() + "\"}}");
+                parameters2.putParameterValue(
+                    name,
+                    " { \"eventDetailData\": {\"value\":\"" + GUIDFactory.newEventGUID(TENANT_ID).getId() + "\"}}"
+                );
             } else {
-                parameters2.putParameterValue(name,
-                    GUIDFactory.newEventGUID(TENANT_ID).getId());
+                parameters2.putParameterValue(name, GUIDFactory.newEventGUID(TENANT_ID).getId());
             }
         }
-        parameters2.putParameterValue(LogbookParameterName.eventIdentifierProcess,
-            parameters.getMapParameters().get(LogbookParameterName.eventIdentifierProcess));
-        parameters2.putParameterValue(LogbookParameterName.eventDateTime,
-            LocalDateUtil.now().toString());
+        parameters2.putParameterValue(
+            LogbookParameterName.eventIdentifierProcess,
+            parameters.getMapParameters().get(LogbookParameterName.eventIdentifierProcess)
+        );
+        parameters2.putParameterValue(LogbookParameterName.eventDateTime, LocalDateUtil.now().toString());
         parameters2.putParameterValue(LogbookParameterName.agIdExt, agidExt);
         parameters2.putParameterValue(LogbookParameterName.rightsStatementIdentifier, rightsStatementIdentifier);
 
         final LogbookOperationParameters parametersWrong = LogbookParameterHelper.newLogbookOperationParameters();
         for (final LogbookParameterName name : LogbookParameterName.values()) {
-            parametersWrong.putParameterValue(name,
-                GUIDFactory.newEventGUID(TENANT_ID).getId());
+            parametersWrong.putParameterValue(name, GUIDFactory.newEventGUID(TENANT_ID).getId());
         }
-        parametersWrong.putParameterValue(LogbookParameterName.eventDateTime,
-            LocalDateUtil.now().toString());
+        parametersWrong.putParameterValue(LogbookParameterName.eventDateTime, LocalDateUtil.now().toString());
         parametersWrong.putParameterValue(LogbookParameterName.rightsStatementIdentifier, rightsStatementIdentifier);
 
         try {
             mongoDbAccess.updateLogbookOperation(parameters);
             fail("Should throw an exception");
-        } catch (final VitamException e) {
-        }
+        } catch (final VitamException e) {}
         mongoDbAccess.createLogbookOperation(parameters);
         assertEquals(nbl, mongoDbAccess.getLogbookLifeCyleUnitSize());
         assertEquals(nbo + 1, mongoDbAccess.getLogbookOperationSize());
         try {
             mongoDbAccess.createLogbookOperation(parameters);
             fail("Should throw an exception");
-        } catch (final VitamException e) {
-        }
+        } catch (final VitamException e) {}
         try {
             mongoDbAccess.createLogbookOperation(parameters2);
             fail("Should throw an exception");
-        } catch (final VitamException e) {
-        }
-        parameters2.putParameterValue(LogbookParameterName.masterData,
-            JsonHandler.getFromString("{\"eventDetailData\" : {\"fileName\":\"newFile.json\"}}").toString());
+        } catch (final VitamException e) {}
+        parameters2.putParameterValue(
+            LogbookParameterName.masterData,
+            JsonHandler.getFromString("{\"eventDetailData\" : {\"fileName\":\"newFile.json\"}}").toString()
+        );
         mongoDbAccess.updateLogbookOperation(parameters2);
         assertEquals(nbl, mongoDbAccess.getLogbookLifeCyleUnitSize());
         assertEquals(nbo + 1, mongoDbAccess.getLogbookOperationSize());
@@ -372,29 +385,26 @@ public class LogbookMongoDbAccessTest {
         try {
             mongoDbAccess.updateLogbookOperation(parametersWrong);
             fail("Should throw an exception");
-        } catch (final VitamException e) {
-        }
+        } catch (final VitamException e) {}
 
-        parameters.putParameterValue(LogbookParameterName.eventIdentifier,
-            GUIDFactory.newEventGUID(TENANT_ID).getId());
-        parameters.putParameterValue(LogbookParameterName.eventDateTime,
-            LocalDateUtil.now().toString());
+        parameters.putParameterValue(LogbookParameterName.eventIdentifier, GUIDFactory.newEventGUID(TENANT_ID).getId());
+        parameters.putParameterValue(LogbookParameterName.eventDateTime, LocalDateUtil.now().toString());
 
-        parameters2.putParameterValue(LogbookParameterName.eventIdentifier,
-            GUIDFactory.newEventGUID(TENANT_ID).getId());
-        parameters2.putParameterValue(LogbookParameterName.eventDateTime,
-            LocalDateUtil.now().toString());
+        parameters2.putParameterValue(
+            LogbookParameterName.eventIdentifier,
+            GUIDFactory.newEventGUID(TENANT_ID).getId()
+        );
+        parameters2.putParameterValue(LogbookParameterName.eventDateTime, LocalDateUtil.now().toString());
         mongoDbAccess.updateBulkLogbookOperation(parameters, parameters2);
         assertEquals(2, mongoDbAccess.getLogbookOperationById(eip).get(LogbookDocument.VERSION));
         assertEquals(nbl, mongoDbAccess.getLogbookLifeCyleUnitSize());
         assertEquals(nbo + 1, mongoDbAccess.getLogbookOperationSize());
 
         assertTrue(mongoDbAccess.existsLogbookOperation(eip));
-        JsonNode node =
-            JsonHandler.getFromString(
-                "{ $query: { $eq: { _id: \"" + eip + "\" } }, $projection: {}, $filter: {} }");
-        try (VitamMongoCursor<LogbookOperation> cursor =
-            mongoDbAccess.getLogbookOperations(node, true)) {
+        JsonNode node = JsonHandler.getFromString(
+            "{ $query: { $eq: { _id: \"" + eip + "\" } }, $projection: {}, $filter: {} }"
+        );
+        try (VitamMongoCursor<LogbookOperation> cursor = mongoDbAccess.getLogbookOperations(node, true)) {
             assertTrue(cursor.hasNext());
             final LogbookOperation operation = cursor.next();
             assertNotNull(operation);
@@ -403,10 +413,15 @@ public class LogbookMongoDbAccessTest {
             assertEquals(3, operation.getOperations(true).size());
             assertEquals(2, operation.getOperations(false).size());
         }
-        node = JsonHandler.getFromString("{ $query: { $eq: { _id: \"" + eip + "\"} }, $projection: { " +
-            LogbookMongoDbName.eventIdentifier.getDbname() + " : 1" + " }, $filter: { $limit : 1 } }");
-        try (VitamMongoCursor<LogbookOperation> cursor =
-            mongoDbAccess.getLogbookOperations(node, true)) {
+        node = JsonHandler.getFromString(
+            "{ $query: { $eq: { _id: \"" +
+            eip +
+            "\"} }, $projection: { " +
+            LogbookMongoDbName.eventIdentifier.getDbname() +
+            " : 1" +
+            " }, $filter: { $limit : 1 } }"
+        );
+        try (VitamMongoCursor<LogbookOperation> cursor = mongoDbAccess.getLogbookOperations(node, true)) {
             assertTrue(cursor.hasNext());
             final LogbookOperation operation = cursor.next();
             assertNotNull(operation);
@@ -418,86 +433,92 @@ public class LogbookMongoDbAccessTest {
         assertEquals(4, operation2.getOperations(true).size());
         assertEquals(2, operation2.getOperations(false).size());
 
-        node = JsonHandler.getFromString("{ $query: { $unknown : '_id' }, $projection: { " +
-            LogbookOperation.ID + " : 1, " +
-            LogbookMongoDbName.eventIdentifier.getDbname() + " : 1" + " }, $filter: { $limit : 1 } }");
+        node = JsonHandler.getFromString(
+            "{ $query: { $unknown : '_id' }, $projection: { " +
+            LogbookOperation.ID +
+            " : 1, " +
+            LogbookMongoDbName.eventIdentifier.getDbname() +
+            " : 1" +
+            " }, $filter: { $limit : 1 } }"
+        );
         try {
             mongoDbAccess.getLogbookOperations(node, true);
             fail("Should throw an exception");
-        } catch (final VitamException e) {
-        }
+        } catch (final VitamException e) {}
 
-        parameters.putParameterValue(LogbookParameterName.eventIdentifier,
-            GUIDFactory.newEventGUID(TENANT_ID).getId());
-        parameters.putParameterValue(LogbookParameterName.eventIdentifierProcess,
-            GUIDFactory.newEventGUID(TENANT_ID).getId());
-        parameters.putParameterValue(LogbookParameterName.eventDateTime,
-            LocalDateUtil.now().toString());
-        parameters2.putParameterValue(LogbookParameterName.eventIdentifier,
-            GUIDFactory.newEventGUID(TENANT_ID).getId());
-        parameters2.putParameterValue(LogbookParameterName.eventIdentifierProcess,
-            parameters.getMapParameters().get(LogbookParameterName.eventIdentifierProcess));
-        parameters2.putParameterValue(LogbookParameterName.eventDateTime,
-            LocalDateUtil.now().toString());
+        parameters.putParameterValue(LogbookParameterName.eventIdentifier, GUIDFactory.newEventGUID(TENANT_ID).getId());
+        parameters.putParameterValue(
+            LogbookParameterName.eventIdentifierProcess,
+            GUIDFactory.newEventGUID(TENANT_ID).getId()
+        );
+        parameters.putParameterValue(LogbookParameterName.eventDateTime, LocalDateUtil.now().toString());
+        parameters2.putParameterValue(
+            LogbookParameterName.eventIdentifier,
+            GUIDFactory.newEventGUID(TENANT_ID).getId()
+        );
+        parameters2.putParameterValue(
+            LogbookParameterName.eventIdentifierProcess,
+            parameters.getMapParameters().get(LogbookParameterName.eventIdentifierProcess)
+        );
+        parameters2.putParameterValue(LogbookParameterName.eventDateTime, LocalDateUtil.now().toString());
 
         try {
             mongoDbAccess.updateBulkLogbookOperation(parameters, parameters2);
             fail("Should throw an exception");
-        } catch (final VitamException e) {
-        }
+        } catch (final VitamException e) {}
         try {
             mongoDbAccess.updateBulkLogbookOperation();
             fail("Should throw an exception");
-        } catch (final IllegalArgumentException e) {
-        }
+        } catch (final IllegalArgumentException e) {}
         try {
             mongoDbAccess.updateBulkLogbookOperation(LogbookParameterHelper.newLogbookOperationParameters());
             fail("Should throw an exception");
-        } catch (final LogbookNotFoundException e) {
-        }
+        } catch (final LogbookNotFoundException e) {}
         mongoDbAccess.createBulkLogbookOperation(parameters, parameters2);
         assertEquals(nbl, mongoDbAccess.getLogbookLifeCyleUnitSize());
         assertEquals(nbo + 2, mongoDbAccess.getLogbookOperationSize());
         try {
             mongoDbAccess.createBulkLogbookOperation(parameters, parameters2);
             fail("Should throw an exception");
-        } catch (final VitamException e) {
-        }
+        } catch (final VitamException e) {}
 
-        node = JsonHandler.getFromString("{ $query: { $exists : '_id' }, $projection: { " +
-            LogbookMongoDbName.eventIdentifier.getDbname() + " : 1" + " }, $filter: { $limit : 1 } }");
-        try (VitamMongoCursor<LogbookOperation> cursor =
-            mongoDbAccess.getLogbookOperations(node, true)) {
+        node = JsonHandler.getFromString(
+            "{ $query: { $exists : '_id' }, $projection: { " +
+            LogbookMongoDbName.eventIdentifier.getDbname() +
+            " : 1" +
+            " }, $filter: { $limit : 1 } }"
+        );
+        try (VitamMongoCursor<LogbookOperation> cursor = mongoDbAccess.getLogbookOperations(node, true)) {
             assertTrue(cursor.hasNext());
             final LogbookOperation operation = cursor.next();
             assertNotNull(operation);
             assertFalse(cursor.hasNext());
         }
-        node =
-            JsonHandler.getFromString(
-                "{ $query: { $exists : '_id' }, $projection: {}, $filter: {} }");
-        try (VitamMongoCursor<LogbookOperation> cursor =
-            mongoDbAccess.getLogbookOperations(node, true)) {
+        node = JsonHandler.getFromString("{ $query: { $exists : '_id' }, $projection: {}, $filter: {} }");
+        try (VitamMongoCursor<LogbookOperation> cursor = mongoDbAccess.getLogbookOperations(node, true)) {
             assertTrue(cursor.hasNext());
             final LogbookOperation operation = cursor.next();
             assertNotNull(operation);
             assertTrue(cursor.hasNext());
         }
 
-        parameters.putParameterValue(LogbookParameterName.eventIdentifier,
-            GUIDFactory.newEventGUID(TENANT_ID).getId());
-        parameters.putParameterValue(LogbookParameterName.eventIdentifierProcess,
-            GUIDFactory.newEventGUID(TENANT_ID).getId());
-        parameters.putParameterValue(LogbookParameterName.eventDateTime,
-            LocalDateUtil.now().toString());
+        parameters.putParameterValue(LogbookParameterName.eventIdentifier, GUIDFactory.newEventGUID(TENANT_ID).getId());
+        parameters.putParameterValue(
+            LogbookParameterName.eventIdentifierProcess,
+            GUIDFactory.newEventGUID(TENANT_ID).getId()
+        );
+        parameters.putParameterValue(LogbookParameterName.eventDateTime, LocalDateUtil.now().toString());
         parameters.putParameterValue(LogbookParameterName.eventTypeProcess, "TRACEABILITY");
         mongoDbAccess.createBulkLogbookOperation(parameters);
 
-        node = JsonHandler.getFromString("{ $query: { $eq: { 'evTypeProc' : 'TRACEABILITY' } }, $projection: { " +
-            LogbookMongoDbName.eventIdentifier.getDbname() + " : 1" + " }, $filter: { $limit : 1 } }");
+        node = JsonHandler.getFromString(
+            "{ $query: { $eq: { 'evTypeProc' : 'TRACEABILITY' } }, $projection: { " +
+            LogbookMongoDbName.eventIdentifier.getDbname() +
+            " : 1" +
+            " }, $filter: { $limit : 1 } }"
+        );
 
-        try (VitamMongoCursor<LogbookOperation> cursor =
-            mongoDbAccess.getLogbookOperations(node, true)) {
+        try (VitamMongoCursor<LogbookOperation> cursor = mongoDbAccess.getLogbookOperations(node, true)) {
             assertTrue(cursor.hasNext());
             final LogbookOperation operation = cursor.next();
             assertNotNull(operation);
@@ -506,15 +527,15 @@ public class LogbookMongoDbAccessTest {
 
         node = JsonHandler.getFromString(
             "{ $query: { $and : [{ $eq: { 'evTypeProc' : 'TRACEABILITY' }}, { $eq: { 'outcome' : 'XXXXX' }} ]} }, $projection: { " +
-                LogbookMongoDbName.eventIdentifier.getDbname() + " : 1" + " }, $filter: { $limit : 1 } }");
+            LogbookMongoDbName.eventIdentifier.getDbname() +
+            " : 1" +
+            " }, $filter: { $limit : 1 } }"
+        );
 
-        try (VitamMongoCursor<LogbookOperation> cursor =
-            mongoDbAccess.getLogbookOperations(node, true)) {
+        try (VitamMongoCursor<LogbookOperation> cursor = mongoDbAccess.getLogbookOperations(node, true)) {
             assertFalse(cursor.hasNext());
             assertNull(cursor.next());
         }
-
-
     }
 
     @Test
@@ -526,58 +547,57 @@ public class LogbookMongoDbAccessTest {
         final long nbl = mongoDbAccess.getLogbookLifeCyleUnitSize();
         final LogbookLifeCycleUnitParameters parameters = LogbookParameterHelper.newLogbookLifeCycleUnitParameters();
         for (final LogbookParameterName name : LogbookParameterName.values()) {
-            parameters.putParameterValue(name,
-                GUIDFactory.newEventGUID(TENANT_ID).getId());
+            parameters.putParameterValue(name, GUIDFactory.newEventGUID(TENANT_ID).getId());
         }
-        parameters.putParameterValue(LogbookParameterName.eventDateTime,
-            LocalDateUtil.now().toString());
+        parameters.putParameterValue(LogbookParameterName.eventDateTime, LocalDateUtil.now().toString());
         parameters.setTypeProcess(LogbookTypeProcess.INGEST);
 
         final String oi = parameters.getParameterValue(LogbookParameterName.objectIdentifier);
 
         final LogbookLifeCycleUnitParameters parameters2 = LogbookParameterHelper.newLogbookLifeCycleUnitParameters();
         for (final LogbookParameterName name : LogbookParameterName.values()) {
-            parameters2.putParameterValue(name,
-                GUIDFactory.newEventGUID(TENANT_ID).getId());
+            parameters2.putParameterValue(name, GUIDFactory.newEventGUID(TENANT_ID).getId());
         }
-        parameters2.putParameterValue(LogbookParameterName.objectIdentifier,
-            parameters.getMapParameters().get(LogbookParameterName.objectIdentifier));
-        parameters2.putParameterValue(LogbookParameterName.eventDateTime,
-            LocalDateUtil.now().toString());
+        parameters2.putParameterValue(
+            LogbookParameterName.objectIdentifier,
+            parameters.getMapParameters().get(LogbookParameterName.objectIdentifier)
+        );
+        parameters2.putParameterValue(LogbookParameterName.eventDateTime, LocalDateUtil.now().toString());
         parameters2.setTypeProcess(LogbookTypeProcess.INGEST);
 
         final LogbookLifeCycleUnitParameters parametersWrong =
             LogbookParameterHelper.newLogbookLifeCycleUnitParameters();
         for (final LogbookParameterName name : LogbookParameterName.values()) {
-            parametersWrong.putParameterValue(name,
-                GUIDFactory.newEventGUID(TENANT_ID).getId());
+            parametersWrong.putParameterValue(name, GUIDFactory.newEventGUID(TENANT_ID).getId());
         }
-        parametersWrong.putParameterValue(LogbookParameterName.eventDateTime,
-            LocalDateUtil.now().toString());
+        parametersWrong.putParameterValue(LogbookParameterName.eventDateTime, LocalDateUtil.now().toString());
         parametersWrong.setTypeProcess(LogbookTypeProcess.INGEST);
 
-        assertThatThrownBy(() -> mongoDbAccess.updateLogbookLifeCycleUnit(
-            parameters.getParameterValue(LogbookParameterName.eventIdentifierProcess), oi, parameters))
-            .isInstanceOf(LogbookNotFoundException.class);
+        assertThatThrownBy(
+            () ->
+                mongoDbAccess.updateLogbookLifeCycleUnit(
+                    parameters.getParameterValue(LogbookParameterName.eventIdentifierProcess),
+                    oi,
+                    parameters
+                )
+        ).isInstanceOf(LogbookNotFoundException.class);
 
         commitUnit(oi, true, parameters);
         assertEquals(nbl + 1, mongoDbAccess.getLogbookLifeCyleUnitSize());
         final String oi2 = parameters.getParameterValue(LogbookParameterName.objectIdentifier);
-        JsonNode queryDsl =
-            JsonHandler.getFromString(
-                "{ $query: { $eq: {obId: \"" + oi2 + "\"} }, $projection: {}, $filter: {} }");
+        JsonNode queryDsl = JsonHandler.getFromString(
+            "{ $query: { $eq: {obId: \"" + oi2 + "\"} }, $projection: {}, $filter: {} }"
+        );
         assertNotNull(mongoDbAccess.getLogbookLifeCycles(queryDsl, false, LogbookCollections.LIFECYCLE_UNIT));
         try {
             commitUnit(oi2, true, parameters);
             fail("Should throw an exception");
-        } catch (final VitamException e) {
-        }
+        } catch (final VitamException e) {}
 
         try {
             commitUnit(oi2, true, parameters2);
             fail("Should throw an exception");
-        } catch (final VitamException e) {
-        }
+        } catch (final VitamException e) {}
 
         // From now on, typeProcess will be UPDATE
         parameters.setTypeProcess(LogbookTypeProcess.UPDATE);
@@ -585,35 +605,44 @@ public class LogbookMongoDbAccessTest {
         parametersWrong.setTypeProcess(LogbookTypeProcess.UPDATE);
 
         mongoDbAccess.updateLogbookLifeCycleUnit(
-            parameters2.getParameterValue(LogbookParameterName.eventIdentifierProcess), oi2, parameters2);
+            parameters2.getParameterValue(LogbookParameterName.eventIdentifierProcess),
+            oi2,
+            parameters2
+        );
 
         // check current lfc version
 
-        assertThat(mongoDbAccess.getOneLogbookLifeCycle(queryDsl, false, LogbookCollections.LIFECYCLE_UNIT)
-            .get(LogbookDocument.VERSION)).isEqualTo(0);
+        assertThat(
+            mongoDbAccess
+                .getOneLogbookLifeCycle(queryDsl, false, LogbookCollections.LIFECYCLE_UNIT)
+                .get(LogbookDocument.VERSION)
+        ).isEqualTo(0);
         // Commit the last update
         commitUnit(oi2, false, parameters2);
         assertThat(mongoDbAccess.getLogbookLifeCyleUnitSize()).isEqualTo(nbl + 1);
         // check version increment
-        assertThat(mongoDbAccess.getOneLogbookLifeCycle(queryDsl, false, LogbookCollections.LIFECYCLE_UNIT)
-            .get(LogbookDocument.VERSION)).isEqualTo(1);
+        assertThat(
+            mongoDbAccess
+                .getOneLogbookLifeCycle(queryDsl, false, LogbookCollections.LIFECYCLE_UNIT)
+                .get(LogbookDocument.VERSION)
+        ).isEqualTo(1);
 
         try {
             mongoDbAccess.updateLogbookLifeCycleUnit(
                 parametersWrong.getParameterValue(LogbookParameterName.eventIdentifierProcess),
-                parametersWrong.getParameterValue(LogbookParameterName.objectIdentifier), parametersWrong);
+                parametersWrong.getParameterValue(LogbookParameterName.objectIdentifier),
+                parametersWrong
+            );
             fail("Should throw an exception");
-        } catch (final VitamException e) {
-        }
+        } catch (final VitamException e) {}
 
-        parameters.putParameterValue(LogbookParameterName.eventIdentifier,
-            GUIDFactory.newEventGUID(TENANT_ID).getId());
-        parameters.putParameterValue(LogbookParameterName.eventDateTime,
-            LocalDateUtil.now().toString());
-        parameters2.putParameterValue(LogbookParameterName.eventIdentifier,
-            GUIDFactory.newEventGUID(TENANT_ID).getId());
-        parameters2.putParameterValue(LogbookParameterName.eventDateTime,
-            LocalDateUtil.now().toString());
+        parameters.putParameterValue(LogbookParameterName.eventIdentifier, GUIDFactory.newEventGUID(TENANT_ID).getId());
+        parameters.putParameterValue(LogbookParameterName.eventDateTime, LocalDateUtil.now().toString());
+        parameters2.putParameterValue(
+            LogbookParameterName.eventIdentifier,
+            GUIDFactory.newEventGUID(TENANT_ID).getId()
+        );
+        parameters2.putParameterValue(LogbookParameterName.eventDateTime, LocalDateUtil.now().toString());
         parameters.putParameterValue(LogbookParameterName.objectIdentifier, oi2);
         parameters2.putParameterValue(LogbookParameterName.objectIdentifier, oi2);
         mongoDbAccess.updateBulkLogbookLifeCycleUnit(parameters, parameters2);
@@ -623,22 +652,31 @@ public class LogbookMongoDbAccessTest {
 
         assertEquals(nbl + 1, mongoDbAccess.getLogbookLifeCyleUnitSize());
 
-
         assertTrue(mongoDbAccess.existsLogbookLifeCycleUnit(oi));
-        JsonNode node =
-            JsonHandler.getFromString(
-                "{ $query: { $eq: {_id: \"" + oi2 + "\"} }, $projection: {}, $filter: {} }");
+        JsonNode node = JsonHandler.getFromString(
+            "{ $query: { $eq: {_id: \"" + oi2 + "\"} }, $projection: {}, $filter: {} }"
+        );
         // sliced
-        try (MongoCursor<LogbookLifeCycle<?>> cursor =
-            mongoDbAccess.getLogbookLifeCycles(node, true, LogbookCollections.LIFECYCLE_UNIT)) {
+        try (
+            MongoCursor<LogbookLifeCycle<?>> cursor = mongoDbAccess.getLogbookLifeCycles(
+                node,
+                true,
+                LogbookCollections.LIFECYCLE_UNIT
+            )
+        ) {
             assertTrue(cursor.hasNext());
             final LogbookLifeCycle<?> lifeCycle = cursor.next();
             assertNotNull(lifeCycle);
             assertThat(lifeCycle.events()).hasSize(1);
         }
         // non sliced
-        try (MongoCursor<LogbookLifeCycle<?>> cursor =
-            mongoDbAccess.getLogbookLifeCycles(node, false, LogbookCollections.LIFECYCLE_UNIT)) {
+        try (
+            MongoCursor<LogbookLifeCycle<?>> cursor = mongoDbAccess.getLogbookLifeCycles(
+                node,
+                false,
+                LogbookCollections.LIFECYCLE_UNIT
+            )
+        ) {
             assertTrue(cursor.hasNext());
             final LogbookLifeCycle<?> lifeCycle = cursor.next();
             assertNotNull(lifeCycle);
@@ -648,62 +686,74 @@ public class LogbookMongoDbAccessTest {
         final SelectParserSingle parser = new SelectParserSingle(new LogbookVarNameAdapter());
         parser.parse(node);
 
-        try (MongoCursor<LogbookLifeCycleUnit> cursor =
-            mongoDbAccess.getLogbookLifeCycleUnitsFull(LogbookCollections.LIFECYCLE_UNIT, parser.getRequest())) {
+        try (
+            MongoCursor<LogbookLifeCycleUnit> cursor = mongoDbAccess.getLogbookLifeCycleUnitsFull(
+                LogbookCollections.LIFECYCLE_UNIT,
+                parser.getRequest()
+            )
+        ) {
             assertTrue(cursor.hasNext());
             final LogbookLifeCycle<?> lifeCycle = cursor.next();
             assertNotNull(lifeCycle);
             assertThat(lifeCycle.events()).hasSize(4);
         }
 
-        LogbookLifeCycle<?> lifeCycle =
-            mongoDbAccess.getOneLogbookLifeCycle(queryDsl, false, LogbookCollections.LIFECYCLE_UNIT);
+        LogbookLifeCycle<?> lifeCycle = mongoDbAccess.getOneLogbookLifeCycle(
+            queryDsl,
+            false,
+            LogbookCollections.LIFECYCLE_UNIT
+        );
         assertNotNull(lifeCycle);
         assertThat(lifeCycle.events()).hasSize(4);
 
-        node = JsonHandler.getFromString("{ $query: { $unknown : '_id' }, $projection: { " +
-            LogbookMongoDbName.eventIdentifier.getDbname() + " : 1" + " }, $filter: { $limit : 1 } }");
+        node = JsonHandler.getFromString(
+            "{ $query: { $unknown : '_id' }, $projection: { " +
+            LogbookMongoDbName.eventIdentifier.getDbname() +
+            " : 1" +
+            " }, $filter: { $limit : 1 } }"
+        );
         try {
             mongoDbAccess.getLogbookLifeCycles(node, true, LogbookCollections.LIFECYCLE_UNIT);
             fail("Should throw an exception");
-        } catch (final VitamException e) {
-        }
+        } catch (final VitamException e) {}
 
-
-        parameters.putParameterValue(LogbookParameterName.eventIdentifierProcess,
-            GUIDFactory.newEventGUID(TENANT_ID).getId());
-        parameters.putParameterValue(LogbookParameterName.eventIdentifier,
-            GUIDFactory.newEventGUID(TENANT_ID).getId());
-        parameters.putParameterValue(LogbookParameterName.objectIdentifier,
-            GUIDFactory.newEventGUID(TENANT_ID).getId());
-        parameters.putParameterValue(LogbookParameterName.eventDateTime,
-            LocalDateUtil.now().toString());
-        parameters2.putParameterValue(LogbookParameterName.eventIdentifier,
-            GUIDFactory.newEventGUID(TENANT_ID).getId());
-        parameters2.putParameterValue(LogbookParameterName.eventIdentifierProcess,
-            parameters.getMapParameters().get(LogbookParameterName.eventIdentifierProcess));
-        parameters2.putParameterValue(LogbookParameterName.objectIdentifier,
-            parameters.getMapParameters().get(LogbookParameterName.objectIdentifier));
-        parameters2.putParameterValue(LogbookParameterName.eventDateTime,
-            LocalDateUtil.now().toString());
+        parameters.putParameterValue(
+            LogbookParameterName.eventIdentifierProcess,
+            GUIDFactory.newEventGUID(TENANT_ID).getId()
+        );
+        parameters.putParameterValue(LogbookParameterName.eventIdentifier, GUIDFactory.newEventGUID(TENANT_ID).getId());
+        parameters.putParameterValue(
+            LogbookParameterName.objectIdentifier,
+            GUIDFactory.newEventGUID(TENANT_ID).getId()
+        );
+        parameters.putParameterValue(LogbookParameterName.eventDateTime, LocalDateUtil.now().toString());
+        parameters2.putParameterValue(
+            LogbookParameterName.eventIdentifier,
+            GUIDFactory.newEventGUID(TENANT_ID).getId()
+        );
+        parameters2.putParameterValue(
+            LogbookParameterName.eventIdentifierProcess,
+            parameters.getMapParameters().get(LogbookParameterName.eventIdentifierProcess)
+        );
+        parameters2.putParameterValue(
+            LogbookParameterName.objectIdentifier,
+            parameters.getMapParameters().get(LogbookParameterName.objectIdentifier)
+        );
+        parameters2.putParameterValue(LogbookParameterName.eventDateTime, LocalDateUtil.now().toString());
 
         final String oi3 = parameters.getMapParameters().get(LogbookParameterName.objectIdentifier);
         try {
             mongoDbAccess.updateBulkLogbookLifeCycleUnit(parameters, parameters2);
             fail("Should throw an exception");
-        } catch (final VitamException e) {
-        }
+        } catch (final VitamException e) {}
         try {
             mongoDbAccess.updateBulkLogbookLifeCycleUnit();
             fail("Should throw an exception");
-        } catch (final IllegalArgumentException e) {
-        }
+        } catch (final IllegalArgumentException e) {}
         try {
             mongoDbAccess.updateBulkLogbookLifeCycleUnit(LogbookParameterHelper.newLogbookLifeCycleUnitParameters());
             fail("Should throw an exception");
-        } catch (final IllegalArgumentException e) {
-
-        }
+        } catch (final IllegalArgumentException e) {}
 
         // Commit new lifeCycle
         commitUnit(oi3, true, parameters, parameters2);
@@ -712,42 +762,71 @@ public class LogbookMongoDbAccessTest {
         try {
             commitUnit(oi3, true, parameters, parameters2);
             fail("Should throw an exception");
-        } catch (final VitamException e) {
-
-        }
-        node = JsonHandler.getFromString("{ $query: { $exists : '_id' }, $projection: { " +
-            LogbookMongoDbName.eventIdentifier.getDbname() + " : 1, " +
-            LogbookMongoDbName.eventIdentifierRequest.getDbname() + " : -1 " + " }, $filter: { $limit : 1 } }");
-        try (MongoCursor<LogbookLifeCycle<?>> cursor =
-            mongoDbAccess.getLogbookLifeCycles(node, true, LogbookCollections.LIFECYCLE_UNIT)) {
+        } catch (final VitamException e) {}
+        node = JsonHandler.getFromString(
+            "{ $query: { $exists : '_id' }, $projection: { " +
+            LogbookMongoDbName.eventIdentifier.getDbname() +
+            " : 1, " +
+            LogbookMongoDbName.eventIdentifierRequest.getDbname() +
+            " : -1 " +
+            " }, $filter: { $limit : 1 } }"
+        );
+        try (
+            MongoCursor<LogbookLifeCycle<?>> cursor = mongoDbAccess.getLogbookLifeCycles(
+                node,
+                true,
+                LogbookCollections.LIFECYCLE_UNIT
+            )
+        ) {
             assertTrue(cursor.hasNext());
             final LogbookLifeCycle<?> lifecycle = cursor.next();
             assertNotNull(lifecycle);
             assertFalse(cursor.hasNext());
         }
-        node = JsonHandler.getFromString("{ $query: { $exists : '_id' }, $projection: { " +
-            LogbookMongoDbName.eventIdentifierRequest.getDbname() + " : -1" + " }, $filter: { $limit : 1 } }");
-        try (MongoCursor<LogbookLifeCycle<?>> cursor =
-            mongoDbAccess.getLogbookLifeCycles(node, true, LogbookCollections.LIFECYCLE_UNIT)) {
+        node = JsonHandler.getFromString(
+            "{ $query: { $exists : '_id' }, $projection: { " +
+            LogbookMongoDbName.eventIdentifierRequest.getDbname() +
+            " : -1" +
+            " }, $filter: { $limit : 1 } }"
+        );
+        try (
+            MongoCursor<LogbookLifeCycle<?>> cursor = mongoDbAccess.getLogbookLifeCycles(
+                node,
+                true,
+                LogbookCollections.LIFECYCLE_UNIT
+            )
+        ) {
             assertTrue(cursor.hasNext());
             final LogbookLifeCycle<?> lifecycle = cursor.next();
             assertNotNull(lifecycle);
             assertFalse(cursor.hasNext());
         }
-        node = JsonHandler.getFromString("{ $query: { $exists : '_id' }, $projection: { " +
-            LogbookMongoDbName.eventIdentifier.getDbname() + " : 1" + " }, $filter: { $limit : 1 } }");
-        try (MongoCursor<LogbookLifeCycle<?>> cursor =
-            mongoDbAccess.getLogbookLifeCycles(node, true, LogbookCollections.LIFECYCLE_UNIT)) {
+        node = JsonHandler.getFromString(
+            "{ $query: { $exists : '_id' }, $projection: { " +
+            LogbookMongoDbName.eventIdentifier.getDbname() +
+            " : 1" +
+            " }, $filter: { $limit : 1 } }"
+        );
+        try (
+            MongoCursor<LogbookLifeCycle<?>> cursor = mongoDbAccess.getLogbookLifeCycles(
+                node,
+                true,
+                LogbookCollections.LIFECYCLE_UNIT
+            )
+        ) {
             assertTrue(cursor.hasNext());
             final LogbookLifeCycle<?> lifecycle = cursor.next();
             assertNotNull(lifecycle);
             assertFalse(cursor.hasNext());
         }
-        node =
-            JsonHandler.getFromString(
-                "{ $query: { $exists : '_id' }, $projection: {}, $filter: {} }");
-        try (MongoCursor<LogbookLifeCycle<?>> cursor =
-            mongoDbAccess.getLogbookLifeCycles(node, true, LogbookCollections.LIFECYCLE_UNIT)) {
+        node = JsonHandler.getFromString("{ $query: { $exists : '_id' }, $projection: {}, $filter: {} }");
+        try (
+            MongoCursor<LogbookLifeCycle<?>> cursor = mongoDbAccess.getLogbookLifeCycles(
+                node,
+                true,
+                LogbookCollections.LIFECYCLE_UNIT
+            )
+        ) {
             assertTrue(cursor.hasNext());
             final LogbookLifeCycle<?> lifecycle = cursor.next();
             assertNotNull(lifecycle);
@@ -755,28 +834,28 @@ public class LogbookMongoDbAccessTest {
         }
         mongoDbAccess.rollbackLogbookLifeCycleUnit(
             parameters.getParameterValue(LogbookParameterName.eventIdentifierProcess),
-            parameters.getParameterValue(LogbookParameterName.objectIdentifier));
+            parameters.getParameterValue(LogbookParameterName.objectIdentifier)
+        );
         try {
             mongoDbAccess.rollbackLogbookLifeCycleUnit(
                 parameters.getParameterValue(LogbookParameterName.eventIdentifierProcess),
-                parameters.getParameterValue(LogbookParameterName.objectIdentifier));
+                parameters.getParameterValue(LogbookParameterName.objectIdentifier)
+            );
             fail("Should throw an exception");
-        } catch (final VitamException e) {
-
-        }
+        } catch (final VitamException e) {}
     }
 
-    private void commitUnit(String objectIdentifier, boolean isCreationProcess,
-        LogbookLifeCycleUnitParameters... parameters)
-        throws LogbookDatabaseException, LogbookAlreadyExistsException, LogbookNotFoundException {
-
+    private void commitUnit(
+        String objectIdentifier,
+        boolean isCreationProcess,
+        LogbookLifeCycleUnitParameters... parameters
+    ) throws LogbookDatabaseException, LogbookAlreadyExistsException, LogbookNotFoundException {
         if (isCreationProcess) {
             // Create a unit lifeCycle in working collection
             mongoDbAccess.createBulkLogbookLifeCycleUnit(parameters);
         }
 
-        LogbookLifeCycleUnitInProcess inProcessUnit = mongoDbAccess
-            .getLogbookLifeCycleUnitInProcess(objectIdentifier);
+        LogbookLifeCycleUnitInProcess inProcessUnit = mongoDbAccess.getLogbookLifeCycleUnitInProcess(objectIdentifier);
 
         if (isCreationProcess) {
             mongoDbAccess.createLogbookLifeCycleUnit(inProcessUnit);
@@ -795,46 +874,44 @@ public class LogbookMongoDbAccessTest {
         final LogbookLifeCycleObjectGroupParameters parameters =
             LogbookParameterHelper.newLogbookLifeCycleObjectGroupParameters();
         for (final LogbookParameterName name : LogbookParameterName.values()) {
-            parameters.putParameterValue(name,
-                GUIDFactory.newEventGUID(TENANT_ID).getId());
+            parameters.putParameterValue(name, GUIDFactory.newEventGUID(TENANT_ID).getId());
         }
-        parameters.putParameterValue(LogbookParameterName.eventDateTime,
-            LocalDateUtil.now().toString());
+        parameters.putParameterValue(LogbookParameterName.eventDateTime, LocalDateUtil.now().toString());
         parameters.setTypeProcess(LogbookTypeProcess.INGEST);
 
         final String oi = parameters.getParameterValue(LogbookParameterName.objectIdentifier);
-        final JsonNode queryDsl =
-            JsonHandler.getFromString(
-                "{ $query: { $eq: {_id: \"" + oi + "\"} }, $projection: {}, $filter: {} }");
+        final JsonNode queryDsl = JsonHandler.getFromString(
+            "{ $query: { $eq: {_id: \"" + oi + "\"} }, $projection: {}, $filter: {} }"
+        );
 
         final LogbookLifeCycleObjectGroupParameters parameters2 =
             LogbookParameterHelper.newLogbookLifeCycleObjectGroupParameters();
         for (final LogbookParameterName name : LogbookParameterName.values()) {
-            parameters2.putParameterValue(name,
-                GUIDFactory.newEventGUID(TENANT_ID).getId());
+            parameters2.putParameterValue(name, GUIDFactory.newEventGUID(TENANT_ID).getId());
         }
-        parameters2.putParameterValue(LogbookParameterName.objectIdentifier,
-            parameters.getMapParameters().get(LogbookParameterName.objectIdentifier));
-        parameters2.putParameterValue(LogbookParameterName.eventDateTime,
-            LocalDateUtil.now().toString());
+        parameters2.putParameterValue(
+            LogbookParameterName.objectIdentifier,
+            parameters.getMapParameters().get(LogbookParameterName.objectIdentifier)
+        );
+        parameters2.putParameterValue(LogbookParameterName.eventDateTime, LocalDateUtil.now().toString());
         parameters2.setTypeProcess(LogbookTypeProcess.INGEST);
 
         final LogbookLifeCycleObjectGroupParameters parametersWrong =
             LogbookParameterHelper.newLogbookLifeCycleObjectGroupParameters();
         for (final LogbookParameterName name : LogbookParameterName.values()) {
-            parametersWrong.putParameterValue(name,
-                GUIDFactory.newEventGUID(TENANT_ID).getId());
+            parametersWrong.putParameterValue(name, GUIDFactory.newEventGUID(TENANT_ID).getId());
         }
-        parametersWrong.putParameterValue(LogbookParameterName.eventDateTime,
-            LocalDateUtil.now().toString());
+        parametersWrong.putParameterValue(LogbookParameterName.eventDateTime, LocalDateUtil.now().toString());
         parametersWrong.setTypeProcess(LogbookTypeProcess.INGEST);
 
         try {
             mongoDbAccess.updateLogbookLifeCycleObjectGroup(
-                parameters.getParameterValue(LogbookParameterName.eventIdentifierProcess), oi, parameters);
+                parameters.getParameterValue(LogbookParameterName.eventIdentifierProcess),
+                oi,
+                parameters
+            );
             fail("Should throw an exception");
-        } catch (final VitamException e) {
-        }
+        } catch (final VitamException e) {}
 
         commitObjectGroup(oi, true, parameters);
 
@@ -844,14 +921,12 @@ public class LogbookMongoDbAccessTest {
         try {
             commitObjectGroup(oi, true, parameters);
             fail("Should throw an exception");
-        } catch (final VitamException e) {
-        }
+        } catch (final VitamException e) {}
 
         try {
             commitObjectGroup(oi, true, parameters2);
             fail("Should throw an exception");
-        } catch (final VitamException e) {
-        }
+        } catch (final VitamException e) {}
 
         // From now on, typeProcess will be UPDATE
         parameters.setTypeProcess(LogbookTypeProcess.UPDATE);
@@ -859,7 +934,10 @@ public class LogbookMongoDbAccessTest {
         parametersWrong.setTypeProcess(LogbookTypeProcess.UPDATE);
 
         mongoDbAccess.updateLogbookLifeCycleObjectGroup(
-            parameters2.getParameterValue(LogbookParameterName.eventIdentifierProcess), oi, parameters2);
+            parameters2.getParameterValue(LogbookParameterName.eventIdentifierProcess),
+            oi,
+            parameters2
+        );
 
         // Commit the last update
         commitObjectGroup(oi, false, parameters2);
@@ -868,20 +946,19 @@ public class LogbookMongoDbAccessTest {
         try {
             mongoDbAccess.updateLogbookLifeCycleObjectGroup(
                 parametersWrong.getParameterValue(LogbookParameterName.eventIdentifierProcess),
-                parametersWrong.getParameterValue(LogbookParameterName.objectIdentifier), parametersWrong);
+                parametersWrong.getParameterValue(LogbookParameterName.objectIdentifier),
+                parametersWrong
+            );
             fail("Should throw an exception");
-        } catch (final VitamException e) {
-        }
+        } catch (final VitamException e) {}
 
-
-        parameters.putParameterValue(LogbookParameterName.eventIdentifier,
-            GUIDFactory.newEventGUID(TENANT_ID).getId());
-        parameters.putParameterValue(LogbookParameterName.eventDateTime,
-            LocalDateUtil.now().toString());
-        parameters2.putParameterValue(LogbookParameterName.eventIdentifier,
-            GUIDFactory.newEventGUID(TENANT_ID).getId());
-        parameters2.putParameterValue(LogbookParameterName.eventDateTime,
-            LocalDateUtil.now().toString());
+        parameters.putParameterValue(LogbookParameterName.eventIdentifier, GUIDFactory.newEventGUID(TENANT_ID).getId());
+        parameters.putParameterValue(LogbookParameterName.eventDateTime, LocalDateUtil.now().toString());
+        parameters2.putParameterValue(
+            LogbookParameterName.eventIdentifier,
+            GUIDFactory.newEventGUID(TENANT_ID).getId()
+        );
+        parameters2.putParameterValue(LogbookParameterName.eventDateTime, LocalDateUtil.now().toString());
         parameters.putParameterValue(LogbookParameterName.objectIdentifier, oi);
         parameters2.putParameterValue(LogbookParameterName.objectIdentifier, oi);
         mongoDbAccess.updateBulkLogbookLifeCycleObjectGroup(parameters, parameters2);
@@ -891,66 +968,79 @@ public class LogbookMongoDbAccessTest {
 
         assertEquals(nbl + 1, mongoDbAccess.getLogbookLifeCyleObjectGroupSize());
 
-
         assertTrue(mongoDbAccess.existsLogbookLifeCycleObjectGroup(oi));
 
-        try (MongoCursor<LogbookLifeCycle<?>> cursor =
-            mongoDbAccess.getLogbookLifeCycles(queryDsl, true, LogbookCollections.LIFECYCLE_OBJECTGROUP)) {
+        try (
+            MongoCursor<LogbookLifeCycle<?>> cursor = mongoDbAccess.getLogbookLifeCycles(
+                queryDsl,
+                true,
+                LogbookCollections.LIFECYCLE_OBJECTGROUP
+            )
+        ) {
             assertTrue(cursor.hasNext());
             final LogbookLifeCycle<?> lifeCycle = cursor.next();
             assertNotNull(lifeCycle);
             assertThat(lifeCycle.events()).hasSize(1);
         }
-        LogbookLifeCycle<?> lifeCycle =
-            mongoDbAccess.getOneLogbookLifeCycle(queryDsl, false, LogbookCollections.LIFECYCLE_OBJECTGROUP);
+        LogbookLifeCycle<?> lifeCycle = mongoDbAccess.getOneLogbookLifeCycle(
+            queryDsl,
+            false,
+            LogbookCollections.LIFECYCLE_OBJECTGROUP
+        );
         assertNotNull(lifeCycle);
         assertThat(lifeCycle.events()).hasSize(4);
 
-        JsonNode node = JsonHandler.getFromString("{ $query: { $unknown : '_id' }, $projection: { " +
-            LogbookMongoDbName.eventIdentifier.getDbname() + " : 1" + " }, $filter: { $limit : 1 } }");
+        JsonNode node = JsonHandler.getFromString(
+            "{ $query: { $unknown : '_id' }, $projection: { " +
+            LogbookMongoDbName.eventIdentifier.getDbname() +
+            " : 1" +
+            " }, $filter: { $limit : 1 } }"
+        );
         try {
             mongoDbAccess.getLogbookLifeCycles(node, true, LogbookCollections.LIFECYCLE_OBJECTGROUP);
             fail("Should throw an exception");
-        } catch (final VitamException e) {
-        }
+        } catch (final VitamException e) {}
 
-
-        parameters.putParameterValue(LogbookParameterName.eventIdentifierProcess,
-            GUIDFactory.newEventGUID(TENANT_ID).getId());
-        parameters.putParameterValue(LogbookParameterName.eventIdentifier,
-            GUIDFactory.newEventGUID(TENANT_ID).getId());
-        parameters.putParameterValue(LogbookParameterName.objectIdentifier,
-            GUIDFactory.newEventGUID(TENANT_ID).getId());
-        parameters.putParameterValue(LogbookParameterName.eventDateTime,
-            LocalDateUtil.now().toString());
-        parameters2.putParameterValue(LogbookParameterName.eventIdentifier,
-            GUIDFactory.newEventGUID(TENANT_ID).getId());
-        parameters2.putParameterValue(LogbookParameterName.eventIdentifierProcess,
-            parameters.getMapParameters().get(LogbookParameterName.eventIdentifierProcess));
-        parameters2.putParameterValue(LogbookParameterName.objectIdentifier,
-            parameters.getMapParameters().get(LogbookParameterName.objectIdentifier));
-        parameters2.putParameterValue(LogbookParameterName.eventDateTime,
-            LocalDateUtil.now().toString());
+        parameters.putParameterValue(
+            LogbookParameterName.eventIdentifierProcess,
+            GUIDFactory.newEventGUID(TENANT_ID).getId()
+        );
+        parameters.putParameterValue(LogbookParameterName.eventIdentifier, GUIDFactory.newEventGUID(TENANT_ID).getId());
+        parameters.putParameterValue(
+            LogbookParameterName.objectIdentifier,
+            GUIDFactory.newEventGUID(TENANT_ID).getId()
+        );
+        parameters.putParameterValue(LogbookParameterName.eventDateTime, LocalDateUtil.now().toString());
+        parameters2.putParameterValue(
+            LogbookParameterName.eventIdentifier,
+            GUIDFactory.newEventGUID(TENANT_ID).getId()
+        );
+        parameters2.putParameterValue(
+            LogbookParameterName.eventIdentifierProcess,
+            parameters.getMapParameters().get(LogbookParameterName.eventIdentifierProcess)
+        );
+        parameters2.putParameterValue(
+            LogbookParameterName.objectIdentifier,
+            parameters.getMapParameters().get(LogbookParameterName.objectIdentifier)
+        );
+        parameters2.putParameterValue(LogbookParameterName.eventDateTime, LocalDateUtil.now().toString());
 
         final String oi2 = parameters.getMapParameters().get(LogbookParameterName.objectIdentifier);
 
         try {
             mongoDbAccess.updateBulkLogbookLifeCycleObjectGroup(parameters, parameters2);
             fail("Should throw an exception");
-        } catch (final VitamException e) {
-        }
+        } catch (final VitamException e) {}
         try {
             mongoDbAccess.updateBulkLogbookLifeCycleObjectGroup();
             fail("Should throw an exception");
-        } catch (final IllegalArgumentException e) {
-        }
+        } catch (final IllegalArgumentException e) {}
         try {
             mongoDbAccess.updateBulkLogbookLifeCycleObjectGroup(
-                LogbookParameterHelper.newLogbookLifeCycleObjectGroupParameters());
+                LogbookParameterHelper.newLogbookLifeCycleObjectGroupParameters()
+            );
             fail("Should throw an exception");
-        } catch (final IllegalArgumentException e) {
-
-        }
+        } catch (final IllegalArgumentException e) {}
 
         // Commit new lifeCycle
         commitObjectGroup(oi2, true, parameters, parameters2);
@@ -959,43 +1049,72 @@ public class LogbookMongoDbAccessTest {
         try {
             commitObjectGroup(oi2, true, parameters, parameters2);
             fail("Should throw an exception");
-        } catch (final VitamException e) {
+        } catch (final VitamException e) {}
 
-        }
-
-        node = JsonHandler.getFromString("{ $query: { $exists : '_id' }, $projection: { " +
-            LogbookMongoDbName.eventIdentifier.getDbname() + " : 1, " +
-            LogbookMongoDbName.eventIdentifierRequest.getDbname() + " : -1 " + " }, $filter: { $limit : 1 } }");
-        try (MongoCursor<LogbookLifeCycle<?>> cursor =
-            mongoDbAccess.getLogbookLifeCycles(node, true, LogbookCollections.LIFECYCLE_OBJECTGROUP)) {
+        node = JsonHandler.getFromString(
+            "{ $query: { $exists : '_id' }, $projection: { " +
+            LogbookMongoDbName.eventIdentifier.getDbname() +
+            " : 1, " +
+            LogbookMongoDbName.eventIdentifierRequest.getDbname() +
+            " : -1 " +
+            " }, $filter: { $limit : 1 } }"
+        );
+        try (
+            MongoCursor<LogbookLifeCycle<?>> cursor = mongoDbAccess.getLogbookLifeCycles(
+                node,
+                true,
+                LogbookCollections.LIFECYCLE_OBJECTGROUP
+            )
+        ) {
             assertTrue(cursor.hasNext());
             final LogbookLifeCycle<?> lifecycle = cursor.next();
             assertNotNull(lifecycle);
             assertFalse(cursor.hasNext());
         }
-        node = JsonHandler.getFromString("{ $query: { $exists : '_id' }, $projection: { " +
-            LogbookMongoDbName.eventIdentifierRequest.getDbname() + " : -1" + " }, $filter: { $limit : 1 } }");
-        try (MongoCursor<LogbookLifeCycle<?>> cursor =
-            mongoDbAccess.getLogbookLifeCycles(node, true, LogbookCollections.LIFECYCLE_OBJECTGROUP)) {
+        node = JsonHandler.getFromString(
+            "{ $query: { $exists : '_id' }, $projection: { " +
+            LogbookMongoDbName.eventIdentifierRequest.getDbname() +
+            " : -1" +
+            " }, $filter: { $limit : 1 } }"
+        );
+        try (
+            MongoCursor<LogbookLifeCycle<?>> cursor = mongoDbAccess.getLogbookLifeCycles(
+                node,
+                true,
+                LogbookCollections.LIFECYCLE_OBJECTGROUP
+            )
+        ) {
             assertTrue(cursor.hasNext());
             final LogbookLifeCycle<?> lifecycle = cursor.next();
             assertNotNull(lifecycle);
             assertFalse(cursor.hasNext());
         }
-        node = JsonHandler.getFromString("{ $query: { $exists : '_id' }, $projection: { " +
-            LogbookMongoDbName.eventIdentifier.getDbname() + " : 1" + " }, $filter: { $limit : 1 } }");
-        try (MongoCursor<LogbookLifeCycle<?>> cursor =
-            mongoDbAccess.getLogbookLifeCycles(node, true, LogbookCollections.LIFECYCLE_OBJECTGROUP)) {
+        node = JsonHandler.getFromString(
+            "{ $query: { $exists : '_id' }, $projection: { " +
+            LogbookMongoDbName.eventIdentifier.getDbname() +
+            " : 1" +
+            " }, $filter: { $limit : 1 } }"
+        );
+        try (
+            MongoCursor<LogbookLifeCycle<?>> cursor = mongoDbAccess.getLogbookLifeCycles(
+                node,
+                true,
+                LogbookCollections.LIFECYCLE_OBJECTGROUP
+            )
+        ) {
             assertTrue(cursor.hasNext());
             final LogbookLifeCycle<?> lifecycle = cursor.next();
             assertNotNull(lifecycle);
             assertFalse(cursor.hasNext());
         }
-        node =
-            JsonHandler.getFromString(
-                "{ $query: { $exists : '_id' }, $projection: {}, $filter: {} }");
-        try (MongoCursor<LogbookLifeCycle<?>> cursor =
-            mongoDbAccess.getLogbookLifeCycles(node, true, LogbookCollections.LIFECYCLE_OBJECTGROUP)) {
+        node = JsonHandler.getFromString("{ $query: { $exists : '_id' }, $projection: {}, $filter: {} }");
+        try (
+            MongoCursor<LogbookLifeCycle<?>> cursor = mongoDbAccess.getLogbookLifeCycles(
+                node,
+                true,
+                LogbookCollections.LIFECYCLE_OBJECTGROUP
+            )
+        ) {
             assertTrue(cursor.hasNext());
             final LogbookLifeCycle<?> lifecycle = cursor.next();
             assertNotNull(lifecycle);
@@ -1003,15 +1122,15 @@ public class LogbookMongoDbAccessTest {
         }
         mongoDbAccess.rollbackLogbookLifeCycleObjectGroup(
             parameters.getParameterValue(LogbookParameterName.eventIdentifierProcess),
-            parameters.getParameterValue(LogbookParameterName.objectIdentifier));
+            parameters.getParameterValue(LogbookParameterName.objectIdentifier)
+        );
         try {
             mongoDbAccess.rollbackLogbookLifeCycleObjectGroup(
                 parameters.getParameterValue(LogbookParameterName.eventIdentifierProcess),
-                parameters.getParameterValue(LogbookParameterName.objectIdentifier));
+                parameters.getParameterValue(LogbookParameterName.objectIdentifier)
+            );
             fail("Should throw an exception");
-        } catch (final VitamException e) {
-
-        }
+        } catch (final VitamException e) {}
     }
 
     @RunWithCustomExecutor
@@ -1024,84 +1143,113 @@ public class LogbookMongoDbAccessTest {
         LogbookOperationParameters logbookOperationParameters = getLogbookOperationParameters(eventIdentifierProcess);
 
         mongoDbAccess.createLogbookOperation(logbookOperationParameters);
-        LogbookOperation logbookOperation =
-            mongoDbAccess.getLogbookOperationById(logbookOperationParameters.getParameterValue
-                (LogbookParameterName.eventIdentifierProcess));
+        LogbookOperation logbookOperation = mongoDbAccess.getLogbookOperationById(
+            logbookOperationParameters.getParameterValue(LogbookParameterName.eventIdentifierProcess)
+        );
         assertNotNull(logbookOperation);
         assertEquals(0, logbookOperation.get(VitamDocument.VERSION));
 
         // lifecycle part
-        LogbookLifeCycleUnitParameters logbookLifeCycleUnitParameters = (LogbookLifeCycleUnitParameters)
-            getLogbookLifecyleParameters(eventIdentifierProcess, true);
+        LogbookLifeCycleUnitParameters logbookLifeCycleUnitParameters =
+            (LogbookLifeCycleUnitParameters) getLogbookLifecyleParameters(eventIdentifierProcess, true);
         String unitId = logbookLifeCycleUnitParameters.getParameterValue(LogbookParameterName.objectIdentifier);
         assertNotNull(unitId);
 
-        final JsonNode queryDslUnit =
-            JsonHandler.getFromString(
-                "{ $query: { $eq: {_id: \"" + unitId + "\"} }, $projection: {}, $filter: {} }");
+        final JsonNode queryDslUnit = JsonHandler.getFromString(
+            "{ $query: { $eq: {_id: \"" + unitId + "\"} }, $projection: {}, $filter: {} }"
+        );
 
         mongoDbAccess.createLogbookLifeCycleUnit(eventIdentifierProcess.getId(), logbookLifeCycleUnitParameters);
         // commit
         mongoDbAccess.createLogbookLifeCycleUnit(mongoDbAccess.getLogbookLifeCycleUnitInProcess(unitId));
-        LogbookLifeCycle<?> logbookLifeCycleUnit =
-            mongoDbAccess.getOneLogbookLifeCycle(queryDslUnit, true, LogbookCollections.LIFECYCLE_UNIT);
+        LogbookLifeCycle<?> logbookLifeCycleUnit = mongoDbAccess.getOneLogbookLifeCycle(
+            queryDslUnit,
+            true,
+            LogbookCollections.LIFECYCLE_UNIT
+        );
         assertNotNull(logbookLifeCycleUnit);
         assertEquals(0, logbookLifeCycleUnit.get(VitamDocument.VERSION));
-
-
 
         LogbookLifeCycleObjectGroupParameters logbookLifeCycleObjectGroupParameters =
             (LogbookLifeCycleObjectGroupParameters) getLogbookLifecyleParameters(eventIdentifierProcess, false);
         String ogId = logbookLifeCycleObjectGroupParameters.getParameterValue(LogbookParameterName.objectIdentifier);
         assertNotNull(ogId);
 
-        final JsonNode queryDslGot =
-            JsonHandler.getFromString(
-                "{ $query: { $eq: {_id: \"" + ogId + "\"} }, $projection: {}, $filter: {} }");
+        final JsonNode queryDslGot = JsonHandler.getFromString(
+            "{ $query: { $eq: {_id: \"" + ogId + "\"} }, $projection: {}, $filter: {} }"
+        );
 
-        mongoDbAccess
-            .createLogbookLifeCycleObjectGroup(eventIdentifierProcess.getId(), logbookLifeCycleObjectGroupParameters);
+        mongoDbAccess.createLogbookLifeCycleObjectGroup(
+            eventIdentifierProcess.getId(),
+            logbookLifeCycleObjectGroupParameters
+        );
         // commit
         mongoDbAccess.createLogbookLifeCycleObjectGroup(mongoDbAccess.getLogbookLifeCycleObjectGroupInProcess(ogId));
-        LogbookLifeCycle<?> logbookLifeCycleObjectGroup =
-            mongoDbAccess.getOneLogbookLifeCycle(queryDslGot, true, LogbookCollections.LIFECYCLE_OBJECTGROUP);
+        LogbookLifeCycle<?> logbookLifeCycleObjectGroup = mongoDbAccess.getOneLogbookLifeCycle(
+            queryDslGot,
+            true,
+            LogbookCollections.LIFECYCLE_OBJECTGROUP
+        );
         assertNotNull(logbookLifeCycleObjectGroup);
         assertEquals(0, logbookLifeCycleObjectGroup.get(VitamDocument.VERSION));
 
-        mongoDbAccess.updateLogbookLifeCycleUnit(eventIdentifierProcess.getId(), unitId,
-            logbookLifeCycleUnitParameters);
+        mongoDbAccess.updateLogbookLifeCycleUnit(
+            eventIdentifierProcess.getId(),
+            unitId,
+            logbookLifeCycleUnitParameters
+        );
         // commit
         mongoDbAccess.updateLogbookLifeCycleUnit(mongoDbAccess.getLogbookLifeCycleUnitInProcess(unitId));
-        logbookLifeCycleUnit =
-            mongoDbAccess.getOneLogbookLifeCycle(queryDslUnit, true, LogbookCollections.LIFECYCLE_UNIT);
+        logbookLifeCycleUnit = mongoDbAccess.getOneLogbookLifeCycle(
+            queryDslUnit,
+            true,
+            LogbookCollections.LIFECYCLE_UNIT
+        );
         assertNotNull(logbookLifeCycleUnit);
         assertEquals(1, logbookLifeCycleUnit.get(VitamDocument.VERSION));
 
-
         // Update committed Unit LFC
-        mongoDbAccess.updateLogbookLifeCycleUnit(eventIdentifierProcess.getId(), unitId,
-            logbookLifeCycleUnitParameters, true);
-        logbookLifeCycleUnit =
-            mongoDbAccess.getOneLogbookLifeCycle(queryDslUnit, true, LogbookCollections.LIFECYCLE_UNIT);
+        mongoDbAccess.updateLogbookLifeCycleUnit(
+            eventIdentifierProcess.getId(),
+            unitId,
+            logbookLifeCycleUnitParameters,
+            true
+        );
+        logbookLifeCycleUnit = mongoDbAccess.getOneLogbookLifeCycle(
+            queryDslUnit,
+            true,
+            LogbookCollections.LIFECYCLE_UNIT
+        );
         assertNotNull(logbookLifeCycleUnit);
         assertEquals(2, logbookLifeCycleUnit.get(VitamDocument.VERSION));
 
-
-        mongoDbAccess.updateLogbookLifeCycleObjectGroup(eventIdentifierProcess.getId(), ogId,
-            logbookLifeCycleObjectGroupParameters);
+        mongoDbAccess.updateLogbookLifeCycleObjectGroup(
+            eventIdentifierProcess.getId(),
+            ogId,
+            logbookLifeCycleObjectGroupParameters
+        );
         // commit
         mongoDbAccess.updateLogbookLifeCycleObjectGroup(mongoDbAccess.getLogbookLifeCycleObjectGroupInProcess(ogId));
-        logbookLifeCycleObjectGroup =
-            mongoDbAccess.getOneLogbookLifeCycle(queryDslGot, true, LogbookCollections.LIFECYCLE_OBJECTGROUP);
+        logbookLifeCycleObjectGroup = mongoDbAccess.getOneLogbookLifeCycle(
+            queryDslGot,
+            true,
+            LogbookCollections.LIFECYCLE_OBJECTGROUP
+        );
         assertNotNull(logbookLifeCycleObjectGroup);
         assertEquals(1, logbookLifeCycleObjectGroup.get(VitamDocument.VERSION));
 
-
         // Update committed ObjectGroup LFC
-        mongoDbAccess.updateLogbookLifeCycleObjectGroup(eventIdentifierProcess.getId(), ogId,
-            logbookLifeCycleObjectGroupParameters, true);
-        logbookLifeCycleObjectGroup =
-            mongoDbAccess.getOneLogbookLifeCycle(queryDslGot, true, LogbookCollections.LIFECYCLE_OBJECTGROUP);
+        mongoDbAccess.updateLogbookLifeCycleObjectGroup(
+            eventIdentifierProcess.getId(),
+            ogId,
+            logbookLifeCycleObjectGroupParameters,
+            true
+        );
+        logbookLifeCycleObjectGroup = mongoDbAccess.getOneLogbookLifeCycle(
+            queryDslGot,
+            true,
+            LogbookCollections.LIFECYCLE_OBJECTGROUP
+        );
         assertNotNull(logbookLifeCycleObjectGroup);
         assertEquals(2, logbookLifeCycleObjectGroup.get(VitamDocument.VERSION));
     }
@@ -1116,27 +1264,29 @@ public class LogbookMongoDbAccessTest {
         LogbookOperationParameters logbookOperationParameters = getLogbookOperationParameters(eventIdentifierProcess);
 
         mongoDbAccess.createLogbookOperation(logbookOperationParameters);
-        LogbookOperation logbookOperation =
-            mongoDbAccess.getLogbookOperationById(logbookOperationParameters.getParameterValue
-                (LogbookParameterName.eventIdentifierProcess));
+        LogbookOperation logbookOperation = mongoDbAccess.getLogbookOperationById(
+            logbookOperationParameters.getParameterValue(LogbookParameterName.eventIdentifierProcess)
+        );
         assertNotNull(logbookOperation);
         assertEquals(0, logbookOperation.get(VitamDocument.VERSION));
 
         // lifecycle part
-        LogbookLifeCycleUnitParameters logbookLifeCycleUnitParameters = (LogbookLifeCycleUnitParameters)
-            getLogbookLifecyleParameters(eventIdentifierProcess, true);
+        LogbookLifeCycleUnitParameters logbookLifeCycleUnitParameters =
+            (LogbookLifeCycleUnitParameters) getLogbookLifecyleParameters(eventIdentifierProcess, true);
         String unitId = logbookLifeCycleUnitParameters.getParameterValue(LogbookParameterName.objectIdentifier);
         assertNotNull(unitId);
-        final JsonNode queryDslUnit =
-            JsonHandler.getFromString(
-                "{ $query: { $eq: {_id: \"" + unitId + "\"} }, $projection: {}, $filter: {} }");
-
+        final JsonNode queryDslUnit = JsonHandler.getFromString(
+            "{ $query: { $eq: {_id: \"" + unitId + "\"} }, $projection: {}, $filter: {} }"
+        );
 
         mongoDbAccess.createLogbookLifeCycleUnit(eventIdentifierProcess.getId(), logbookLifeCycleUnitParameters);
         // commit
         mongoDbAccess.createLogbookLifeCycleUnit(mongoDbAccess.getLogbookLifeCycleUnitInProcess(unitId));
-        LogbookLifeCycle<?> logbookLifeCycleUnit =
-            mongoDbAccess.getOneLogbookLifeCycle(queryDslUnit, true, LogbookCollections.LIFECYCLE_UNIT);
+        LogbookLifeCycle<?> logbookLifeCycleUnit = mongoDbAccess.getOneLogbookLifeCycle(
+            queryDslUnit,
+            true,
+            LogbookCollections.LIFECYCLE_UNIT
+        );
         assertNotNull(logbookLifeCycleUnit);
         assertEquals(0, logbookLifeCycleUnit.get(VitamDocument.VERSION));
 
@@ -1144,17 +1294,21 @@ public class LogbookMongoDbAccessTest {
             (LogbookLifeCycleObjectGroupParameters) getLogbookLifecyleParameters(eventIdentifierProcess, false);
         String ogId = logbookLifeCycleObjectGroupParameters.getParameterValue(LogbookParameterName.objectIdentifier);
         assertNotNull(ogId);
-        final JsonNode queryDslGot =
-            JsonHandler.getFromString(
-                "{ $query: { $eq: {_id: \"" + ogId + "\"} }, $projection: {}, $filter: {} }");
+        final JsonNode queryDslGot = JsonHandler.getFromString(
+            "{ $query: { $eq: {_id: \"" + ogId + "\"} }, $projection: {}, $filter: {} }"
+        );
 
-
-        mongoDbAccess
-            .createLogbookLifeCycleObjectGroup(eventIdentifierProcess.getId(), logbookLifeCycleObjectGroupParameters);
+        mongoDbAccess.createLogbookLifeCycleObjectGroup(
+            eventIdentifierProcess.getId(),
+            logbookLifeCycleObjectGroupParameters
+        );
         // commit
         mongoDbAccess.createLogbookLifeCycleObjectGroup(mongoDbAccess.getLogbookLifeCycleObjectGroupInProcess(ogId));
-        LogbookLifeCycle<?> logbookLifeCycleObjectGroup =
-            mongoDbAccess.getOneLogbookLifeCycle(queryDslGot, true, LogbookCollections.LIFECYCLE_OBJECTGROUP);
+        LogbookLifeCycle<?> logbookLifeCycleObjectGroup = mongoDbAccess.getOneLogbookLifeCycle(
+            queryDslGot,
+            true,
+            LogbookCollections.LIFECYCLE_OBJECTGROUP
+        );
         assertNotNull(logbookLifeCycleObjectGroup);
         assertEquals(0, logbookLifeCycleObjectGroup.get(VitamDocument.VERSION));
 
@@ -1164,21 +1318,33 @@ public class LogbookMongoDbAccessTest {
         assertNotNull(logbookOperation);
         assertEquals(1, logbookOperation.get(VitamDocument.VERSION));
 
-        mongoDbAccess.updateLogbookLifeCycleUnit(eventIdentifierProcess.getId(), unitId,
-            logbookLifeCycleUnitParameters);
+        mongoDbAccess.updateLogbookLifeCycleUnit(
+            eventIdentifierProcess.getId(),
+            unitId,
+            logbookLifeCycleUnitParameters
+        );
         // commit
         mongoDbAccess.updateLogbookLifeCycleUnit(mongoDbAccess.getLogbookLifeCycleUnitInProcess(unitId));
-        logbookLifeCycleUnit =
-            mongoDbAccess.getOneLogbookLifeCycle(queryDslUnit, true, LogbookCollections.LIFECYCLE_UNIT);
+        logbookLifeCycleUnit = mongoDbAccess.getOneLogbookLifeCycle(
+            queryDslUnit,
+            true,
+            LogbookCollections.LIFECYCLE_UNIT
+        );
         assertNotNull(logbookLifeCycleUnit);
         assertEquals(1, logbookLifeCycleUnit.get(VitamDocument.VERSION));
 
-        mongoDbAccess.updateLogbookLifeCycleObjectGroup(eventIdentifierProcess.getId(), ogId,
-            logbookLifeCycleObjectGroupParameters);
+        mongoDbAccess.updateLogbookLifeCycleObjectGroup(
+            eventIdentifierProcess.getId(),
+            ogId,
+            logbookLifeCycleObjectGroupParameters
+        );
         // commit
         mongoDbAccess.updateLogbookLifeCycleObjectGroup(mongoDbAccess.getLogbookLifeCycleObjectGroupInProcess(ogId));
-        logbookLifeCycleObjectGroup =
-            mongoDbAccess.getOneLogbookLifeCycle(queryDslGot, true, LogbookCollections.LIFECYCLE_OBJECTGROUP);
+        logbookLifeCycleObjectGroup = mongoDbAccess.getOneLogbookLifeCycle(
+            queryDslGot,
+            true,
+            LogbookCollections.LIFECYCLE_OBJECTGROUP
+        );
         assertNotNull(logbookLifeCycleObjectGroup);
         assertEquals(1, logbookLifeCycleObjectGroup.get(VitamDocument.VERSION));
     }
@@ -1191,69 +1357,98 @@ public class LogbookMongoDbAccessTest {
         // create -> _v: 0
         GUID eventIdentifierProcess = GUIDFactory.newGUID();
         LogbookOperationParameters logbookOperationParameters = getLogbookOperationParameters(eventIdentifierProcess);
-        mongoDbAccess.createBulkLogbookOperation(logbookOperationParameters, logbookOperationParameters,
-            logbookOperationParameters);
-        LogbookOperation logbookOperation =
-            mongoDbAccess.getLogbookOperationById(logbookOperationParameters.getParameterValue
-                (LogbookParameterName.eventIdentifierProcess));
+        mongoDbAccess.createBulkLogbookOperation(
+            logbookOperationParameters,
+            logbookOperationParameters,
+            logbookOperationParameters
+        );
+        LogbookOperation logbookOperation = mongoDbAccess.getLogbookOperationById(
+            logbookOperationParameters.getParameterValue(LogbookParameterName.eventIdentifierProcess)
+        );
         assertNotNull(logbookOperation);
         assertEquals(0, logbookOperation.get(VitamDocument.VERSION));
 
-        LogbookLifeCycleUnitParameters logbookLifeCycleUnitParameters = (LogbookLifeCycleUnitParameters)
-            getLogbookLifecyleParameters(eventIdentifierProcess, true);
+        LogbookLifeCycleUnitParameters logbookLifeCycleUnitParameters =
+            (LogbookLifeCycleUnitParameters) getLogbookLifecyleParameters(eventIdentifierProcess, true);
         String unitId = logbookLifeCycleUnitParameters.getParameterValue(LogbookParameterName.objectIdentifier);
         assertNotNull(unitId);
-        final JsonNode queryDslUnit =
-            JsonHandler.getFromString(
-                "{ $query: { $eq: {_id: \"" + unitId + "\"} }, $projection: {}, $filter: {} }");
-        mongoDbAccess.createBulkLogbookLifeCycleUnit(logbookLifeCycleUnitParameters, logbookLifeCycleUnitParameters,
-            logbookLifeCycleUnitParameters);
+        final JsonNode queryDslUnit = JsonHandler.getFromString(
+            "{ $query: { $eq: {_id: \"" + unitId + "\"} }, $projection: {}, $filter: {} }"
+        );
+        mongoDbAccess.createBulkLogbookLifeCycleUnit(
+            logbookLifeCycleUnitParameters,
+            logbookLifeCycleUnitParameters,
+            logbookLifeCycleUnitParameters
+        );
         mongoDbAccess.createLogbookLifeCycleUnit(mongoDbAccess.getLogbookLifeCycleUnitInProcess(unitId));
-        LogbookLifeCycle<?> logbookLifeCycleUnit =
-            mongoDbAccess.getOneLogbookLifeCycle(queryDslUnit, true, LogbookCollections.LIFECYCLE_UNIT);
+        LogbookLifeCycle<?> logbookLifeCycleUnit = mongoDbAccess.getOneLogbookLifeCycle(
+            queryDslUnit,
+            true,
+            LogbookCollections.LIFECYCLE_UNIT
+        );
         assertNotNull(logbookLifeCycleUnit);
         assertEquals(0, logbookLifeCycleUnit.get(VitamDocument.VERSION));
 
         LogbookLifeCycleObjectGroupParameters logbookLifeCycleObjectGroupParameters =
-            (LogbookLifeCycleObjectGroupParameters)
-                getLogbookLifecyleParameters(eventIdentifierProcess, false);
+            (LogbookLifeCycleObjectGroupParameters) getLogbookLifecyleParameters(eventIdentifierProcess, false);
         String ogId = logbookLifeCycleObjectGroupParameters.getParameterValue(LogbookParameterName.objectIdentifier);
         assertNotNull(ogId);
-        final JsonNode queryDslGot =
-            JsonHandler.getFromString(
-                "{ $query: { $eq: {_id: \"" + ogId + "\"} }, $projection: {}, $filter: {} }");
-        mongoDbAccess.createBulkLogbookLifeCycleObjectGroup(logbookLifeCycleObjectGroupParameters,
+        final JsonNode queryDslGot = JsonHandler.getFromString(
+            "{ $query: { $eq: {_id: \"" + ogId + "\"} }, $projection: {}, $filter: {} }"
+        );
+        mongoDbAccess.createBulkLogbookLifeCycleObjectGroup(
             logbookLifeCycleObjectGroupParameters,
-            logbookLifeCycleObjectGroupParameters);
+            logbookLifeCycleObjectGroupParameters,
+            logbookLifeCycleObjectGroupParameters
+        );
         mongoDbAccess.createLogbookLifeCycleObjectGroup(mongoDbAccess.getLogbookLifeCycleObjectGroupInProcess(ogId));
-        LogbookLifeCycle<?> logbookLifeCycleObjectGroup =
-            mongoDbAccess.getOneLogbookLifeCycle(queryDslGot, true, LogbookCollections.LIFECYCLE_OBJECTGROUP);
+        LogbookLifeCycle<?> logbookLifeCycleObjectGroup = mongoDbAccess.getOneLogbookLifeCycle(
+            queryDslGot,
+            true,
+            LogbookCollections.LIFECYCLE_OBJECTGROUP
+        );
         assertNotNull(logbookLifeCycleObjectGroup);
         assertEquals(0, logbookLifeCycleObjectGroup.get(VitamDocument.VERSION));
 
         // update -> _v: 1
-        mongoDbAccess.updateBulkLogbookOperation(logbookOperationParameters, logbookOperationParameters,
-            logbookOperationParameters);
-        logbookOperation = mongoDbAccess.getLogbookOperationById(logbookOperationParameters.getParameterValue
-            (LogbookParameterName.eventIdentifierProcess));
+        mongoDbAccess.updateBulkLogbookOperation(
+            logbookOperationParameters,
+            logbookOperationParameters,
+            logbookOperationParameters
+        );
+        logbookOperation = mongoDbAccess.getLogbookOperationById(
+            logbookOperationParameters.getParameterValue(LogbookParameterName.eventIdentifierProcess)
+        );
         assertNotNull(logbookOperation);
         assertEquals(1, logbookOperation.get(VitamDocument.VERSION));
 
-        mongoDbAccess.updateBulkLogbookLifeCycleUnit(logbookLifeCycleUnitParameters, logbookLifeCycleUnitParameters,
-            logbookLifeCycleUnitParameters);
+        mongoDbAccess.updateBulkLogbookLifeCycleUnit(
+            logbookLifeCycleUnitParameters,
+            logbookLifeCycleUnitParameters,
+            logbookLifeCycleUnitParameters
+        );
         // commit
         mongoDbAccess.updateLogbookLifeCycleUnit(mongoDbAccess.getLogbookLifeCycleUnitInProcess(unitId));
-        logbookLifeCycleUnit =
-            mongoDbAccess.getOneLogbookLifeCycle(queryDslUnit, true, LogbookCollections.LIFECYCLE_UNIT);
+        logbookLifeCycleUnit = mongoDbAccess.getOneLogbookLifeCycle(
+            queryDslUnit,
+            true,
+            LogbookCollections.LIFECYCLE_UNIT
+        );
         assertNotNull(logbookLifeCycleUnit);
         assertEquals(1, logbookLifeCycleUnit.get(VitamDocument.VERSION));
 
-        mongoDbAccess.updateBulkLogbookLifeCycleObjectGroup(logbookLifeCycleObjectGroupParameters,
-            logbookLifeCycleObjectGroupParameters, logbookLifeCycleObjectGroupParameters);
+        mongoDbAccess.updateBulkLogbookLifeCycleObjectGroup(
+            logbookLifeCycleObjectGroupParameters,
+            logbookLifeCycleObjectGroupParameters,
+            logbookLifeCycleObjectGroupParameters
+        );
         // commit
         mongoDbAccess.updateLogbookLifeCycleObjectGroup(mongoDbAccess.getLogbookLifeCycleObjectGroupInProcess(ogId));
-        logbookLifeCycleObjectGroup =
-            mongoDbAccess.getOneLogbookLifeCycle(queryDslGot, true, LogbookCollections.LIFECYCLE_OBJECTGROUP);
+        logbookLifeCycleObjectGroup = mongoDbAccess.getOneLogbookLifeCycle(
+            queryDslGot,
+            true,
+            LogbookCollections.LIFECYCLE_OBJECTGROUP
+        );
         assertNotNull(logbookLifeCycleObjectGroup);
         assertEquals(1, logbookLifeCycleObjectGroup.get(VitamDocument.VERSION));
     }
@@ -1265,8 +1460,15 @@ public class LogbookMongoDbAccessTest {
         StatusCode outcome = StatusCode.OK;
         String outcomeDetailMessage = StatusCode.OK.name();
         GUID eventIdentifierRequest = GUIDFactory.newRequestIdGUID(TENANT_ID);
-        return LogbookParameterHelper.newLogbookOperationParameters(eventIdentifier,
-            eventType, eventIdentifierProcess, eventTypeProcess, outcome, outcomeDetailMessage, eventIdentifierRequest);
+        return LogbookParameterHelper.newLogbookOperationParameters(
+            eventIdentifier,
+            eventType,
+            eventIdentifierProcess,
+            eventTypeProcess,
+            outcome,
+            outcomeDetailMessage,
+            eventIdentifierRequest
+        );
     }
 
     /**
@@ -1276,36 +1478,51 @@ public class LogbookMongoDbAccessTest {
      */
     private LogbookLifeCycleParameters getLogbookLifecyleParameters(GUID eventIdentifierProcess, boolean unit) {
         GUID eventIdentifierLFC = GUIDFactory.newEventGUID(TENANT_ID);
-        String eventTypeLFC = unit ? "logbook lifecycle unit version test" : "logbook lifecycle object group version " +
-            "test";
+        String eventTypeLFC = unit
+            ? "logbook lifecycle unit version test"
+            : "logbook lifecycle object group version " + "test";
         LogbookTypeProcess eventTypeProcessLFC = LogbookTypeProcess.INGEST_TEST;
         StatusCode outcomeLFC = StatusCode.OK;
         String outcomeDetailLFC = StatusCode.OK.name();
         String outcomeDetailMessageLFC = StatusCode.OK.name();
         GUID objectIdentifierLFC = GUIDFactory.newObjectGroupGUID(TENANT_ID);
         if (unit) {
-            return LogbookParameterHelper.newLogbookLifeCycleUnitParameters
-                (eventIdentifierLFC, eventTypeLFC, eventIdentifierProcess, eventTypeProcessLFC, outcomeLFC,
-                    outcomeDetailLFC, outcomeDetailMessageLFC, objectIdentifierLFC);
+            return LogbookParameterHelper.newLogbookLifeCycleUnitParameters(
+                eventIdentifierLFC,
+                eventTypeLFC,
+                eventIdentifierProcess,
+                eventTypeProcessLFC,
+                outcomeLFC,
+                outcomeDetailLFC,
+                outcomeDetailMessageLFC,
+                objectIdentifierLFC
+            );
         } else {
-            return LogbookParameterHelper
-                .newLogbookLifeCycleObjectGroupParameters(eventIdentifierLFC, eventTypeLFC,
-                    eventIdentifierProcess, eventTypeProcessLFC, outcomeLFC, outcomeDetailLFC,
-                    outcomeDetailMessageLFC, objectIdentifierLFC);
+            return LogbookParameterHelper.newLogbookLifeCycleObjectGroupParameters(
+                eventIdentifierLFC,
+                eventTypeLFC,
+                eventIdentifierProcess,
+                eventTypeProcessLFC,
+                outcomeLFC,
+                outcomeDetailLFC,
+                outcomeDetailMessageLFC,
+                objectIdentifierLFC
+            );
         }
     }
 
-    private void commitObjectGroup(String objectIdentifier, boolean isCreationProcess,
-        LogbookLifeCycleObjectGroupParameters... parameters)
-        throws LogbookDatabaseException, LogbookAlreadyExistsException, LogbookNotFoundException {
-
+    private void commitObjectGroup(
+        String objectIdentifier,
+        boolean isCreationProcess,
+        LogbookLifeCycleObjectGroupParameters... parameters
+    ) throws LogbookDatabaseException, LogbookAlreadyExistsException, LogbookNotFoundException {
         if (isCreationProcess) {
             // Create an object group lifeCycle in working collection
             mongoDbAccess.createBulkLogbookLifeCycleObjectGroup(parameters);
         }
 
-        LogbookLifeCycleObjectGroupInProcess inProcessObjectGroup = mongoDbAccess
-            .getLogbookLifeCycleObjectGroupInProcess(objectIdentifier);
+        LogbookLifeCycleObjectGroupInProcess inProcessObjectGroup =
+            mongoDbAccess.getLogbookLifeCycleObjectGroupInProcess(objectIdentifier);
 
         if (isCreationProcess) {
             mongoDbAccess.createLogbookLifeCycleObjectGroup(inProcessObjectGroup);

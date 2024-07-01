@@ -62,17 +62,21 @@ import java.util.Set;
 
 public class CollectExternalClientRestTest extends ResteasyTestApplication {
 
-    private final static int TENANT_ID = 0;
+    private static final int TENANT_ID = 0;
 
     protected static CollectExternalClient client;
 
-    private final static ExpectedResults mock = Mockito.mock(ExpectedResults.class);
+    private static final ExpectedResults mock = Mockito.mock(ExpectedResults.class);
     static CollectExternalClientFactory factory = CollectExternalClientFactory.getInstance();
-    public static VitamServerTestRunner vitamServerTestRunner =
-        new VitamServerTestRunner(CollectExternalClientRestTest.class, factory);
+    public static VitamServerTestRunner vitamServerTestRunner = new VitamServerTestRunner(
+        CollectExternalClientRestTest.class,
+        factory
+    );
 
-    @Rule public RunWithCustomExecutorRule runInThread =
-        new RunWithCustomExecutorRule(VitamThreadPoolExecutor.getDefaultExecutor());
+    @Rule
+    public RunWithCustomExecutorRule runInThread = new RunWithCustomExecutorRule(
+        VitamThreadPoolExecutor.getDefaultExecutor()
+    );
 
     @BeforeClass
     public static void init() throws Throwable {
@@ -90,10 +94,8 @@ public class CollectExternalClientRestTest extends ResteasyTestApplication {
         return Sets.newHashSet(new MockResource(mock));
     }
 
-
     @Before
-    public void setUp() throws Exception {
-    }
+    public void setUp() throws Exception {}
 
     @Test
     public void initProject() throws Exception {
@@ -119,16 +121,20 @@ public class CollectExternalClientRestTest extends ResteasyTestApplication {
     @Test
     public void getTransactionById() throws Exception {
         Mockito.when(mock.get()).thenReturn(Response.ok().build());
-        final RequestResponse<JsonNode> response =
-            client.getTransactionById(new VitamContext(TENANT_ID), "TRANSACTION_ID");
+        final RequestResponse<JsonNode> response = client.getTransactionById(
+            new VitamContext(TENANT_ID),
+            "TRANSACTION_ID"
+        );
         Assertions.assertThat(response).isNotNull();
     }
 
     @Test
     public void getTransactionByProjectId() throws Exception {
         Mockito.when(mock.get()).thenReturn(Response.ok().build());
-        final RequestResponse<JsonNode> response =
-            client.getTransactionByProjectId(new VitamContext(TENANT_ID), "PROJECT_ID");
+        final RequestResponse<JsonNode> response = client.getTransactionByProjectId(
+            new VitamContext(TENANT_ID),
+            "PROJECT_ID"
+        );
         Assertions.assertThat(response).isNotNull();
     }
 
@@ -142,8 +148,10 @@ public class CollectExternalClientRestTest extends ResteasyTestApplication {
     @Test
     public void deleteTransactionById() throws Exception {
         Mockito.when(mock.delete()).thenReturn(Response.ok().build());
-        final RequestResponse<JsonNode> response =
-            client.deleteTransactionById(new VitamContext(TENANT_ID), "TRANSACTION_ID");
+        final RequestResponse<JsonNode> response = client.deleteTransactionById(
+            new VitamContext(TENANT_ID),
+            "TRANSACTION_ID"
+        );
         Assertions.assertThat(response).isNotNull();
     }
 
@@ -156,6 +164,7 @@ public class CollectExternalClientRestTest extends ResteasyTestApplication {
 
     @Path("/collect-external/v1")
     public static class MockResource {
+
         private final ExpectedResults expectedResponse;
 
         public MockResource(ExpectedResults expectedResponse) {
@@ -216,7 +225,6 @@ public class CollectExternalClientRestTest extends ResteasyTestApplication {
             return expectedResponse.get();
         }
 
-
         @Path("/projects")
         @POST
         @Consumes(MediaType.APPLICATION_JSON)
@@ -247,7 +255,6 @@ public class CollectExternalClientRestTest extends ResteasyTestApplication {
         public Response updateProject(ProjectDto projectDto) {
             return expectedResponse.get();
         }
-
 
         @Path("/projects/{projectId}")
         @GET
@@ -288,10 +295,9 @@ public class CollectExternalClientRestTest extends ResteasyTestApplication {
             return expectedResponse.get();
         }
 
-
         @Path("/projects/{projectId}/binary")
         @POST
-        @Consumes({CommonMediaType.ZIP})
+        @Consumes({ CommonMediaType.ZIP })
         @Produces(MediaType.APPLICATION_JSON)
         public Response uploadProjectZip(@PathParam("projectId") String projectId, InputStream inputStreamObject) {
             return expectedResponse.get();
@@ -304,13 +310,16 @@ public class CollectExternalClientRestTest extends ResteasyTestApplication {
             return expectedResponse.get();
         }
 
-
         @Path("/units/{unitId}/objects/{usage}/{version}")
         @POST
         @Consumes(MediaType.APPLICATION_JSON)
         @Produces(MediaType.APPLICATION_JSON)
-        public Response uploadObjectGroup(@PathParam("unitId") String unitId, @PathParam("usage") String usageString,
-            @PathParam("version") Integer version, ObjectDto objectDto) {
+        public Response uploadObjectGroup(
+            @PathParam("unitId") String unitId,
+            @PathParam("usage") String usageString,
+            @PathParam("version") Integer version,
+            ObjectDto objectDto
+        ) {
             return expectedResponse.get();
         }
 
@@ -325,16 +334,23 @@ public class CollectExternalClientRestTest extends ResteasyTestApplication {
         @POST
         @Consumes(MediaType.APPLICATION_OCTET_STREAM)
         @Produces(MediaType.APPLICATION_JSON)
-        public Response upload(@PathParam("unitId") String unitId, @PathParam("usage") String usageString,
-            @PathParam("version") Integer version, InputStream uploadedInputStream) {
+        public Response upload(
+            @PathParam("unitId") String unitId,
+            @PathParam("usage") String usageString,
+            @PathParam("version") Integer version,
+            InputStream uploadedInputStream
+        ) {
             return expectedResponse.get();
         }
 
         @Path("/units/{unitId}/objects/{usage}/{version}/binary")
         @GET
         @Produces(MediaType.APPLICATION_OCTET_STREAM)
-        public Response download(@PathParam("unitId") String unitId, @PathParam("usage") String usageString,
-            @PathParam("version") Integer version) {
+        public Response download(
+            @PathParam("unitId") String unitId,
+            @PathParam("usage") String usageString,
+            @PathParam("version") Integer version
+        ) {
             return expectedResponse.get();
         }
     }

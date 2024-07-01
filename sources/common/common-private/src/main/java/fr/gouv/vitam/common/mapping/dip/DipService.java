@@ -31,7 +31,6 @@ import com.fasterxml.jackson.databind.JsonNode;
 import javax.ws.rs.core.Response;
 
 public interface DipService {
-
     /**
      * Transform the representation of an object (unit or objectGroup) to an xml format (DIP)
      *
@@ -40,5 +39,4 @@ public interface DipService {
      * @return xml representation of the object (Unit or Object Group)
      */
     Response jsonToXml(JsonNode object, String id);
-
 }

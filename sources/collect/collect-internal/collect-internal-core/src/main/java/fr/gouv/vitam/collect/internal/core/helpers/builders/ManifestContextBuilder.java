@@ -31,6 +31,7 @@ import fr.gouv.vitam.collect.internal.core.common.ManifestContext;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class ManifestContextBuilder {
+
     private String acquisitionInformation;
     private String legalStatus;
     private String archivalAgreement;
@@ -99,9 +100,18 @@ public class ManifestContextBuilder {
     }
 
     public ManifestContext build() {
-        return new ManifestContext(acquisitionInformation, legalStatus,
-            archivalAgreement, messageIdentifier, archivalAgencyIdentifier,
-            transferringAgencyIdentifier, originatingAgencyIdentifier, submissionAgencyIdentifier, archivalProfile,
-            comment, unitUp);
+        return new ManifestContext(
+            acquisitionInformation,
+            legalStatus,
+            archivalAgreement,
+            messageIdentifier,
+            archivalAgencyIdentifier,
+            transferringAgencyIdentifier,
+            originatingAgencyIdentifier,
+            submissionAgencyIdentifier,
+            archivalProfile,
+            comment,
+            unitUp
+        );
     }
 }

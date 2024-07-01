@@ -30,7 +30,6 @@ import com.fasterxml.jackson.databind.JsonNode;
 import fr.gouv.culture.archivesdefrance.seda.v2.LegalStatusType;
 import fr.gouv.vitam.collect.common.dto.ProjectDto;
 import fr.gouv.vitam.collect.common.dto.TransactionDto;
-import fr.gouv.vitam.collect.common.enums.TransactionStatus;
 import fr.gouv.vitam.collect.external.client.CollectExternalClient;
 import fr.gouv.vitam.collect.external.client.CollectExternalClientFactory;
 import fr.gouv.vitam.common.PropertiesUtils;
@@ -48,6 +47,7 @@ import java.util.Optional;
 import static org.assertj.core.api.Assertions.assertThat;
 
 public class CollectTestHelper {
+
     public static Optional<ProjectDto> createProject(VitamContext vitamContext) {
         try (final CollectExternalClient client = CollectExternalClientFactory.getInstance().getClient()) {
             final ProjectDto createProjectDto = initProjectData();
@@ -85,7 +85,11 @@ public class CollectTestHelper {
     public static Optional<TransactionDto> createTransaction(final VitamContext vitamContext, final String projectId) {
         try (final CollectExternalClient client = CollectExternalClientFactory.getInstance().getClient()) {
             final TransactionDto createTransactionDto = initTransaction();
-            final RequestResponse<JsonNode> response = client.initTransaction(vitamContext, createTransactionDto, projectId);
+            final RequestResponse<JsonNode> response = client.initTransaction(
+                vitamContext,
+                createTransactionDto,
+                projectId
+            );
 
             if (response.isOk()) {
                 final JsonNode payload = ((RequestResponseOK<JsonNode>) response).getFirstResult();
@@ -99,10 +103,14 @@ public class CollectTestHelper {
         }
     }
 
-    public static void uploadZipTransaction(final VitamContext vitamContext, final String transactionId, final String zipPath) {
+    public static void uploadZipTransaction(
+        final VitamContext vitamContext,
+        final String transactionId,
+        final String zipPath
+    ) {
         try (
-                final CollectExternalClient client = CollectExternalClientFactory.getInstance().getClient();
-                final InputStream is = PropertiesUtils.getResourceAsStream(zipPath)
+            final CollectExternalClient client = CollectExternalClientFactory.getInstance().getClient();
+            final InputStream is = PropertiesUtils.getResourceAsStream(zipPath)
         ) {
             client.uploadProjectZip(vitamContext, transactionId, is);
         } catch (IOException | VitamClientException e) {
@@ -142,8 +150,8 @@ public class CollectTestHelper {
 
     public static void uploadUnit(VitamContext vitamContext, final String transactionId, final String resourcePath) {
         try (
-                final CollectExternalClient client = CollectExternalClientFactory.getInstance().getClient();
-                final InputStream is = PropertiesUtils.getResourceAsStream(resourcePath)
+            final CollectExternalClient client = CollectExternalClientFactory.getInstance().getClient();
+            final InputStream is = PropertiesUtils.getResourceAsStream(resourcePath)
         ) {
             final JsonNode jsonNode = JsonHandler.getFromInputStream(is);
             final RequestResponse<JsonNode> response = client.uploadArchiveUnit(vitamContext, jsonNode, transactionId);
@@ -156,10 +164,11 @@ public class CollectTestHelper {
         }
     }
 
-    public static void updateUnit(VitamContext vitamContext, final String transactionId, final String resourcePath) throws IOException, VitamClientException {
+    public static void updateUnit(VitamContext vitamContext, final String transactionId, final String resourcePath)
+        throws IOException, VitamClientException {
         try (
-                final CollectExternalClient client = CollectExternalClientFactory.getInstance().getClient();
-                final InputStream is = PropertiesUtils.getResourceAsStream(resourcePath)
+            final CollectExternalClient client = CollectExternalClientFactory.getInstance().getClient();
+            final InputStream is = PropertiesUtils.getResourceAsStream(resourcePath)
         ) {
             final String data = PropertiesUtils.getResourceAsString(resourcePath);
             assertThat(data.length()).isGreaterThan(0);

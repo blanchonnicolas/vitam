@@ -27,7 +27,6 @@
 package fr.gouv.vitam.worker.core.plugin.bulkatomicupdate;
 
 public enum BulkUpdateUnitReportKey {
-
     INVALID_DSL_QUERY("Invalid DSL query: cannot contains internal field(s)"),
     UNIT_NOT_FOUND("No Unit was found for the $query"),
     TOO_MANY_UNITS_FOUND("More than one Unit was found for the $query"),
@@ -42,5 +41,4 @@ public enum BulkUpdateUnitReportKey {
     public String getMessage() {
         return message;
     }
-
 }

@@ -76,6 +76,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 public class CollectServiceTest {
+
     private static final int TENANT_ID = 0;
     private static final String SAMPLE_ARCHIVE_UNIT = "archive_unit_from_metadata.json";
     private static final String SAMPLE_OBJECT_GROUP2 = "object_group_from_metadata2.json";
@@ -83,25 +84,39 @@ public class CollectServiceTest {
     private static final String SAMPLE_OBJECT_GROUP_NEW_VERSION = "object_group_from_metadata4.json";
     private static final String SAMPLE_OBJECT_GROUP5 = "object_group_from_metadata5.json";
 
-    @Rule public RunWithCustomExecutorRule runInThread =
-        new RunWithCustomExecutorRule(VitamThreadPoolExecutor.getDefaultExecutor());
-    @Rule public MockitoRule mockitoRule = MockitoJUnit.rule();
+    @Rule
+    public RunWithCustomExecutorRule runInThread = new RunWithCustomExecutorRule(
+        VitamThreadPoolExecutor.getDefaultExecutor()
+    );
 
-    @Rule public TempFolderRule tempFolder = new TempFolderRule();
+    @Rule
+    public MockitoRule mockitoRule = MockitoJUnit.rule();
 
-    @InjectMocks private CollectService collectService;
+    @Rule
+    public TempFolderRule tempFolder = new TempFolderRule();
 
-    @Mock private MetadataRepository metadataRepository;
-    @Mock private WorkspaceClientFactory workspaceClientFactory;
-    @Mock private WorkspaceClient workspaceClient;
-    @Mock private FormatIdentifierFactory formatIdentifierFactory;
+    @InjectMocks
+    private CollectService collectService;
+
+    @Mock
+    private MetadataRepository metadataRepository;
+
+    @Mock
+    private WorkspaceClientFactory workspaceClientFactory;
+
+    @Mock
+    private WorkspaceClient workspaceClient;
+
+    @Mock
+    private FormatIdentifierFactory formatIdentifierFactory;
 
     @Test
     public void getArchiveUnitModel() throws Exception {
         // Given
         String unitId = "aeeaaaaaacfm6tqsaawpgamadc4j5baaaaaq";
         when(metadataRepository.selectUnitById(any())).thenReturn(
-            JsonHandler.getFromFile(PropertiesUtils.findFile(SAMPLE_ARCHIVE_UNIT)));
+            JsonHandler.getFromFile(PropertiesUtils.findFile(SAMPLE_ARCHIVE_UNIT))
+        );
         // When
         CollectUnitModel archiveUnitModel = collectService.getArchiveUnitModel(unitId);
         // Then
@@ -112,8 +127,9 @@ public class CollectServiceTest {
     @Test
     public void getInputStreamFromWorkspace() throws Exception {
         // Given
-        Response response =
-            Response.ok(new ByteArrayInputStream("ResponseOK".getBytes())).status(Response.Status.OK).build();
+        Response response = Response.ok(new ByteArrayInputStream("ResponseOK".getBytes()))
+            .status(Response.Status.OK)
+            .build();
         when(workspaceClient.getObject(any(), any())).thenReturn(response);
         when(workspaceClientFactory.getClient()).thenReturn(workspaceClient);
         // When
@@ -127,10 +143,12 @@ public class CollectServiceTest {
     public void getBinaryByUsageAndVersion() throws Exception {
         // Given
         when(metadataRepository.selectObjectGroupById("og", true)).thenReturn(
-            JsonHandler.getFromFile(PropertiesUtils.findFile(SAMPLE_OBJECT_GROUP5)));
+            JsonHandler.getFromFile(PropertiesUtils.findFile(SAMPLE_OBJECT_GROUP5))
+        );
         when(workspaceClientFactory.getClient()).thenReturn(workspaceClient);
-        Response response =
-            Response.ok(new ByteArrayInputStream("ResponseOK".getBytes())).status(Response.Status.OK).build();
+        Response response = Response.ok(new ByteArrayInputStream("ResponseOK".getBytes()))
+            .status(Response.Status.OK)
+            .build();
         when(workspaceClient.getObject(any(), any())).thenReturn(response);
         CollectUnitModel unitModel = new CollectUnitModel();
         unitModel.setOg("og");
@@ -139,8 +157,9 @@ public class CollectServiceTest {
         // Then
         assertThat(binaryByUsageAndVersion).isNotNull();
         assertThat(binaryByUsageAndVersion.getStatus()).isEqualTo(200);
-        assertThat(binaryByUsageAndVersion.readEntity(InputStream.class).readAllBytes())
-            .isEqualTo("ResponseOK".getBytes());
+        assertThat(binaryByUsageAndVersion.readEntity(InputStream.class).readAllBytes()).isEqualTo(
+            "ResponseOK".getBytes()
+        );
     }
 
     @Test
@@ -148,7 +167,8 @@ public class CollectServiceTest {
     public void testUpdateOrSaveObjectGroup_insertNewObjectGroup() throws Exception {
         // Given
         when(metadataRepository.saveObjectGroup(any())).thenReturn(
-            JsonHandler.getFromFile(PropertiesUtils.findFile(SAMPLE_OBJECT_GROUP2)));
+            JsonHandler.getFromFile(PropertiesUtils.findFile(SAMPLE_OBJECT_GROUP2))
+        );
         VitamThreadUtils.getVitamSession().setTenantId(1);
         CollectUnitModel unitModel = new CollectUnitModel();
         unitModel.setId("1");
@@ -172,8 +192,10 @@ public class CollectServiceTest {
         unitModel.setOpi("opi");
         ObjectDto myObjectDto = new ObjectDto("1", new FileInfoDto("filename", "lastname"));
         // When - Then
-        assertThrows(CollectInternalException.class,
-            () -> collectService.updateOrSaveObjectGroup(unitModel, BINARY_MASTER, 1, myObjectDto));
+        assertThrows(
+            CollectInternalException.class,
+            () -> collectService.updateOrSaveObjectGroup(unitModel, BINARY_MASTER, 1, myObjectDto)
+        );
     }
 
     @Test
@@ -181,7 +203,8 @@ public class CollectServiceTest {
     public void testUpdateOrSaveObjectGroup_updateExistingObjectGroup() throws Exception {
         // Given
         when(metadataRepository.selectObjectGroupById("og", true)).thenReturn(
-            JsonHandler.getFromFile(PropertiesUtils.findFile(SAMPLE_OBJECT_GROUP2)));
+            JsonHandler.getFromFile(PropertiesUtils.findFile(SAMPLE_OBJECT_GROUP2))
+        );
         VitamThreadUtils.getVitamSession().setTenantId(1);
         CollectUnitModel unitModel = new CollectUnitModel();
         unitModel.setId("1");
@@ -200,7 +223,8 @@ public class CollectServiceTest {
     public void testUpdateOrSaveObjectGroup_ko_with_qualifier() throws Exception {
         // Given
         when(metadataRepository.selectObjectGroupById("og", true)).thenReturn(
-            JsonHandler.getFromFile(PropertiesUtils.findFile(SAMPLE_OBJECT_GROUP_WITH_QUALIFIER)));
+            JsonHandler.getFromFile(PropertiesUtils.findFile(SAMPLE_OBJECT_GROUP_WITH_QUALIFIER))
+        );
         VitamThreadUtils.getVitamSession().setTenantId(1);
         CollectUnitModel unitModel = new CollectUnitModel();
         unitModel.setId("1");
@@ -208,8 +232,10 @@ public class CollectServiceTest {
         unitModel.setOg("og");
         ObjectDto myObjectDto = new ObjectDto("1", new FileInfoDto("filename", "lastname"));
         // When - Then
-        assertThrows(CollectInternalException.class,
-            () -> collectService.updateOrSaveObjectGroup(unitModel, BINARY_MASTER, 1, myObjectDto));
+        assertThrows(
+            CollectInternalException.class,
+            () -> collectService.updateOrSaveObjectGroup(unitModel, BINARY_MASTER, 1, myObjectDto)
+        );
     }
 
     @Test
@@ -217,7 +243,8 @@ public class CollectServiceTest {
     public void testUpdateOrSaveObjectGroup_ok_with_new_version() throws Exception {
         // Given
         when(metadataRepository.selectObjectGroupById("og", true)).thenReturn(
-            JsonHandler.getFromFile(PropertiesUtils.findFile(SAMPLE_OBJECT_GROUP_NEW_VERSION)));
+            JsonHandler.getFromFile(PropertiesUtils.findFile(SAMPLE_OBJECT_GROUP_NEW_VERSION))
+        );
         VitamThreadUtils.getVitamSession().setTenantId(1);
         CollectUnitModel unitModel = new CollectUnitModel();
         unitModel.setId("1");
@@ -240,7 +267,8 @@ public class CollectServiceTest {
     public void testGetDbObjectGroup_ok() throws Exception {
         // Given
         when(metadataRepository.selectObjectGroupById("og", true)).thenReturn(
-            JsonHandler.getFromFile(PropertiesUtils.findFile(SAMPLE_OBJECT_GROUP2)));
+            JsonHandler.getFromFile(PropertiesUtils.findFile(SAMPLE_OBJECT_GROUP2))
+        );
         CollectUnitModel unitModel = new CollectUnitModel();
         unitModel.setId("1");
         unitModel.setOpi("opi");
@@ -273,24 +301,33 @@ public class CollectServiceTest {
         qualifiersModel.setVersions(dbVersionsModels);
         dbObjectGroupModel.setQualifiers(dbQualifiersModels);
         when(workspaceClientFactory.getClient()).thenReturn(workspaceClient);
-        Response response =
-            Response.ok(new ByteArrayInputStream("ResponseOK".getBytes())).status(Response.Status.OK).build();
+        Response response = Response.ok(new ByteArrayInputStream("ResponseOK".getBytes()))
+            .status(Response.Status.OK)
+            .build();
         when(workspaceClient.getObject(any(), any())).thenReturn(response);
         FormatIdentifier formatIdentifier = mock(FormatIdentifier.class);
         when(formatIdentifierFactory.getFormatIdentifierFor(anyString())).thenReturn(formatIdentifier);
         when(formatIdentifier.analysePath(any())).thenReturn(List.of(new FormatIdentifierResponse("", "", "", "")));
         // When
-        collectService.addBinaryInfoToQualifier(dbObjectGroupModel, BINARY_MASTER, 1,
-            StreamUtils.toInputStream("Vitam test"));
-        DbVersionsModel objectVersionsModel =
-            CollectHelper.getObjectVersionsModel(dbObjectGroupModel, BINARY_MASTER, 1);
+        collectService.addBinaryInfoToQualifier(
+            dbObjectGroupModel,
+            BINARY_MASTER,
+            1,
+            StreamUtils.toInputStream("Vitam test")
+        );
+        DbVersionsModel objectVersionsModel = CollectHelper.getObjectVersionsModel(
+            dbObjectGroupModel,
+            BINARY_MASTER,
+            1
+        );
         // Then
         assertThat(objectVersionsModel.getMessageDigest()).isNotNull();
-        assertThat(objectVersionsModel.getUri())
-            .isEqualTo("Content/aebbaaaaacaltpovaewckal62ukh4ml5a67q.txt");
+        assertThat(objectVersionsModel.getUri()).isEqualTo("Content/aebbaaaaacaltpovaewckal62ukh4ml5a67q.txt");
 
-        File file = new File(VitamConfiguration.getVitamTmpFolder(),
-            VitamThreadUtils.getVitamSession().getRequestId() + ".txt");
+        File file = new File(
+            VitamConfiguration.getVitamTmpFolder(),
+            VitamThreadUtils.getVitamSession().getRequestId() + ".txt"
+        );
         assertThat(file).doesNotExist();
     }
 }

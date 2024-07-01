@@ -30,12 +30,13 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class PurgeUnitReportEntry {
-    private final static String ID = "id";
-    private final static String ORIGINATING_AGENCY = "originatingAgency";
-    private final static String OPI = "opi";
-    private final static String OBJECT_GROUP = "objectGroupId";
-    private final static String STATUS = "status";
-    private final static String TYPE = "type";
+
+    private static final String ID = "id";
+    private static final String ORIGINATING_AGENCY = "originatingAgency";
+    private static final String OPI = "opi";
+    private static final String OBJECT_GROUP = "objectGroupId";
+    private static final String STATUS = "status";
+    private static final String TYPE = "type";
 
     private final String id;
     private final String originatingAgency;
@@ -51,7 +52,8 @@ public class PurgeUnitReportEntry {
         @JsonProperty(OPI) String initialOperation,
         @JsonProperty(OBJECT_GROUP) String objectGroupId,
         @JsonProperty(STATUS) String status,
-        @JsonProperty(TYPE) String type) {
+        @JsonProperty(TYPE) String type
+    ) {
         this.id = id;
         this.originatingAgency = originatingAgency;
         this.initialOperation = initialOperation;

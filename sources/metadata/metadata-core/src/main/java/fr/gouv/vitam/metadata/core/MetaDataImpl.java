@@ -26,7 +26,6 @@
  */
 package fr.gouv.vitam.metadata.core;
 
-
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
@@ -92,7 +91,6 @@ import fr.gouv.vitam.metadata.api.exception.MetaDataDocumentSizeException;
 import fr.gouv.vitam.metadata.api.exception.MetaDataException;
 import fr.gouv.vitam.metadata.api.exception.MetaDataExecutionException;
 import fr.gouv.vitam.metadata.api.exception.MetaDataNotFoundException;
-import fr.gouv.vitam.metadata.api.model.BulkUnitInsertRequest;
 import fr.gouv.vitam.metadata.api.model.ObjectGroupPerOriginatingAgency;
 import fr.gouv.vitam.metadata.core.config.ElasticsearchMetadataIndexManager;
 import fr.gouv.vitam.metadata.core.database.collections.DbRequest;
@@ -170,6 +168,7 @@ import static java.util.Collections.singletonList;
 import static java.util.function.Predicate.not;
 
 public class MetaDataImpl {
+
     private static final VitamLogger LOGGER = VitamLoggerFactory.getInstance(MetaDataImpl.class);
 
     private static final String REQUEST_IS_NULL = "Request select is null or is empty";
@@ -188,27 +187,45 @@ public class MetaDataImpl {
     private final OntologyLoader objectGroupOntologyLoader;
     private final ElasticsearchMetadataIndexManager indexManager;
 
-    public MetaDataImpl(MongoDbAccessMetadataImpl mongoDbAccess,
-        int ontologyCacheMaxEntries, int ontologyCacheTimeoutInSeconds,
-        int archiveUnitProfileCacheMaxEntries, int archiveUnitProfileCacheTimeoutInSeconds,
-        int schemaValidatorCacheMaxEntries, int schemaValidatorCacheTimeoutInSeconds,
-        ElasticsearchMetadataIndexManager indexManager) {
-
-        this(mongoDbAccess, AdminManagementClientFactory.getInstance(), IndexationHelper.getInstance(),
-            new DbRequest(), ontologyCacheMaxEntries, ontologyCacheTimeoutInSeconds,
-            archiveUnitProfileCacheMaxEntries, archiveUnitProfileCacheTimeoutInSeconds,
-            schemaValidatorCacheMaxEntries, schemaValidatorCacheTimeoutInSeconds,
-            indexManager);
+    public MetaDataImpl(
+        MongoDbAccessMetadataImpl mongoDbAccess,
+        int ontologyCacheMaxEntries,
+        int ontologyCacheTimeoutInSeconds,
+        int archiveUnitProfileCacheMaxEntries,
+        int archiveUnitProfileCacheTimeoutInSeconds,
+        int schemaValidatorCacheMaxEntries,
+        int schemaValidatorCacheTimeoutInSeconds,
+        ElasticsearchMetadataIndexManager indexManager
+    ) {
+        this(
+            mongoDbAccess,
+            AdminManagementClientFactory.getInstance(),
+            IndexationHelper.getInstance(),
+            new DbRequest(),
+            ontologyCacheMaxEntries,
+            ontologyCacheTimeoutInSeconds,
+            archiveUnitProfileCacheMaxEntries,
+            archiveUnitProfileCacheTimeoutInSeconds,
+            schemaValidatorCacheMaxEntries,
+            schemaValidatorCacheTimeoutInSeconds,
+            indexManager
+        );
     }
 
     @VisibleForTesting
-    public MetaDataImpl(MongoDbAccessMetadataImpl mongoDbAccess,
+    public MetaDataImpl(
+        MongoDbAccessMetadataImpl mongoDbAccess,
         AdminManagementClientFactory adminManagementClientFactory,
         IndexationHelper indexationHelper,
-        DbRequest dbRequest, int ontologyCacheMaxEntries, int ontologyCacheTimeoutInSeconds,
-        int archiveUnitProfileCacheMaxEntries, int archiveUnitProfileCacheTimeoutInSeconds,
-        int schemaValidatorCacheMaxEntries, int schemaValidatorCacheTimeoutInSeconds,
-        ElasticsearchMetadataIndexManager indexManager) {
+        DbRequest dbRequest,
+        int ontologyCacheMaxEntries,
+        int ontologyCacheTimeoutInSeconds,
+        int archiveUnitProfileCacheMaxEntries,
+        int archiveUnitProfileCacheTimeoutInSeconds,
+        int schemaValidatorCacheMaxEntries,
+        int schemaValidatorCacheTimeoutInSeconds,
+        ElasticsearchMetadataIndexManager indexManager
+    ) {
         this.mongoDbAccess = mongoDbAccess;
         this.indexationHelper = indexationHelper;
         this.dbRequest = dbRequest;
@@ -222,8 +239,10 @@ public class MetaDataImpl {
         this.objectGroupOntologyLoader = new CachedOntologyLoader(
             ontologyCacheMaxEntries,
             ontologyCacheTimeoutInSeconds,
-            new AdminManagementOntologyLoader(adminManagementClientFactory,
-                Optional.of(MetadataType.OBJECTGROUP.getName()))
+            new AdminManagementOntologyLoader(
+                adminManagementClientFactory,
+                Optional.of(MetadataType.OBJECTGROUP.getName())
+            )
         );
 
         this.unitOntologyValidator = new OntologyValidator(this.unitOntologyLoader);
@@ -250,16 +269,26 @@ public class MetaDataImpl {
      * @param indexManager
      * @return a new instance of MetaDataImpl
      */
-    public static MetaDataImpl newMetadata(MongoDbAccessMetadataImpl mongoDbAccessMetadata,
-        int ontologyCacheMaxEntries, int ontologyCacheTimeoutInSeconds,
-        int archiveUnitProfileCacheMaxEntries, int archiveUnitProfileCacheTimeoutInSeconds,
-        int schemaValidatorCacheMaxEntries, int schemaValidatorCacheTimeoutInSeconds,
-        ElasticsearchMetadataIndexManager indexManager) {
-
-        return new MetaDataImpl(mongoDbAccessMetadata, ontologyCacheMaxEntries, ontologyCacheTimeoutInSeconds,
-            archiveUnitProfileCacheMaxEntries, archiveUnitProfileCacheTimeoutInSeconds,
-            schemaValidatorCacheMaxEntries, schemaValidatorCacheTimeoutInSeconds,
-            indexManager);
+    public static MetaDataImpl newMetadata(
+        MongoDbAccessMetadataImpl mongoDbAccessMetadata,
+        int ontologyCacheMaxEntries,
+        int ontologyCacheTimeoutInSeconds,
+        int archiveUnitProfileCacheMaxEntries,
+        int archiveUnitProfileCacheTimeoutInSeconds,
+        int schemaValidatorCacheMaxEntries,
+        int schemaValidatorCacheTimeoutInSeconds,
+        ElasticsearchMetadataIndexManager indexManager
+    ) {
+        return new MetaDataImpl(
+            mongoDbAccessMetadata,
+            ontologyCacheMaxEntries,
+            ontologyCacheTimeoutInSeconds,
+            archiveUnitProfileCacheMaxEntries,
+            archiveUnitProfileCacheTimeoutInSeconds,
+            schemaValidatorCacheMaxEntries,
+            schemaValidatorCacheTimeoutInSeconds,
+            indexManager
+        );
     }
 
     /**
@@ -270,11 +299,11 @@ public class MetaDataImpl {
     }
 
     public void insertUnits(List<JsonNode> unitRequest)
-        throws InvalidParseOperationException, MetaDataExecutionException,
-        MetaDataNotFoundException {
+        throws InvalidParseOperationException, MetaDataExecutionException, MetaDataNotFoundException {
         try {
-
-            List<InsertParserMultiple> collect = unitRequest.stream().map(insertRequest -> {
+            List<InsertParserMultiple> collect = unitRequest
+                .stream()
+                .map(insertRequest -> {
                     InsertParserMultiple insertParser = new InsertParserMultiple(DEFAULT_VARNAME_ADAPTER);
                     try {
                         insertParser.parse(insertRequest);
@@ -282,11 +311,10 @@ public class MetaDataImpl {
                         throw new VitamRuntimeException(e);
                     }
                     return insertParser;
-                }
-            ).collect(Collectors.toList());
+                })
+                .collect(Collectors.toList());
 
             dbRequest.execInsertUnitRequests(collect);
-
         } catch (VitamRuntimeException e) {
             if (e.getCause() instanceof InvalidParseOperationException) {
                 throw (InvalidParseOperationException) e.getCause();
@@ -295,18 +323,12 @@ public class MetaDataImpl {
         }
     }
 
-    public void deleteUnits(List<String> idList)
-        throws IllegalArgumentException, MetaDataExecutionException {
-
+    public void deleteUnits(List<String> idList) throws IllegalArgumentException, MetaDataExecutionException {
         dbRequest.deleteUnits(idList);
-
     }
 
-    public void deleteObjectGroups(List<String> idList)
-        throws IllegalArgumentException, MetaDataExecutionException {
-
+    public void deleteObjectGroups(List<String> idList) throws IllegalArgumentException, MetaDataExecutionException {
         dbRequest.deleteObjectGroups(idList);
-
     }
 
     public void insertObjectGroup(JsonNode objectGroupRequest)
@@ -315,14 +337,14 @@ public class MetaDataImpl {
         insertParser.parse(objectGroupRequest);
         insertParser.getRequest().addHintFilter(BuilderToken.FILTERARGS.OBJECTGROUPS.exactToken());
         dbRequest.execInsertObjectGroupRequests(singletonList(insertParser));
-
     }
 
     public void insertObjectGroups(List<JsonNode> objectGroupRequest)
         throws InvalidParseOperationException, MetaDataExecutionException {
-
         try {
-            List<InsertParserMultiple> collect = objectGroupRequest.stream().map(insertRequest -> {
+            List<InsertParserMultiple> collect = objectGroupRequest
+                .stream()
+                .map(insertRequest -> {
                     InsertParserMultiple insertParser = new InsertParserMultiple(DEFAULT_VARNAME_ADAPTER);
                     try {
                         insertParser.parse(insertRequest);
@@ -330,11 +352,10 @@ public class MetaDataImpl {
                         throw new VitamRuntimeException(e);
                     }
                     return insertParser;
-                }
-            ).collect(Collectors.toList());
+                })
+                .collect(Collectors.toList());
 
             dbRequest.execInsertObjectGroupRequests(collect);
-
         } catch (VitamRuntimeException e) {
             if (e.getCause() instanceof InvalidParseOperationException) {
                 throw (InvalidParseOperationException) e.getCause();
@@ -349,28 +370,28 @@ public class MetaDataImpl {
      */
     public List<FacetBucket> selectOwnAccessionRegisterOnUnitByOperationId(String operationId)
         throws MetaDataExecutionException {
-
         final SelectParserMultiple request = new SelectParserMultiple(DEFAULT_VARNAME_ADAPTER);
         final SelectMultiQuery select = new SelectMultiQuery();
         try {
-
-            BooleanQuery query = and().add(
-                eq(PROJECTIONARGS.INITIAL_OPERATION.exactToken(), operationId),
-                ne(PROJECTIONARGS.UNITTYPE.exactToken(), UnitType.HOLDING_UNIT.name())
-            );
+            BooleanQuery query = and()
+                .add(
+                    eq(PROJECTIONARGS.INITIAL_OPERATION.exactToken(), operationId),
+                    ne(PROJECTIONARGS.UNITTYPE.exactToken(), UnitType.HOLDING_UNIT.name())
+                );
 
             select.addQueries(query);
 
-            Facet facet = FacetHelper
-                .terms(AccessionRegisterDetail.class.getSimpleName(), PROJECTIONARGS.ORIGINATING_AGENCY.exactToken(),
-                    Integer.MAX_VALUE,
-                    FacetOrder.ASC);
+            Facet facet = FacetHelper.terms(
+                AccessionRegisterDetail.class.getSimpleName(),
+                PROJECTIONARGS.ORIGINATING_AGENCY.exactToken(),
+                Integer.MAX_VALUE,
+                FacetOrder.ASC
+            );
             select.addFacets(facet);
 
             select.setLimitFilter(0, 1);
 
             request.parse(select.getFinalSelect());
-
         } catch (InvalidCreateOperationException | InvalidParseOperationException e) {
             throw new MetaDataExecutionException(e);
         }
@@ -391,7 +412,6 @@ public class MetaDataImpl {
                     return facetResult.getBuckets();
                 }
             }
-
         } catch (InvalidParseOperationException | BadRequestException | VitamDBException e) {
             throw new MetaDataExecutionException(e);
         }
@@ -408,79 +428,100 @@ public class MetaDataImpl {
         return createWithInformations(aUAccessionRegisterInfo, oGAccessionRegisterInfo, creationDate, tenant);
     }
 
-    private List<Document> createWithInformations(Aggregations archiveUnitAccessionRegisterInformation,
-        Aggregations objectGroupAccessionRegisterInformation, String creationDate, Integer tenant) {
+    private List<Document> createWithInformations(
+        Aggregations archiveUnitAccessionRegisterInformation,
+        Aggregations objectGroupAccessionRegisterInformation,
+        String creationDate,
+        Integer tenant
+    ) {
         Map<String, AccessionRegisterSymbolic> accessionRegisterSymbolicByOriginatingAgency =
             fillWithArchiveUnitInformation(archiveUnitAccessionRegisterInformation, creationDate, tenant);
-        updateExistingAccessionRegisterWithObjectGroupInformation(objectGroupAccessionRegisterInformation, creationDate,
-            tenant, accessionRegisterSymbolicByOriginatingAgency);
+        updateExistingAccessionRegisterWithObjectGroupInformation(
+            objectGroupAccessionRegisterInformation,
+            creationDate,
+            tenant,
+            accessionRegisterSymbolicByOriginatingAgency
+        );
 
         return new ArrayList<>(accessionRegisterSymbolicByOriginatingAgency.values());
     }
 
     private void updateExistingAccessionRegisterWithObjectGroupInformation(
-        Aggregations objectGroupAccessionRegisterInformation, String creationDate, Integer tenant,
-        Map<String, AccessionRegisterSymbolic> accessionRegisterSymbolicByOriginatingAgency) {
-
+        Aggregations objectGroupAccessionRegisterInformation,
+        String creationDate,
+        Integer tenant,
+        Map<String, AccessionRegisterSymbolic> accessionRegisterSymbolicByOriginatingAgency
+    ) {
         Terms objectGroupOriginatingAgencies = objectGroupAccessionRegisterInformation.get("originatingAgencies");
         Terms objectGroupOriginatingAgency = objectGroupAccessionRegisterInformation.get("originatingAgency");
 
-        Map<String, OriginatingAgencyBucketResult> objectGroupByOriginatingAgency =
-            objectGroupOriginatingAgency.getBuckets().stream()
-                .map(bucket -> OriginatingAgencyBucketResult
-                    .of(bucket.getKeyAsString(),
+        Map<String, OriginatingAgencyBucketResult> objectGroupByOriginatingAgency = objectGroupOriginatingAgency
+            .getBuckets()
+            .stream()
+            .map(
+                bucket ->
+                    OriginatingAgencyBucketResult.of(
+                        bucket.getKeyAsString(),
                         bucket.getDocCount(),
                         bucket.getAggregations().get("nestedVersions")
-                    ))
-                .collect(Collectors.toMap(e -> e.originatingAgency, e -> e));
+                    )
+            )
+            .collect(Collectors.toMap(e -> e.originatingAgency, e -> e));
 
-        objectGroupOriginatingAgencies.getBuckets()
-            .forEach(bucket ->
-                updateAccessionsRegister(
-                    creationDate,
-                    tenant,
-                    accessionRegisterSymbolicByOriginatingAgency,
-                    objectGroupByOriginatingAgency,
-                    OriginatingAgencyBucketResult
-                        .of(bucket.getKeyAsString(),
+        objectGroupOriginatingAgencies
+            .getBuckets()
+            .forEach(
+                bucket ->
+                    updateAccessionsRegister(
+                        creationDate,
+                        tenant,
+                        accessionRegisterSymbolicByOriginatingAgency,
+                        objectGroupByOriginatingAgency,
+                        OriginatingAgencyBucketResult.of(
+                            bucket.getKeyAsString(),
                             bucket.getDocCount(),
                             bucket.getAggregations().get("nestedVersions")
                         )
-                )
+                    )
             );
     }
 
-    private void updateAccessionsRegister(String creationDate, Integer tenant,
+    private void updateAccessionsRegister(
+        String creationDate,
+        Integer tenant,
         Map<String, AccessionRegisterSymbolic> accessionRegisterSymbolicByOriginatingAgency,
         Map<String, OriginatingAgencyBucketResult> objectGroupByOriginatingAgency,
-        OriginatingAgencyBucketResult objectGroup) {
-
-        OriginatingAgencyBucketResult originatingAgencyBucketResult = objectGroupByOriginatingAgency
-            .getOrDefault(objectGroup.originatingAgency, OriginatingAgencyBucketResult.empty());
+        OriginatingAgencyBucketResult objectGroup
+    ) {
+        OriginatingAgencyBucketResult originatingAgencyBucketResult = objectGroupByOriginatingAgency.getOrDefault(
+            objectGroup.originatingAgency,
+            OriginatingAgencyBucketResult.empty()
+        );
 
         long groupObjectsCount = objectGroup.docCount - originatingAgencyBucketResult.docCount;
         long objectCount = objectGroup.objectCount - originatingAgencyBucketResult.objectCount;
         double binaryObjectSize = objectGroup.binaryObjectSize - originatingAgencyBucketResult.binaryObjectSize;
-        AccessionRegisterSymbolic existingAccessionRegister =
-            accessionRegisterSymbolicByOriginatingAgency.get(objectGroup.originatingAgency);
+        AccessionRegisterSymbolic existingAccessionRegister = accessionRegisterSymbolicByOriginatingAgency.get(
+            objectGroup.originatingAgency
+        );
 
         if (groupObjectsCount > 0 && existingAccessionRegister != null) {
-            existingAccessionRegister.setObjectGroup(groupObjectsCount)
+            existingAccessionRegister
+                .setObjectGroup(groupObjectsCount)
                 .setBinaryObject(objectCount)
                 .setBinaryObjectSize(binaryObjectSize);
             return;
         }
 
         if (groupObjectsCount <= 0 && existingAccessionRegister != null) {
-            existingAccessionRegister.setObjectGroup(0)
-                .setBinaryObject(0L)
-                .setBinaryObjectSize(0D);
+            existingAccessionRegister.setObjectGroup(0).setBinaryObject(0L).setBinaryObjectSize(0D);
             return;
         }
 
         if (groupObjectsCount > 0) {
-            accessionRegisterSymbolicByOriginatingAgency
-                .put(objectGroup.originatingAgency, new AccessionRegisterSymbolic()
+            accessionRegisterSymbolicByOriginatingAgency.put(
+                objectGroup.originatingAgency,
+                new AccessionRegisterSymbolic()
                     .setId(GUIDFactory.newAccessionRegisterSymbolicGUID(tenant).getId())
                     .setCreationDate(creationDate)
                     .setTenant(tenant)
@@ -488,24 +529,35 @@ public class MetaDataImpl {
                     .setArchiveUnit(0L)
                     .setObjectGroup(groupObjectsCount)
                     .setBinaryObject(objectCount)
-                    .setBinaryObjectSize(binaryObjectSize));
+                    .setBinaryObjectSize(binaryObjectSize)
+            );
             return;
         }
 
         return;
-
     }
 
     private Map<String, AccessionRegisterSymbolic> fillWithArchiveUnitInformation(
-        Aggregations archiveUnitAccessionRegisterformation, String creationDate, Integer tenant) {
+        Aggregations archiveUnitAccessionRegisterformation,
+        String creationDate,
+        Integer tenant
+    ) {
         Terms archiveUnitOriginatingAgencies = archiveUnitAccessionRegisterformation.get("originatingAgencies");
         Terms archiveUnitOriginatingAgency = archiveUnitAccessionRegisterformation.get("originatingAgency");
 
-        Map<String, Long> archiveUnitByOriginatingAgency = archiveUnitOriginatingAgency.getBuckets().stream()
-            .collect(Collectors
-                .toMap(MultiBucketsAggregation.Bucket::getKeyAsString, MultiBucketsAggregation.Bucket::getDocCount));
+        Map<String, Long> archiveUnitByOriginatingAgency = archiveUnitOriginatingAgency
+            .getBuckets()
+            .stream()
+            .collect(
+                Collectors.toMap(
+                    MultiBucketsAggregation.Bucket::getKeyAsString,
+                    MultiBucketsAggregation.Bucket::getDocCount
+                )
+            );
 
-        return archiveUnitOriginatingAgencies.getBuckets().stream()
+        return archiveUnitOriginatingAgencies
+            .getBuckets()
+            .stream()
             .map(e -> {
                 long archiveUnitCount =
                     e.getDocCount() - archiveUnitByOriginatingAgency.getOrDefault(e.getKeyAsString(), 0L);
@@ -526,16 +578,22 @@ public class MetaDataImpl {
     private Aggregations selectObjectGroupAccessionRegisterInformation(Integer tenant)
         throws MetaDataExecutionException {
         TermsAggregationBuilder ogs = AggregationBuilders.terms("originatingAgencies")
-            .field("_sps").size(AGGREGATION_SIZE)
-            .subAggregation(AggregationBuilders.nested("nestedVersions", "_qualifiers.versions")
-                .subAggregation(AggregationBuilders.sum("binaryObjectSize").field("_qualifiers.versions.Size"))
-                .subAggregation(AggregationBuilders.count("binaryObjectCount").field("_qualifiers.versions._id")));
+            .field("_sps")
+            .size(AGGREGATION_SIZE)
+            .subAggregation(
+                AggregationBuilders.nested("nestedVersions", "_qualifiers.versions")
+                    .subAggregation(AggregationBuilders.sum("binaryObjectSize").field("_qualifiers.versions.Size"))
+                    .subAggregation(AggregationBuilders.count("binaryObjectCount").field("_qualifiers.versions._id"))
+            );
 
         TermsAggregationBuilder og = AggregationBuilders.terms("originatingAgency")
-            .field("_sp").size(AGGREGATION_SIZE)
-            .subAggregation(AggregationBuilders.nested("nestedVersions", "_qualifiers.versions")
-                .subAggregation(AggregationBuilders.sum("binaryObjectSize").field("_qualifiers.versions.Size"))
-                .subAggregation(AggregationBuilders.count("binaryObjectCount").field("_qualifiers.versions._id")));
+            .field("_sp")
+            .size(AGGREGATION_SIZE)
+            .subAggregation(
+                AggregationBuilders.nested("nestedVersions", "_qualifiers.versions")
+                    .subAggregation(AggregationBuilders.sum("binaryObjectSize").field("_qualifiers.versions.Size"))
+                    .subAggregation(AggregationBuilders.count("binaryObjectCount").field("_qualifiers.versions._id"))
+            );
 
         return OBJECTGROUP.getEsClient()
             .basicAggregationSearch(OBJECTGROUP, tenant, Arrays.asList(og, ogs), QueryBuilders.matchAllQuery());
@@ -551,10 +609,11 @@ public class MetaDataImpl {
             .basicAggregationSearch(MetadataCollections.UNIT, tenant, aggregations, QueryBuilders.matchAllQuery());
     }
 
-    public List<ObjectGroupPerOriginatingAgency> selectOwnAccessionRegisterOnObjectGroupByOperationId(Integer tenant,
-        String operationId) throws MetaDataExecutionException {
-        AggregationBuilder originatingAgencyAgg = aggregationForObjectGroupAccessionRegisterByOperationId(
-            operationId);
+    public List<ObjectGroupPerOriginatingAgency> selectOwnAccessionRegisterOnObjectGroupByOperationId(
+        Integer tenant,
+        String operationId
+    ) throws MetaDataExecutionException {
+        AggregationBuilder originatingAgencyAgg = aggregationForObjectGroupAccessionRegisterByOperationId(operationId);
 
         QueryBuilder query = queryForObjectGroupAccessionRegisterByOperationId(tenant, operationId);
 
@@ -592,66 +651,71 @@ public class MetaDataImpl {
 
     private QueryBuilder queryForObjectGroupAccessionRegisterByOperationId(Integer tenant, String operationId) {
         QueryBuilder operationQuery = QueryBuilders.matchQuery("_ops", operationId);
-        QueryBuilder nestedOperationQuery = QueryBuilders.nestedQuery("_qualifiers.versions",
-            QueryBuilders.matchQuery("_qualifiers.versions._opi", operationId), ScoreMode.Avg);
+        QueryBuilder nestedOperationQuery = QueryBuilders.nestedQuery(
+            "_qualifiers.versions",
+            QueryBuilders.matchQuery("_qualifiers.versions._opi", operationId),
+            ScoreMode.Avg
+        );
         return QueryBuilders.boolQuery().must(operationQuery).must(nestedOperationQuery);
     }
 
     private AggregationBuilder aggregationForObjectGroupAccessionRegisterByOperationId(String operationId) {
         AggregationBuilder gotCountAgg = AggregationBuilders.cardinality("gotCount")
-            .field("_qualifiers.versions.DataObjectGroupId").precisionThreshold(MAX_PRECISION_THRESHOLD);
-        AggregationBuilder binaryObjectSizeAgg = AggregationBuilders.sum("binaryObjectSize")
-            .field("_qualifiers.versions.Size");
-        AggregationBuilder binaryObjectCountAgg = AggregationBuilders.count("binaryObjectCount")
-            .field("_qualifiers.versions._id");
-        AggregationBuilder versionOperationAgg = AggregationBuilders
-            .filter("versionOperation", QueryBuilders.matchQuery("_qualifiers.versions._opi", operationId))
-            .subAggregation(binaryObjectCountAgg).subAggregation(binaryObjectSizeAgg).subAggregation(gotCountAgg);
-        AggregationBuilder versionAgg = AggregationBuilders.nested("version", "_qualifiers.versions")
-            .subAggregation(versionOperationAgg);
-        AggregationBuilder operationAgg = AggregationBuilders.terms("operation").field("_opi")
+            .field("_qualifiers.versions.DataObjectGroupId")
+            .precisionThreshold(MAX_PRECISION_THRESHOLD);
+        AggregationBuilder binaryObjectSizeAgg = AggregationBuilders.sum("binaryObjectSize").field(
+            "_qualifiers.versions.Size"
+        );
+        AggregationBuilder binaryObjectCountAgg = AggregationBuilders.count("binaryObjectCount").field(
+            "_qualifiers.versions._id"
+        );
+        AggregationBuilder versionOperationAgg = AggregationBuilders.filter(
+            "versionOperation",
+            QueryBuilders.matchQuery("_qualifiers.versions._opi", operationId)
+        )
+            .subAggregation(binaryObjectCountAgg)
+            .subAggregation(binaryObjectSizeAgg)
+            .subAggregation(gotCountAgg);
+        AggregationBuilder versionAgg = AggregationBuilders.nested("version", "_qualifiers.versions").subAggregation(
+            versionOperationAgg
+        );
+        AggregationBuilder operationAgg = AggregationBuilders.terms("operation")
+            .field("_opi")
             .subAggregation(versionAgg);
-        return AggregationBuilders.terms("originatingAgency").field("_sp")
-            .subAggregation(operationAgg);
+        return AggregationBuilders.terms("originatingAgency").field("_sp").subAggregation(operationAgg);
     }
 
     public MetadataResult selectUnitsByQuery(JsonNode selectQuery)
-        throws MetaDataExecutionException, InvalidParseOperationException,
-        MetaDataDocumentSizeException, MetaDataNotFoundException, BadRequestException, VitamDBException {
+        throws MetaDataExecutionException, InvalidParseOperationException, MetaDataDocumentSizeException, MetaDataNotFoundException, BadRequestException, VitamDBException {
         LOGGER.debug("SelectUnitsByQuery/ selectQuery: " + selectQuery);
         return selectMetadataObject(selectQuery, null, singletonList(BuilderToken.FILTERARGS.UNITS));
-
     }
 
     public MetadataResult selectObjectGroupsByQuery(JsonNode selectQuery)
-        throws MetaDataExecutionException, InvalidParseOperationException,
-        MetaDataDocumentSizeException, MetaDataNotFoundException, BadRequestException, VitamDBException {
+        throws MetaDataExecutionException, InvalidParseOperationException, MetaDataDocumentSizeException, MetaDataNotFoundException, BadRequestException, VitamDBException {
         LOGGER.debug("selectObjectGroupsByQuery/ selectQuery: " + selectQuery);
         return selectMetadataObject(selectQuery, null, singletonList(BuilderToken.FILTERARGS.OBJECTGROUPS));
-
     }
 
     public MetadataResult selectUnitsById(JsonNode selectQuery, String unitId)
-        throws InvalidParseOperationException, MetaDataExecutionException,
-        MetaDataDocumentSizeException, MetaDataNotFoundException, BadRequestException, VitamDBException {
+        throws InvalidParseOperationException, MetaDataExecutionException, MetaDataDocumentSizeException, MetaDataNotFoundException, BadRequestException, VitamDBException {
         LOGGER.debug("SelectUnitsById/ selectQuery: " + selectQuery);
         return selectMetadataObject(selectQuery, unitId, singletonList(BuilderToken.FILTERARGS.UNITS));
     }
 
     public MetadataResult selectObjectGroupById(JsonNode selectQuery, String objectGroupId)
-        throws InvalidParseOperationException, MetaDataDocumentSizeException, MetaDataExecutionException,
-        MetaDataNotFoundException, BadRequestException, VitamDBException {
+        throws InvalidParseOperationException, MetaDataDocumentSizeException, MetaDataExecutionException, MetaDataNotFoundException, BadRequestException, VitamDBException {
         LOGGER.debug("SelectObjectGroupById - objectGroupId : " + objectGroupId);
         LOGGER.debug("SelectObjectGroupById - selectQuery : " + selectQuery);
-        return selectMetadataObject(selectQuery, objectGroupId,
-            singletonList(BuilderToken.FILTERARGS.OBJECTGROUPS));
+        return selectMetadataObject(selectQuery, objectGroupId, singletonList(BuilderToken.FILTERARGS.OBJECTGROUPS));
     }
 
-    private MetadataResult selectMetadataObject(JsonNode selectQuery, String unitOrObjectGroupId,
-        List<BuilderToken.FILTERARGS> filters)
-        throws MetaDataExecutionException, InvalidParseOperationException,
-        MetaDataDocumentSizeException, MetaDataNotFoundException, BadRequestException, VitamDBException {
-
+    private MetadataResult selectMetadataObject(
+        JsonNode selectQuery,
+        String unitOrObjectGroupId,
+        List<BuilderToken.FILTERARGS> filters
+    )
+        throws MetaDataExecutionException, InvalidParseOperationException, MetaDataDocumentSizeException, MetaDataNotFoundException, BadRequestException, VitamDBException {
         Result<MetadataDocument<?>> result;
         ArrayNode arrayNodeResponse;
         if (selectQuery.isNull()) {
@@ -684,17 +748,17 @@ public class MetaDataImpl {
         if (filters != null && !filters.isEmpty()) {
             final RequestMultiple request = selectRequest.getRequest();
             if (request != null) {
-                final String[] hints = filters.stream()
-                    .map(BuilderToken.FILTERARGS::exactToken)
-                    .toArray(String[]::new);
+                final String[] hints = filters.stream().map(BuilderToken.FILTERARGS::exactToken).toArray(String[]::new);
                 LOGGER.debug("Adding given $hint filters: " + Arrays.toString(hints));
                 request.addHintFilter(hints);
             }
         }
 
         boolean shouldComputeUnitRule = false;
-        ObjectNode fieldsProjection =
-            (ObjectNode) selectRequest.getRequest().getProjection().get(PROJECTION.FIELDS.exactToken());
+        ObjectNode fieldsProjection = (ObjectNode) selectRequest
+            .getRequest()
+            .getProjection()
+            .get(PROJECTION.FIELDS.exactToken());
         if (fieldsProjection != null && fieldsProjection.get(GLOBAL.RULES.exactToken()) != null) {
             shouldComputeUnitRule = true;
             fieldsProjection.removeAll();
@@ -719,15 +783,14 @@ public class MetaDataImpl {
         List<FacetResult> facetResults = (result != null) ? result.getFacet() : new ArrayList<>();
         long total = (result != null) ? result.getTotal() : res.size();
         String scrollId = (result != null) ? result.getScrollId() : null;
-        DatabaseCursor hits = (scrollId != null) ? new DatabaseCursor(total, offset, limit, res.size(), scrollId)
+        DatabaseCursor hits = (scrollId != null)
+            ? new DatabaseCursor(total, offset, limit, res.size(), scrollId)
             : new DatabaseCursor(total, offset, limit, res.size());
         return new MetadataResult(queryCopy, res, facetResults, total, scrollId, hits);
     }
 
     public void updateObjectGroupId(JsonNode updateQuery, String objectId, boolean forceUpdate)
-        throws InvalidParseOperationException, MetaDataExecutionException, MetaDataNotFoundException,
-        MetadataValidationException {
-
+        throws InvalidParseOperationException, MetaDataExecutionException, MetaDataNotFoundException, MetadataValidationException {
         if (updateQuery.isNull()) {
             throw new InvalidParseOperationException(REQUEST_IS_NULL);
         }
@@ -736,9 +799,15 @@ public class MetaDataImpl {
         updateRequest.parse(updateQuery);
 
         // Execute DSL request
-        dbRequest.execUpdateRequest(updateRequest, objectId, OBJECTGROUP, this.objectGroupOntologyValidator, null,
-            this.objectGroupOntologyLoader.loadOntologies(), forceUpdate);
-
+        dbRequest.execUpdateRequest(
+            updateRequest,
+            objectId,
+            OBJECTGROUP,
+            this.objectGroupOntologyValidator,
+            null,
+            this.objectGroupOntologyLoader.loadOntologies(),
+            forceUpdate
+        );
     }
 
     public RequestResponse<UpdateUnit> updateUnits(JsonNode updateQuery, boolean forceUpdate)
@@ -749,45 +818,59 @@ public class MetaDataImpl {
         final RequestMultiple request = updateRequest.getRequest();
         unitIds = request.getRoots();
 
-        List<UpdateUnit> updatedUnits = unitIds.stream()
+        List<UpdateUnit> updatedUnits = unitIds
+            .stream()
             .map(unitId -> updateAndTransformUnit(updateRequest, unitId, forceUpdate))
             .collect(Collectors.toList());
 
-        return new RequestResponseOK<UpdateUnit>(updateQuery)
-            .addAllResults(updatedUnits)
-            .setTotal(updatedUnits.size());
+        return new RequestResponseOK<UpdateUnit>(updateQuery).addAllResults(updatedUnits).setTotal(updatedUnits.size());
     }
 
-    private UpdateUnit updateAndTransformUnit(UpdateParserMultiple updateRequest, String unitId,
-        boolean forceUpdate) {
-
+    private UpdateUnit updateAndTransformUnit(UpdateParserMultiple updateRequest, String unitId, boolean forceUpdate) {
         try {
+            UpdatedDocument updatedDocument = dbRequest.execUpdateRequest(
+                updateRequest,
+                unitId,
+                MetadataCollections.UNIT,
+                this.unitOntologyValidator,
+                this.unitValidator,
+                this.unitOntologyLoader.loadOntologies(),
+                forceUpdate
+            );
 
-            UpdatedDocument updatedDocument = dbRequest
-                .execUpdateRequest(updateRequest, unitId, MetadataCollections.UNIT, this.unitOntologyValidator,
-                    this.unitValidator, this.unitOntologyLoader.loadOntologies(), forceUpdate);
-
-            String diffs = String.join("\n", VitamDocument.getConcernedDiffLines(
-                VitamDocument.getUnifiedDiff(JsonHandler.prettyPrint(updatedDocument.getBeforeUpdate()),
-                    JsonHandler.prettyPrint(updatedDocument.getAfterUpdate()))));
+            String diffs = String.join(
+                "\n",
+                VitamDocument.getConcernedDiffLines(
+                    VitamDocument.getUnifiedDiff(
+                        JsonHandler.prettyPrint(updatedDocument.getBeforeUpdate()),
+                        JsonHandler.prettyPrint(updatedDocument.getAfterUpdate())
+                    )
+                )
+            );
 
             if (diffs.isEmpty()) {
                 if (!updatedDocument.isUpdated()) {
                     LOGGER.info(String.format("No new data updates for unit update %s.", unitId));
-                    return new UpdateUnit(unitId, StatusCode.OK, UNIT_METADATA_NO_NEW_DATA,
+                    return new UpdateUnit(
+                        unitId,
+                        StatusCode.OK,
+                        UNIT_METADATA_NO_NEW_DATA,
                         "Unit not updated.",
-                        "No diff, there are no new changes.");
-
+                        "No diff, there are no new changes."
+                    );
                 } else {
                     LOGGER.warn(String.format("UNKNOWN updates for unit update %s.", unitId));
-                    return new UpdateUnit(unitId, StatusCode.OK, UNIT_METADATA_NO_CHANGES,
+                    return new UpdateUnit(
+                        unitId,
+                        StatusCode.OK,
+                        UNIT_METADATA_NO_CHANGES,
                         "Unit updated with UNKNOWN changes.",
-                        "UNKNOWN diff, there are some changes but they cannot be trace.");
+                        "UNKNOWN diff, there are some changes but they cannot be trace."
+                    );
                 }
             }
 
             return new UpdateUnit(unitId, StatusCode.OK, UNIT_METADATA_UPDATE, "Update unit OK.", diffs);
-
         } catch (MetadataValidationException e) {
             LOGGER.error("An error occurred during unit update " + unitId, e);
             return error(unitId, KO, CHECK_UNIT_SCHEMA, e.getMessage());
@@ -800,40 +883,59 @@ public class MetaDataImpl {
         }
     }
 
-    public RequestResponse<UpdateUnit> updateUnitsRules(List<String> unitIds, RuleActions ruleActions,
-        Map<String, DurationData> bindRuleToDuration) {
-
+    public RequestResponse<UpdateUnit> updateUnitsRules(
+        List<String> unitIds,
+        RuleActions ruleActions,
+        Map<String, DurationData> bindRuleToDuration
+    ) {
         List<OntologyModel> ontologies = this.unitOntologyLoader.loadOntologies();
 
-        List<UpdateUnit> unitRules = unitIds.stream()
+        List<UpdateUnit> unitRules = unitIds
+            .stream()
             .map(unitId -> updateAndTransformUnitRules(unitId, ruleActions, bindRuleToDuration, ontologies))
             .collect(Collectors.toList());
 
-        return new RequestResponseOK<UpdateUnit>()
-            .addAllResults(unitRules)
-            .setTotal(unitRules.size());
+        return new RequestResponseOK<UpdateUnit>().addAllResults(unitRules).setTotal(unitRules.size());
     }
 
-    private UpdateUnit updateAndTransformUnitRules(String unitId, RuleActions ruleActions,
-        Map<String, DurationData> bindRuleToDuration, List<OntologyModel> ontologies) {
+    private UpdateUnit updateAndTransformUnitRules(
+        String unitId,
+        RuleActions ruleActions,
+        Map<String, DurationData> bindRuleToDuration,
+        List<OntologyModel> ontologies
+    ) {
         try {
-            UpdatedDocument updatedDocument =
-                dbRequest.execRuleRequest(unitId, ruleActions, bindRuleToDuration, this.unitOntologyValidator,
-                    unitValidator, ontologies);
+            UpdatedDocument updatedDocument = dbRequest.execRuleRequest(
+                unitId,
+                ruleActions,
+                bindRuleToDuration,
+                this.unitOntologyValidator,
+                unitValidator,
+                ontologies
+            );
 
-            String diffs = String.join("\n", VitamDocument.getConcernedDiffLines(
-                VitamDocument.getUnifiedDiff(JsonHandler.prettyPrint(updatedDocument.getBeforeUpdate()),
-                    JsonHandler.prettyPrint(updatedDocument.getAfterUpdate()))));
+            String diffs = String.join(
+                "\n",
+                VitamDocument.getConcernedDiffLines(
+                    VitamDocument.getUnifiedDiff(
+                        JsonHandler.prettyPrint(updatedDocument.getBeforeUpdate()),
+                        JsonHandler.prettyPrint(updatedDocument.getAfterUpdate())
+                    )
+                )
+            );
 
             if (diffs.isEmpty()) {
                 LOGGER.warn(String.format("UNKNOWN updates for unit update %s.", unitId));
-                return new UpdateUnit(unitId, StatusCode.OK, UNIT_METADATA_NO_CHANGES,
+                return new UpdateUnit(
+                    unitId,
+                    StatusCode.OK,
+                    UNIT_METADATA_NO_CHANGES,
                     "Unit updated with UNKNOWN changes.",
-                    "UNKNOWN diff, there are some changes but they cannot be trace.");
+                    "UNKNOWN diff, there are some changes but they cannot be trace."
+                );
             }
 
             return new UpdateUnit(unitId, StatusCode.OK, UNIT_METADATA_UPDATE, "Update unit rules OK.", diffs);
-
         } catch (MetadataValidationException e) {
             LOGGER.error("An error occurred during unit update " + unitId, e);
             return error(unitId, KO, CHECK_UNIT_SCHEMA, e.getMessage());
@@ -847,25 +949,34 @@ public class MetaDataImpl {
     }
 
     private UpdateUnit error(String unitId, StatusCode status, UpdateUnitKey key, String message) {
-        return new UpdateUnit(unitId, status, key,
-            StringUtils.defaultIfBlank(message, "Unknown error"), "no diff");
+        return new UpdateUnit(unitId, status, key, StringUtils.defaultIfBlank(message, "Unknown error"), "no diff");
     }
 
     public UpdateUnit updateUnitById(JsonNode updateQuery, String unitId, boolean forceUpdate)
-        throws MetaDataNotFoundException, InvalidParseOperationException, MetaDataExecutionException,
-        MetadataValidationException {
-
+        throws MetaDataNotFoundException, InvalidParseOperationException, MetaDataExecutionException, MetadataValidationException {
         // parse Update request
         final RequestParserMultiple updateRequest = new UpdateParserMultiple(DEFAULT_VARNAME_ADAPTER);
         updateRequest.parse(updateQuery);
 
-        UpdatedDocument updatedDocument = dbRequest
-            .execUpdateRequest(updateRequest, unitId, MetadataCollections.UNIT, this.unitOntologyValidator,
-                this.unitValidator, this.unitOntologyLoader.loadOntologies(), forceUpdate);
+        UpdatedDocument updatedDocument = dbRequest.execUpdateRequest(
+            updateRequest,
+            unitId,
+            MetadataCollections.UNIT,
+            this.unitOntologyValidator,
+            this.unitValidator,
+            this.unitOntologyLoader.loadOntologies(),
+            forceUpdate
+        );
 
-        String diffs = String.join("\n", VitamDocument.getConcernedDiffLines(
-            VitamDocument.getUnifiedDiff(JsonHandler.prettyPrint(updatedDocument.getBeforeUpdate()),
-                JsonHandler.prettyPrint(updatedDocument.getAfterUpdate()))));
+        String diffs = String.join(
+            "\n",
+            VitamDocument.getConcernedDiffLines(
+                VitamDocument.getUnifiedDiff(
+                    JsonHandler.prettyPrint(updatedDocument.getBeforeUpdate()),
+                    JsonHandler.prettyPrint(updatedDocument.getAfterUpdate())
+                )
+            )
+        );
 
         return new UpdateUnit(unitId, StatusCode.OK, UNIT_METADATA_UPDATE, "Update unit OK.", diffs);
     }
@@ -876,11 +987,15 @@ public class MetaDataImpl {
         rootList = unitList.toArray(rootList);
         newSelectQuery.addRoots(rootList);
         newSelectQuery.addProjection(
-            JsonHandler.createObjectNode().set(PROJECTION.FIELDS.exactToken(),
-                JsonHandler.createObjectNode()
-                    .put(PROJECTIONARGS.ID.exactToken(), 1)
-                    .put(PROJECTIONARGS.UNITUPS.exactToken(), 1)
-                    .put(PROJECTIONARGS.MANAGEMENT.exactToken(), 1)));
+            JsonHandler.createObjectNode()
+                .set(
+                    PROJECTION.FIELDS.exactToken(),
+                    JsonHandler.createObjectNode()
+                        .put(PROJECTIONARGS.ID.exactToken(), 1)
+                        .put(PROJECTIONARGS.UNITUPS.exactToken(), 1)
+                        .put(PROJECTIONARGS.MANAGEMENT.exactToken(), 1)
+                )
+        );
         return newSelectQuery;
     }
 
@@ -888,8 +1003,7 @@ public class MetaDataImpl {
      * @deprecated : Use the new api /unitsWithInheritedRules instead. To be removed in future releases.
      */
     private void computeRuleForUnit(ArrayNode arrayNodeResponse)
-        throws InvalidParseOperationException, MetaDataExecutionException, MetaDataDocumentSizeException,
-        MetaDataNotFoundException, BadRequestException, VitamDBException {
+        throws InvalidParseOperationException, MetaDataExecutionException, MetaDataDocumentSizeException, MetaDataNotFoundException, BadRequestException, VitamDBException {
         Map<String, UnitNode> allUnitNode = new HashMap<>();
         Set<String> rootList = new HashSet<>();
         List<String> unitParentIdList = new ArrayList<>();
@@ -906,8 +1020,11 @@ public class MetaDataImpl {
             unitParentIdList.add(currentUnitId);
         }
         SelectMultiQuery newSelectQuery = createSearchParentSelect(unitParentIdList);
-        final MetadataResult metadataResult = selectMetadataObject(newSelectQuery.getFinalSelect(), null,
-            singletonList(BuilderToken.FILTERARGS.UNITS));
+        final MetadataResult metadataResult = selectMetadataObject(
+            newSelectQuery.getFinalSelect(),
+            null,
+            singletonList(BuilderToken.FILTERARGS.UNITS)
+        );
 
         Map<String, UnitSimplified> unitMap = UnitSimplified.getUnitIdMap(metadataResult.getResults());
         UnitRuleCompute unitNode = new UnitRuleCompute(unitMap.get(unitId));
@@ -917,8 +1034,7 @@ public class MetaDataImpl {
         ((ObjectNode) arrayNodeResponse.get(0)).set(UnitInheritedRule.INHERITED_RULE, rule);
     }
 
-    public void refreshUnit()
-        throws IllegalArgumentException, VitamThreadAccessException, MetaDataExecutionException {
+    public void refreshUnit() throws IllegalArgumentException, VitamThreadAccessException, MetaDataExecutionException {
         final Integer tenantId = ParameterHelper.getTenantParameter();
         mongoDbAccess.getEsClient().refreshIndex(MetadataCollections.UNIT, tenantId);
     }
@@ -949,8 +1065,10 @@ public class MetaDataImpl {
         }
 
         if (CollectionUtils.isEmpty(indexParameters.getTenants())) {
-            String message = String.format("Missing tenants for %s collection reindexation",
-                indexParameters.getCollectionName());
+            String message = String.format(
+                "Missing tenants for %s collection reindexation",
+                indexParameters.getCollectionName()
+            );
             LOGGER.error(message);
             return indexationHelper.getFullKOResult(indexParameters, message);
         }
@@ -964,22 +1082,33 @@ public class MetaDataImpl {
         return indexationResult;
     }
 
-    private void processDedicatedTenants(IndexParameters indexParameters, MetadataCollections collection,
-        ReindexationResult indexationResult) {
+    private void processDedicatedTenants(
+        IndexParameters indexParameters,
+        MetadataCollections collection,
+        ReindexationResult indexationResult
+    ) {
+        ElasticsearchIndexAliasResolver indexAliasResolver = indexManager.getElasticsearchIndexAliasResolver(
+            collection
+        );
 
-        ElasticsearchIndexAliasResolver indexAliasResolver =
-            indexManager.getElasticsearchIndexAliasResolver(collection);
-
-        List<Integer> dedicatedTenantToProcess = indexParameters.getTenants().stream()
+        List<Integer> dedicatedTenantToProcess = indexParameters
+            .getTenants()
+            .stream()
             .filter(not(this.indexManager::isGroupedTenant))
             .collect(Collectors.toList());
 
         for (Integer tenantId : dedicatedTenantToProcess) {
             try {
-                ReindexationOK reindexResult = this.indexationHelper.reindex(collection.getCollection(),
-                    collection.getEsClient(), indexAliasResolver.resolveIndexName(tenantId),
-                    this.indexManager.getElasticsearchIndexSettings(collection, tenantId),
-                    collection.getElasticsearchCollection(), Collections.singletonList(tenantId), null);
+                ReindexationOK reindexResult =
+                    this.indexationHelper.reindex(
+                            collection.getCollection(),
+                            collection.getEsClient(),
+                            indexAliasResolver.resolveIndexName(tenantId),
+                            this.indexManager.getElasticsearchIndexSettings(collection, tenantId),
+                            collection.getElasticsearchCollection(),
+                            Collections.singletonList(tenantId),
+                            null
+                        );
                 indexationResult.addIndexOK(reindexResult);
             } catch (Exception exc) {
                 String message =
@@ -990,13 +1119,19 @@ public class MetaDataImpl {
         }
     }
 
-    private void processGroupedTenants(IndexParameters indexParameters, MetadataCollections collection,
-        ReindexationResult indexationResult) {
-        ElasticsearchIndexAliasResolver indexAliasResolver =
-            indexManager.getElasticsearchIndexAliasResolver(collection);
+    private void processGroupedTenants(
+        IndexParameters indexParameters,
+        MetadataCollections collection,
+        ReindexationResult indexationResult
+    ) {
+        ElasticsearchIndexAliasResolver indexAliasResolver = indexManager.getElasticsearchIndexAliasResolver(
+            collection
+        );
 
         SetValuedMap<String, Integer> tenantGroupTenantsMap = new HashSetValuedHashMap<>();
-        indexParameters.getTenants().stream()
+        indexParameters
+            .getTenants()
+            .stream()
             .filter(this.indexManager::isGroupedTenant)
             .forEach(tenantId -> tenantGroupTenantsMap.put(this.indexManager.getTenantGroup(tenantId), tenantId));
 
@@ -1004,9 +1139,17 @@ public class MetaDataImpl {
             Collection<Integer> allTenantGroupTenants = this.indexManager.getTenantGroupTenants(tenantGroupName);
             if (allTenantGroupTenants.size() != tenantGroupTenantsMap.get(tenantGroupName).size()) {
                 SetUtils.SetView<Integer> missingTenants = SetUtils.difference(
-                    new HashSet<>(allTenantGroupTenants), tenantGroupTenantsMap.get(tenantGroupName));
-                LOGGER.warn("Missing tenants " + missingTenants + " of tenant group " + tenantGroupName +
-                    " will also be reindexed for collection " + collection);
+                    new HashSet<>(allTenantGroupTenants),
+                    tenantGroupTenantsMap.get(tenantGroupName)
+                );
+                LOGGER.warn(
+                    "Missing tenants " +
+                    missingTenants +
+                    " of tenant group " +
+                    tenantGroupName +
+                    " will also be reindexed for collection " +
+                    collection
+                );
             }
         }
 
@@ -1014,14 +1157,24 @@ public class MetaDataImpl {
         for (String tenantGroupName : tenantGroupNamesToProcess) {
             List<Integer> tenantIds = this.indexManager.getTenantGroupTenants(tenantGroupName);
             try {
-                ReindexationOK reindexResult = this.indexationHelper.reindex(collection.getCollection(),
-                    collection.getEsClient(), indexAliasResolver.resolveIndexName(tenantIds.get(0)),
-                    this.indexManager.getElasticsearchIndexSettings(collection, tenantIds.get(0)),
-                    collection.getElasticsearchCollection(), tenantIds, tenantGroupName);
+                ReindexationOK reindexResult =
+                    this.indexationHelper.reindex(
+                            collection.getCollection(),
+                            collection.getEsClient(),
+                            indexAliasResolver.resolveIndexName(tenantIds.get(0)),
+                            this.indexManager.getElasticsearchIndexSettings(collection, tenantIds.get(0)),
+                            collection.getElasticsearchCollection(),
+                            tenantIds,
+                            tenantGroupName
+                        );
                 indexationResult.addIndexOK(reindexResult);
             } catch (Exception exc) {
-                String message = "Cannot reindex collection " + collection.name()
-                    + " for tenant group " + tenantGroupName + ". Unexpected error";
+                String message =
+                    "Cannot reindex collection " +
+                    collection.name() +
+                    " for tenant group " +
+                    tenantGroupName +
+                    ". Unexpected error";
                 LOGGER.error(message, exc);
                 indexationResult.addIndexKO(new ReindexationKO(tenantIds, tenantGroupName, message));
             }
@@ -1033,7 +1186,8 @@ public class MetaDataImpl {
             return indexationHelper.switchIndex(
                 ElasticsearchIndexAlias.ofFullIndexName(alias),
                 ElasticsearchIndexAlias.ofFullIndexName(newIndexName),
-                mongoDbAccess.getEsClient());
+                mongoDbAccess.getEsClient()
+            );
         } catch (DatabaseException exc) {
             LOGGER.error("Cannot switch alias {} to index {}", alias, newIndexName);
             throw exc;
@@ -1044,8 +1198,9 @@ public class MetaDataImpl {
      * this is an evolution requested by the client
      */
     public void checkStreamUnits(int tenantId, short streamExecutionLimit) throws MetaDataException {
-        final MongoCollection<MetadataSnapshot> snapshotCollection =
-            mongoDbAccess.getMongoDatabase().getCollection(SNAPSHOT_COLLECTION, MetadataSnapshot.class);
+        final MongoCollection<MetadataSnapshot> snapshotCollection = mongoDbAccess
+            .getMongoDatabase()
+            .getCollection(SNAPSHOT_COLLECTION, MetadataSnapshot.class);
 
         final Bson scrollRequestDateFilter = Filters.and(
             Filters.eq(MetadataSnapshot.TENANT_ID, tenantId),
@@ -1059,14 +1214,14 @@ public class MetaDataImpl {
 
         final MetadataSnapshot lastScrollRequestDate = snapshotCollection.find(scrollRequestDateFilter).first();
         if (lastScrollRequestDate != null) {
-            final LocalDate value =
-                LocalDateUtil.parseMongoFormattedDate(lastScrollRequestDate.getValue(String.class)).toLocalDate();
+            final LocalDate value = LocalDateUtil.parseMongoFormattedDate(
+                lastScrollRequestDate.getValue(String.class)
+            ).toLocalDate();
             if (value.isBefore(LocalDate.now())) {
                 snapshotCollection.updateOne(scrollFilter, set(MetadataSnapshot.VALUE, 0));
                 return;
             }
         }
-
 
         final MetadataSnapshot scroll = snapshotCollection.find(scrollFilter).first();
         if (streamExecutionLimit != 0 && scroll != null) {
@@ -1074,15 +1229,15 @@ public class MetaDataImpl {
                 throw new MetaDataException("Scroll execution limit reached, please re-try next day");
             }
         }
-
     }
 
     /*
      * this is an evolution requested by the client
      */
     public void updateParameterStreamUnits(int tenantId) {
-        final MongoCollection<MetadataSnapshot> snapshotCollection =
-            mongoDbAccess.getMongoDatabase().getCollection(SNAPSHOT_COLLECTION, MetadataSnapshot.class);
+        final MongoCollection<MetadataSnapshot> snapshotCollection = mongoDbAccess
+            .getMongoDatabase()
+            .getCollection(SNAPSHOT_COLLECTION, MetadataSnapshot.class);
         final Bson scrollRequestDateFilter = Filters.and(
             Filters.eq(MetadataSnapshot.TENANT_ID, tenantId),
             Filters.eq(MetadataSnapshot.NAME, MetadataSnapshot.PARAMETERS.LastScrollRequestDate.name())
@@ -1093,13 +1248,22 @@ public class MetaDataImpl {
             Filters.eq(MetadataSnapshot.NAME, MetadataSnapshot.PARAMETERS.Scroll.name())
         );
 
-        snapshotCollection.updateOne(scrollFilter, Updates
-            .combine(Updates.setOnInsert(VitamDocument.ID, GUIDFactory.newGUID().getId()),
-                inc(MetadataSnapshot.VALUE, 1)), new UpdateOptions().upsert(true));
+        snapshotCollection.updateOne(
+            scrollFilter,
+            Updates.combine(
+                Updates.setOnInsert(VitamDocument.ID, GUIDFactory.newGUID().getId()),
+                inc(MetadataSnapshot.VALUE, 1)
+            ),
+            new UpdateOptions().upsert(true)
+        );
 
-        snapshotCollection.updateOne(scrollRequestDateFilter, Updates
-                .combine(Updates.setOnInsert(VitamDocument.ID, GUIDFactory.newGUID().getId()),
-                    set(MetadataSnapshot.VALUE, LocalDateUtil.getFormattedDateForMongo(LocalDateUtil.now()))),
-            new UpdateOptions().upsert(true));
+        snapshotCollection.updateOne(
+            scrollRequestDateFilter,
+            Updates.combine(
+                Updates.setOnInsert(VitamDocument.ID, GUIDFactory.newGUID().getId()),
+                set(MetadataSnapshot.VALUE, LocalDateUtil.getFormattedDateForMongo(LocalDateUtil.now()))
+            ),
+            new UpdateOptions().upsert(true)
+        );
     }
 }

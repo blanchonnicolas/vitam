@@ -26,7 +26,6 @@
  */
 package fr.gouv.vitam.collect.external.external.rest;
 
-
 import fr.gouv.vitam.common.security.rest.EndpointInfo;
 import fr.gouv.vitam.common.security.rest.SecureEndpointRegistry;
 import fr.gouv.vitam.common.security.rest.Unsecured;
@@ -53,7 +52,6 @@ public class CollectExternalResource extends ApplicationStatusResource {
         this.secureEndpointRegistry = secureEndpointRegistry;
     }
 
-
     /**
      * Get all Endpoints
      *
@@ -62,19 +60,21 @@ public class CollectExternalResource extends ApplicationStatusResource {
     @Path("/")
     @OPTIONS
     @Produces(MediaType.APPLICATION_JSON)
-    @Unsecured()
+    @Unsecured
     public Response listResourceEndpoints() {
-        final List<EndpointInfo> allCollectSecuredEndpoints =
-            Stream.of(
-                    this.secureEndpointRegistry.getEndPointsByResourcePath(
-                        ProjectExternalResource.class.getAnnotation(Path.class).value()),
-                    this.secureEndpointRegistry.getEndPointsByResourcePath(
-                        TransactionExternalResource.class.getAnnotation(Path.class).value()),
-                    this.secureEndpointRegistry.getEndPointsByResourcePath(
-                        CollectMetadataExternalResource.class.getAnnotation(Path.class).value())
+        final List<EndpointInfo> allCollectSecuredEndpoints = Stream.of(
+            this.secureEndpointRegistry.getEndPointsByResourcePath(
+                    ProjectExternalResource.class.getAnnotation(Path.class).value()
+                ),
+            this.secureEndpointRegistry.getEndPointsByResourcePath(
+                    TransactionExternalResource.class.getAnnotation(Path.class).value()
+                ),
+            this.secureEndpointRegistry.getEndPointsByResourcePath(
+                    CollectMetadataExternalResource.class.getAnnotation(Path.class).value()
                 )
-                .flatMap(Collection::stream)
-                .collect(Collectors.toList());
+        )
+            .flatMap(Collection::stream)
+            .collect(Collectors.toList());
         return Response.status(Response.Status.OK).entity(allCollectSecuredEndpoints).build();
     }
 }

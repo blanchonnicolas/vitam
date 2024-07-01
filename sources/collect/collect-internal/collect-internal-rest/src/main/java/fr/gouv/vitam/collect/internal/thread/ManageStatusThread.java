@@ -45,7 +45,6 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
-
 public class ManageStatusThread implements Runnable {
 
     private static final VitamLogger LOGGER = VitamLoggerFactory.getInstance(ManageStatusThread.class);
@@ -53,15 +52,19 @@ public class ManageStatusThread implements Runnable {
     private final CollectInternalConfiguration collectInternalConfiguration;
     private static final String ERROR_THREAD_EXECUTING = "Error when executing threads:";
 
-
-    public ManageStatusThread(CollectInternalConfiguration collectInternalConfiguration,
-        TransactionService transactionService) {
+    public ManageStatusThread(
+        CollectInternalConfiguration collectInternalConfiguration,
+        TransactionService transactionService
+    ) {
         this.transactionService = transactionService;
         this.collectInternalConfiguration = collectInternalConfiguration;
 
-        Executors.newScheduledThreadPool(1, VitamThreadFactory.getInstance())
-            .scheduleAtFixedRate(this, Math.min(5, collectInternalConfiguration.getStatusTransactionThreadFrequency()),
-                collectInternalConfiguration.getStatusTransactionThreadFrequency(), TimeUnit.MINUTES);
+        Executors.newScheduledThreadPool(1, VitamThreadFactory.getInstance()).scheduleAtFixedRate(
+            this,
+            Math.min(5, collectInternalConfiguration.getStatusTransactionThreadFrequency()),
+            collectInternalConfiguration.getStatusTransactionThreadFrequency(),
+            TimeUnit.MINUTES
+        );
     }
 
     @Override
@@ -78,14 +81,16 @@ public class ManageStatusThread implements Runnable {
         VitamThreadUtils.getVitamSession()
             .setRequestId(GUIDFactory.newRequestIdGUID(VitamConfiguration.getAdminTenant()));
         List<Integer> tenants = VitamConfiguration.getTenants();
-        int threadPoolSize = Math.min(this.collectInternalConfiguration.getTransactionStatusThreadPoolSize(),
-            tenants.size());
+        int threadPoolSize = Math.min(
+            this.collectInternalConfiguration.getTransactionStatusThreadPoolSize(),
+            tenants.size()
+        );
         ExecutorService executorService = ExecutorUtils.createScalableBatchExecutorService(threadPoolSize);
         try {
             List<CompletableFuture<Void>> completableFuturesList = new ArrayList<>();
             for (var tenant : tenants) {
-                CompletableFuture<Void> traceabilityCompletableFuture =
-                    CompletableFuture.runAsync(() -> {
+                CompletableFuture<Void> traceabilityCompletableFuture = CompletableFuture.runAsync(
+                    () -> {
                         Thread.currentThread().setName(ManageStatusThread.class.getName() + "-" + tenant);
                         VitamThreadUtils.getVitamSession().setTenantId(tenant);
                         try {
@@ -93,12 +98,15 @@ public class ManageStatusThread implements Runnable {
                         } catch (CollectInternalException e) {
                             LOGGER.error("Error when managing status transaction: {}", e);
                         }
-                    }, executorService);
+                    },
+                    executorService
+                );
 
                 completableFuturesList.add(traceabilityCompletableFuture);
             }
-            CompletableFuture<Void> combinedFuture =
-                CompletableFuture.allOf(completableFuturesList.toArray(new CompletableFuture[0]));
+            CompletableFuture<Void> combinedFuture = CompletableFuture.allOf(
+                completableFuturesList.toArray(new CompletableFuture[0])
+            );
             combinedFuture.get();
         } catch (InterruptedException e) {
             LOGGER.error(ERROR_THREAD_EXECUTING + " {}", e);
@@ -111,6 +119,4 @@ public class ManageStatusThread implements Runnable {
             executorService.shutdown();
         }
     }
-
-
 }

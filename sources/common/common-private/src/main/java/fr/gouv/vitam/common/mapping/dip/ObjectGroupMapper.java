@@ -78,7 +78,6 @@ public class ObjectGroupMapper {
             dataObjectGroup.setId(objectGroupId);
 
             for (QualifiersModel qualifiersModel : objectGroupResponse.getQualifiers()) {
-
                 final int lastIndexVersion = qualifiersModel.getVersions().size() - 1;
                 final VersionsModel version = qualifiersModel.getVersions().get(lastIndexVersion);
                 MinimalDataObjectType minimalDataObjectType;
@@ -89,20 +88,16 @@ public class ObjectGroupMapper {
                     minimalDataObjectType = mapBinaryDataObject(version);
                 }
 
-                dataObjectGroup.getBinaryDataObjectOrPhysicalDataObject()
-                    .add(minimalDataObjectType);
-
+                dataObjectGroup.getBinaryDataObjectOrPhysicalDataObject().add(minimalDataObjectType);
             }
 
-            dataObjectPackageType.getDataObjectGroupOrBinaryDataObjectOrPhysicalDataObject()
-                .add(dataObjectGroup);
+            dataObjectPackageType.getDataObjectGroupOrBinaryDataObjectOrPhysicalDataObject().add(dataObjectGroup);
         }
 
         return dataObjectPackageType;
     }
 
-    private BinaryDataObjectType mapBinaryDataObject(VersionsModel version)
-        throws InternalServerException {
+    private BinaryDataObjectType mapBinaryDataObject(VersionsModel version) throws InternalServerException {
         final BinaryDataObjectType binaryDataObjectType = new BinaryDataObjectType();
         // FIXME : BinaryDataObjectType.Compressed not supported yet in SIP ingest
         // final BinaryDataObjectType.Compressed compressed = new BinaryDataObjectType.Compressed();
@@ -123,37 +118,35 @@ public class ObjectGroupMapper {
         final FileInfoModel fileInfoModel = version != null ? version.getFileInfoModel() : null;
         if (fileInfoModel != null) {
             fileInfoType.setFilename(fileInfoModel.getFilename());
-            fileInfoType
-                .setCreatingApplicationName(fileInfoModel.getCreatingApplicationName());
-            fileInfoType
-                .setCreatingApplicationVersion(fileInfoModel.getCreatingApplicationVersion());
+            fileInfoType.setCreatingApplicationName(fileInfoModel.getCreatingApplicationName());
+            fileInfoType.setCreatingApplicationVersion(fileInfoModel.getCreatingApplicationVersion());
             fileInfoType.setCreatingOs(fileInfoModel.getCreatingOs());
             fileInfoType.setCreatingOsVersion(fileInfoModel.getCreatingOsVersion());
-            final String dateCreatedByApplication =
-                fileInfoModel.getDateCreatedByApplication();
+            final String dateCreatedByApplication = fileInfoModel.getDateCreatedByApplication();
             final String lastModified = fileInfoModel.getLastModified();
             try {
                 if (dateCreatedByApplication != null && !dateCreatedByApplication.isEmpty()) {
-                    fileInfoType.setDateCreatedByApplication(DatatypeFactory.newInstance()
-                        .newXMLGregorianCalendar(dateCreatedByApplication));
+                    fileInfoType.setDateCreatedByApplication(
+                        DatatypeFactory.newInstance().newXMLGregorianCalendar(dateCreatedByApplication)
+                    );
                 }
                 if (lastModified != null && !lastModified.isEmpty()) {
-                    fileInfoType.setLastModified(DatatypeFactory.newInstance()
-                        .newXMLGregorianCalendar(lastModified));
+                    fileInfoType.setLastModified(DatatypeFactory.newInstance().newXMLGregorianCalendar(lastModified));
                 }
             } catch (DatatypeConfigurationException e) {
-                throw new InternalServerException(String
-                    .format(
+                throw new InternalServerException(
+                    String.format(
                         "Exception occurred During parsing of field DateCreatedByApplication or lastModified: %s",
-                        dateCreatedByApplication));
+                        dateCreatedByApplication
+                    )
+                );
             }
         }
         binaryDataObjectType.setFileInfo(fileInfoType);
         if (version != null) {
             binaryDataObjectType.setUri(version.getUri());
             binaryDataObjectType.setSize(BigInteger.valueOf(version.getSize()));
-            final MessageDigestBinaryObjectType messageDigestBinaryObjectType =
-                new MessageDigestBinaryObjectType();
+            final MessageDigestBinaryObjectType messageDigestBinaryObjectType = new MessageDigestBinaryObjectType();
             messageDigestBinaryObjectType.setAlgorithm(StringUtils.trimToEmpty(version.getAlgorithm()));
             messageDigestBinaryObjectType.setValue(StringUtils.trimToEmpty(version.getMessageDigest()));
             binaryDataObjectType.setMessageDigest(messageDigestBinaryObjectType);
@@ -164,8 +157,7 @@ public class ObjectGroupMapper {
             final DescriptiveTechnicalMetadataType otherMetadata = new DescriptiveTechnicalMetadataType();
             Map<String, Object> otherMetadataMap = version.getOtherMetadata();
             if (otherMetadataMap != null && !otherMetadataMap.isEmpty()) {
-                otherMetadata.getAny()
-                    .addAll(TransformJsonTreeToListOfXmlElement.mapJsonToElement(otherMetadataMap));
+                otherMetadata.getAny().addAll(TransformJsonTreeToListOfXmlElement.mapJsonToElement(otherMetadataMap));
                 binaryDataObjectType.setOtherMetadata(otherMetadata);
             }
         }
@@ -174,14 +166,14 @@ public class ObjectGroupMapper {
 
     private PhysicalDataObjectType mapPhysicalDataObject(VersionsModel version) {
         final PhysicalDataObjectType physicalDataObjectType = new PhysicalDataObjectType();
-        physicalDataObjectType
-            .setPhysicalDimensions(physicalDimensionsMapper.map(version.getPhysicalDimensionsModel()));
+        physicalDataObjectType.setPhysicalDimensions(
+            physicalDimensionsMapper.map(version.getPhysicalDimensionsModel())
+        );
         mapCommonInformations(version, physicalDataObjectType);
         final IdentifierType identifierType = new IdentifierType();
         identifierType.setValue(version.getPhysicalId());
         physicalDataObjectType.setPhysicalId(identifierType);
-        physicalDataObjectType.getAny()
-            .addAll(TransformJsonTreeToListOfXmlElement.mapJsonToElement(version.getAny()));
+        physicalDataObjectType.getAny().addAll(TransformJsonTreeToListOfXmlElement.mapJsonToElement(version.getAny()));
 
         return physicalDataObjectType;
     }
@@ -194,8 +186,10 @@ public class ObjectGroupMapper {
      * binaryDataObjectType
      * @param <T> object that extend MinimalDataObjectType
      */
-    private <T extends MinimalDataObjectType> void mapCommonInformations(final VersionsModel version,
-        T minimalDataObjectType) {
+    private <T extends MinimalDataObjectType> void mapCommonInformations(
+        final VersionsModel version,
+        T minimalDataObjectType
+    ) {
         // TODO : Not done yet we need informations about field List<RelationshipType> and dataObjectGroupReferenceId
         // from the SEDA 2.0 .xsd,it's is not map for the moment because don't know
         // where the fields is mapped in mongo

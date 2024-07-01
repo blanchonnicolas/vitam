@@ -52,7 +52,6 @@ public class ArchiveUnitMapper {
     }
 
     public ArchiveUnitType map(ArchiveUnitModel model) throws DatatypeConfigurationException {
-
         ArchiveUnitType archiveUnitType = new ArchiveUnitType();
         archiveUnitType.setId(model.getId());
 
@@ -63,7 +62,8 @@ public class ArchiveUnitMapper {
         }
 
         archiveUnitType.setContent(
-            descriptiveMetadataMapper.map(model.getDescriptiveMetadataModel(), model.getHistory()));
+            descriptiveMetadataMapper.map(model.getDescriptiveMetadataModel(), model.getHistory())
+        );
 
         if (!model.getManagement().isEmpty()) {
             archiveUnitType.setManagement(managementMapper.map(model.getManagement()));

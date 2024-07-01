@@ -109,30 +109,35 @@ public class UnitInheritedRule {
      * @param parentRule of type UnitInheritedRule
      */
     public void concatRule(UnitInheritedRule parentRule) {
-        for (Entry<String, Map<String, Map<String, InheritedRuleModel>>> paroleCategoryEntry : parentRule.inheritedRule
-            .entrySet()) {
+        for (Entry<
+            String,
+            Map<String, Map<String, InheritedRuleModel>>
+        > paroleCategoryEntry : parentRule.inheritedRule.entrySet()) {
             String parentCategoryName = paroleCategoryEntry.getKey();
             Map<String, Map<String, InheritedRuleModel>> parentCategoryNode = paroleCategoryEntry.getValue();
             if (inheritedRule.containsKey(parentCategoryName)) {
-
                 for (Entry<String, Map<String, InheritedRuleModel>> parentRuleEntry : parentCategoryNode.entrySet()) {
                     String parentRuleId = parentRuleEntry.getKey();
-                    Map<String, Map<String, InheritedRuleModel>> selfCategoryNode =
-                        inheritedRule.get(parentCategoryName);
+                    Map<String, Map<String, InheritedRuleModel>> selfCategoryNode = inheritedRule.get(
+                        parentCategoryName
+                    );
                     // rule name
                     Map<String, InheritedRuleModel> selfRuleNode = selfCategoryNode.get(parentRuleId);
                     if (selfRuleNode != null) {
-                        for (Entry<String, InheritedRuleModel> parentOriginEntry : parentCategoryNode.get(parentRuleId)
+                        for (Entry<String, InheritedRuleModel> parentOriginEntry : parentCategoryNode
+                            .get(parentRuleId)
                             .entrySet()) {
                             String parentOriginId = parentOriginEntry.getKey();
                             InheritedRuleModel selfOriginDetailNode = selfRuleNode.get(parentOriginId);
-                            InheritedRuleModel parentOriginDetailNode =
-                                parentCategoryNode.get(parentRuleId).get(parentOriginId);
+                            InheritedRuleModel parentOriginDetailNode = parentCategoryNode
+                                .get(parentRuleId)
+                                .get(parentOriginId);
 
                             if (selfOriginDetailNode != null) {
                                 if (!selfOriginDetailNode.getPath().equals(parentOriginDetailNode.getPath())) {
-                                    ((ArrayNode) selfOriginDetailNode.getPath())
-                                        .addAll((ArrayNode) parentOriginDetailNode.getPath());
+                                    ((ArrayNode) selfOriginDetailNode.getPath()).addAll(
+                                            (ArrayNode) parentOriginDetailNode.getPath()
+                                        );
                                 }
                             } else {
                                 // Do not take parent if the rule is defined in the child: Override it)
@@ -140,14 +145,19 @@ public class UnitInheritedRule {
                                     selfRuleNode.put(parentOriginId, parentOriginDetailNode);
                                 }
                             }
-                            if (parentOriginDetailNode.getOverrideBy() != null &&
-                                !parentOriginDetailNode.getOverrideBy().isEmpty()) {
+                            if (
+                                parentOriginDetailNode.getOverrideBy() != null &&
+                                !parentOriginDetailNode.getOverrideBy().isEmpty()
+                            ) {
                                 for (String reference : parentOriginDetailNode.getOverrideBy()) {
                                     selfRuleNode.remove(reference);
                                 }
                             }
-                            if (selfOriginDetailNode != null && selfOriginDetailNode.getOverrideBy() != null &&
-                                !parentOriginDetailNode.getOverrideBy().isEmpty()) {
+                            if (
+                                selfOriginDetailNode != null &&
+                                selfOriginDetailNode.getOverrideBy() != null &&
+                                !parentOriginDetailNode.getOverrideBy().isEmpty()
+                            ) {
                                 for (String reference : selfOriginDetailNode.getOverrideBy()) {
                                     selfRuleNode.remove(reference);
                                 }
@@ -182,15 +192,19 @@ public class UnitInheritedRule {
         List<String> parentCategoryList = new ArrayList<>();
 
         // By Category
-        for (Entry<String, Map<String, Map<String, InheritedRuleModel>>> categoryEntry : newRule.inheritedRule
-            .entrySet()) {
+        for (Entry<
+            String,
+            Map<String, Map<String, InheritedRuleModel>>
+        > categoryEntry : newRule.inheritedRule.entrySet()) {
             String categoryName = categoryEntry.getKey();
             parentCategoryList.add(categoryName);
             Map<String, Map<String, InheritedRuleModel>> categoryValue = categoryEntry.getValue();
             ruleCategoryFromUnit.remove(categoryName);
-            if (unitManagement.get(categoryName) == null ||
+            if (
+                unitManagement.get(categoryName) == null ||
                 unitManagement.get(categoryName).get(RULES) == null ||
-                unitManagement.get(categoryName).get(RULES).size() == 0) {
+                unitManagement.get(categoryName).get(RULES).size() == 0
+            ) {
                 // Unit management does not contain category rule
                 // By rule
                 for (Entry<String, Map<String, InheritedRuleModel>> ruleEntry : categoryValue.entrySet()) {
@@ -208,8 +222,13 @@ public class UnitInheritedRule {
                     String ruleId = ruleEntry.getKey();
                     Map<String, InheritedRuleModel> ruleValue = ruleEntry.getValue();
                     JsonNode unitManagementRuleCategory = unitManagement.get(categoryName);
-                    compareInheritedRuleWithManagement(unitManagementRuleCategory, ruleId, ruleValue, unitId,
-                        ruleIdTodReplace);
+                    compareInheritedRuleWithManagement(
+                        unitManagementRuleCategory,
+                        ruleId,
+                        ruleValue,
+                        unitId,
+                        ruleIdTodReplace
+                    );
                 }
 
                 for (Entry<String, String> ruleIdEntry : ruleIdTodReplace.entrySet()) {
@@ -223,12 +242,12 @@ public class UnitInheritedRule {
                 ruleIdTodReplace.clear();
             }
 
-            if (unitManagement.get(categoryName) != null &&
-                unitManagement.get(categoryName).get("Inheritance") != null) {
+            if (
+                unitManagement.get(categoryName) != null && unitManagement.get(categoryName).get("Inheritance") != null
+            ) {
                 addPreventRulesId(unitManagement.get(categoryName).get("Inheritance").get("PreventRulesId"));
             }
         }
-
 
         for (String ruleCategory : VitamConstants.getSupportedRules()) {
             JsonNode unitManagementRuleCategory = unitManagement.get(ruleCategory);
@@ -244,10 +263,14 @@ public class UnitInheritedRule {
             }
 
             if (unitManagementRuleCategory.has(RULES)) {
-                computeRuleCategoryInheritance(unitManagementRuleCategory, newRule, ruleCategory, ruleCategoryFromUnit,
-                    parentCategoryList);
+                computeRuleCategoryInheritance(
+                    unitManagementRuleCategory,
+                    newRule,
+                    ruleCategory,
+                    ruleCategoryFromUnit,
+                    parentCategoryList
+                );
             }
-
         }
 
         for (Map.Entry<String, ObjectNode> entry : ruleCategoryFromUnit.entrySet()) {
@@ -299,8 +322,11 @@ public class UnitInheritedRule {
      * @param newRule
      * @param unitRuleCategory
      */
-    private void computeRuleCategoryInheritancePrevent(JsonNode inheritance, UnitInheritedRule newRule,
-        String unitRuleCategory) {
+    private void computeRuleCategoryInheritancePrevent(
+        JsonNode inheritance,
+        UnitInheritedRule newRule,
+        String unitRuleCategory
+    ) {
         if (inheritance.has(PREVENTRULESID)) {
             ArrayNode nonRefRuleId = (ArrayNode) inheritance.get(PREVENTRULESID);
             for (int index = nonRefRuleId.size() - 1; index >= 0; index--) {
@@ -323,32 +349,42 @@ public class UnitInheritedRule {
      * @param ruleCategoryFromUnit
      * @param parentCategoryList
      */
-    private void computeRuleCategoryInheritance(JsonNode unitManagementRuleCategory, UnitInheritedRule newRule,
-        String unitRuleCategory, Map<String, ObjectNode> ruleCategoryFromUnit,
-        List<String> parentCategoryList) {
+    private void computeRuleCategoryInheritance(
+        JsonNode unitManagementRuleCategory,
+        UnitInheritedRule newRule,
+        String unitRuleCategory,
+        Map<String, ObjectNode> ruleCategoryFromUnit,
+        List<String> parentCategoryList
+    ) {
         Map<String, JsonNode> categoryFinalAction = new HashMap<>();
         Map<String, JsonNode> categoryClassificationLevel = new HashMap<>();
         Map<String, JsonNode> categoryClassificationOwner = new HashMap<>();
         for (JsonNode rule : unitManagementRuleCategory.get(RULES)) {
             ObjectNode ruleToEdit = (ObjectNode) rule;
             if (!parentCategoryList.contains(unitRuleCategory) && rule.has(RULE)) {
-                ObjectNode ruleCategories =
-                    createRuleCategories(unitManagementRuleCategory, ruleToEdit, newRule.unitId);
+                ObjectNode ruleCategories = createRuleCategories(
+                    unitManagementRuleCategory,
+                    ruleToEdit,
+                    newRule.unitId
+                );
                 String ruleName = rule.get(RULE).asText();
                 JsonNode unitRuleNode = ruleCategories.get(ruleName);
-                categoryFinalAction
-                    .put(unitRuleCategory, unitRuleNode.get(newRule.unitId).get(SedaConstants.TAG_RULE_FINAL_ACTION));
-                categoryClassificationLevel
-                    .put(unitRuleCategory,
-                        unitRuleNode.get(newRule.unitId).get(SedaConstants.TAG_RULE_CLASSIFICATION_LEVEL));
-                categoryClassificationOwner
-                    .put(unitRuleCategory,
-                        unitRuleNode.get(newRule.unitId).get(SedaConstants.TAG_RULE_CLASSIFICATION_OWNER));
+                categoryFinalAction.put(
+                    unitRuleCategory,
+                    unitRuleNode.get(newRule.unitId).get(SedaConstants.TAG_RULE_FINAL_ACTION)
+                );
+                categoryClassificationLevel.put(
+                    unitRuleCategory,
+                    unitRuleNode.get(newRule.unitId).get(SedaConstants.TAG_RULE_CLASSIFICATION_LEVEL)
+                );
+                categoryClassificationOwner.put(
+                    unitRuleCategory,
+                    unitRuleNode.get(newRule.unitId).get(SedaConstants.TAG_RULE_CLASSIFICATION_OWNER)
+                );
 
                 ruleCategoryFromUnit.put(unitRuleCategory, ruleCategories);
                 parentCategoryList.add(unitRuleCategory);
             } else {
-
                 // Add FinalAction
                 JsonNode finalActionNode = categoryFinalAction.get(unitRuleCategory);
                 if (null != finalActionNode) {
@@ -366,14 +402,24 @@ public class UnitInheritedRule {
                     ruleToEdit.set(SedaConstants.TAG_RULE_CLASSIFICATION_OWNER, classificationOwner);
                 }
 
-                addInheritedRuleFromManagement(newRule, ruleToEdit, unitRuleCategory, newRule.unitId,
-                    ruleCategoryFromUnit);
+                addInheritedRuleFromManagement(
+                    newRule,
+                    ruleToEdit,
+                    unitRuleCategory,
+                    newRule.unitId,
+                    ruleCategoryFromUnit
+                );
             }
         }
     }
 
-    private void addInheritedRuleFromManagement(UnitInheritedRule newRule, ObjectNode unitRuleNode,
-        String unitRuleCategory, String unitId, Map<String, ObjectNode> ruleCategoryFromUnit) {
+    private void addInheritedRuleFromManagement(
+        UnitInheritedRule newRule,
+        ObjectNode unitRuleNode,
+        String unitRuleCategory,
+        String unitId,
+        Map<String, ObjectNode> ruleCategoryFromUnit
+    ) {
         if (unitRuleNode.has(RULE)) {
             String ruleId = unitRuleNode.get(RULE).asText();
 
@@ -385,9 +431,11 @@ public class UnitInheritedRule {
                 ruleCategoryFromUnit.put(unitRuleCategory, new ObjectNode(null));
             }
 
-            if (!newRule.inheritedRule.containsKey(unitRuleCategory) ||
+            if (
+                !newRule.inheritedRule.containsKey(unitRuleCategory) ||
                 !newRule.inheritedRule.get(unitRuleCategory).containsKey(ruleId) ||
-                ruleCategoryFromUnit.get(unitRuleCategory).get(ruleId) == null) {
+                ruleCategoryFromUnit.get(unitRuleCategory).get(ruleId) == null
+            ) {
                 ObjectNode unitNode = createNewRuleWithOrigin(unitRuleNode, unitId);
                 ruleCategoryFromUnit.get(unitRuleCategory).set(ruleId, unitNode);
             }
@@ -398,10 +446,13 @@ public class UnitInheritedRule {
         }
     }
 
-    private void compareInheritedRuleWithManagement(JsonNode unitManagementRuleCategory, String ruleId,
-        Map<String, InheritedRuleModel> ruleValue, String unitId,
-        Map<String, String> ruleIdTodReplace) throws InvalidParseOperationException {
-
+    private void compareInheritedRuleWithManagement(
+        JsonNode unitManagementRuleCategory,
+        String ruleId,
+        Map<String, InheritedRuleModel> ruleValue,
+        String unitId,
+        Map<String, String> ruleIdTodReplace
+    ) throws InvalidParseOperationException {
         if (null == unitManagementRuleCategory) {
             return;
         }
@@ -413,15 +464,16 @@ public class UnitInheritedRule {
         }
 
         for (JsonNode unitRule : unitRuleNodes) {
-
             String unitRuleId = null;
             if (unitRule.get(RULE) != null) {
                 unitRuleId = unitRule.get(RULE).asText();
             }
 
             ObjectNode modifiedUnitRule = (ObjectNode) unitRule;
-            modifiedUnitRule.set(SedaConstants.TAG_RULE_FINAL_ACTION,
-                unitManagementRuleCategory.get(SedaConstants.TAG_RULE_FINAL_ACTION));
+            modifiedUnitRule.set(
+                SedaConstants.TAG_RULE_FINAL_ACTION,
+                unitManagementRuleCategory.get(SedaConstants.TAG_RULE_FINAL_ACTION)
+            );
 
             if (unitRuleId == null || !unitRuleId.equals(ruleId)) {
                 // Unit management contains category rule but not the ruleId
@@ -429,14 +481,15 @@ public class UnitInheritedRule {
                     ArrayNode pathNode = originEntry.getValue().getPath();
                     updateOriginPath(pathNode, unitId);
                 }
-
             } else {
                 // Unit management contains category rule with the same ruleId
                 for (Entry<String, InheritedRuleModel> originEntry : ruleValue.entrySet()) {
                     String originId = originEntry.getKey();
                     InheritedRuleModel originValue = originEntry.getValue();
-                    InheritedRuleModel copiedRule = createNewOriginModel((ObjectNode) unitRule,
-                        JsonHandler.createArrayNode().add(JsonHandler.createArrayNode().add(unitId)));
+                    InheritedRuleModel copiedRule = createNewOriginModel(
+                        (ObjectNode) unitRule,
+                        JsonHandler.createArrayNode().add(JsonHandler.createArrayNode().add(unitId))
+                    );
                     ruleValue.put(originId, copiedRule);
                     ruleIdTodReplace.put(originId + SEPERATOR + ruleId, unitId);
                     if (originValue.getOverrideBy() == null) {
@@ -558,6 +611,4 @@ public class UnitInheritedRule {
         newRule.refNonRuleIds.clear();
         return newRule;
     }
-
-
 }

@@ -42,6 +42,7 @@ import static javax.ws.rs.core.Response.Status.Family.SUCCESSFUL;
 import static javax.ws.rs.core.Response.Status.fromStatusCode;
 
 class SchedulerClientRest extends DefaultClient implements SchedulerClient {
+
     /**
      * Constructor using given scheme (http)
      *
@@ -67,8 +68,12 @@ class SchedulerClientRest extends DefaultClient implements SchedulerClient {
             return;
         }
 
-        throw new VitamClientInternalException(String
-            .format("Error with the response, get status: '%d' and reason '%s'.", response.getStatus(),
-                fromStatusCode(response.getStatus()).getReasonPhrase()));
+        throw new VitamClientInternalException(
+            String.format(
+                "Error with the response, get status: '%d' and reason '%s'.",
+                response.getStatus(),
+                fromStatusCode(response.getStatus()).getReasonPhrase()
+            )
+        );
     }
 }

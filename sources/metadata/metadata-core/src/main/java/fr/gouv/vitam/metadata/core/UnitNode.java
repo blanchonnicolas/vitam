@@ -36,6 +36,7 @@ import java.util.Set;
  * @deprecated : Use the new api /unitsWithInheritedRules instead. To be removed in future releases.
  */
 public class UnitNode {
+
     private UnitSimplified unit;
     private Map<String, UnitNode> childs;
     private Map<String, UnitNode> allUnitNode;
@@ -43,8 +44,7 @@ public class UnitNode {
     /**
      * Empty Constructor
      */
-    public UnitNode() {
-    }
+    public UnitNode() {}
 
     /**
      * constructor with UnitSimplified
@@ -64,8 +64,11 @@ public class UnitNode {
      * @param allUnitNode map a all unit
      * @param rootList list of root
      */
-    public void buildAncestors(Map<String, UnitSimplified> parentMap,
-        Map<String, UnitNode> allUnitNode, Set<String> rootList) {
+    public void buildAncestors(
+        Map<String, UnitSimplified> parentMap,
+        Map<String, UnitNode> allUnitNode,
+        Set<String> rootList
+    ) {
         this.allUnitNode = allUnitNode;
         allUnitNode.put(unit.getId(), this);
         for (String parentId : this.unit.getDirectParent()) {
@@ -87,9 +90,7 @@ public class UnitNode {
         this.childs.put(childNode.unit.getId(), childNode);
     }
 
-
-    private void addParent(UnitNode parentNode,
-        Map<String, UnitSimplified> parentMap, Set<String> rootList) {
+    private void addParent(UnitNode parentNode, Map<String, UnitSimplified> parentMap, Set<String> rootList) {
         parentNode.addChild(this);
         parentNode.buildAncestors(parentMap, allUnitNode, rootList);
     }

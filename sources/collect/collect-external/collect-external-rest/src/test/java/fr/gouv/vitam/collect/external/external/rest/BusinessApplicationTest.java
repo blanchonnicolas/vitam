@@ -73,12 +73,12 @@ public class BusinessApplicationTest extends Application {
         SecureEndpointRegistry secureEndpointRegistry = new SecureEndpointRegistry();
         SecureEndpointScanner secureEndpointScanner = new SecureEndpointScanner(secureEndpointRegistry);
 
-        final CollectExternalResource collectExternalResource =
-            new CollectExternalResource(secureEndpointRegistry);
+        final CollectExternalResource collectExternalResource = new CollectExternalResource(secureEndpointRegistry);
         final TransactionExternalResource transactionExternalResource = new TransactionExternalResource();
 
-        final ProjectExternalResource projectExternalResource =
-            new ProjectExternalResource(collectInternalClientFactory);
+        final ProjectExternalResource projectExternalResource = new ProjectExternalResource(
+            collectInternalClientFactory
+        );
         singletons = new HashSet<>();
         singletons.addAll(commonBusinessApplication.getResources());
         singletons.add(collectExternalResource);

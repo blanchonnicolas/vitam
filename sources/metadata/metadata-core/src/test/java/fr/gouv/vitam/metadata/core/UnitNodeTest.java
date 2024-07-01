@@ -52,9 +52,9 @@ public class UnitNodeTest {
     private static final String AU3_ID = "AU3";
     private static final String AU4_ID = "AU4";
 
-    private final static String AU1_MGT = "UnitNode/AU1_MGT.json";
-    private final static String AU5_MGT = "UnitNode/AU5_MGT.json";
-    private final static String AU3_MGT = "UnitNode/AU3_MGT.json";
+    private static final String AU1_MGT = "UnitNode/AU1_MGT.json";
+    private static final String AU5_MGT = "UnitNode/AU5_MGT.json";
+    private static final String AU3_MGT = "UnitNode/AU3_MGT.json";
 
     private ObjectNode node = JsonHandler.createObjectNode();
     private List<String> emptyParent = new ArrayList<String>();
@@ -77,13 +77,22 @@ public class UnitNodeTest {
         upAU4.add(AU3_ID);
         upAU4.add(AU2_ID);
 
-        UnitSimplified AU1 = new UnitSimplified(AU1_ID,
-            (ObjectNode) JsonHandler.getFromFile(PropertiesUtils.getResourceFile(AU1_MGT)), emptyParent);
-        UnitSimplified AU5 = new UnitSimplified(AU5_ID,
-            (ObjectNode) JsonHandler.getFromFile(PropertiesUtils.getResourceFile(AU5_MGT)), emptyParent);
+        UnitSimplified AU1 = new UnitSimplified(
+            AU1_ID,
+            (ObjectNode) JsonHandler.getFromFile(PropertiesUtils.getResourceFile(AU1_MGT)),
+            emptyParent
+        );
+        UnitSimplified AU5 = new UnitSimplified(
+            AU5_ID,
+            (ObjectNode) JsonHandler.getFromFile(PropertiesUtils.getResourceFile(AU5_MGT)),
+            emptyParent
+        );
         UnitSimplified AU2 = new UnitSimplified(AU2_ID, node, upAU2);
-        UnitSimplified AU3 = new UnitSimplified(AU3_ID,
-            (ObjectNode) JsonHandler.getFromFile(PropertiesUtils.getResourceFile(AU3_MGT)), upAU3);
+        UnitSimplified AU3 = new UnitSimplified(
+            AU3_ID,
+            (ObjectNode) JsonHandler.getFromFile(PropertiesUtils.getResourceFile(AU3_MGT)),
+            upAU3
+        );
         UnitSimplified AU4 = new UnitSimplified(AU4_ID, node, upAU4);
         Map<String, UnitSimplified> parentMap = new HashedMap<>();
         parentMap.put(AU1_ID, AU1);
@@ -96,7 +105,6 @@ public class UnitNodeTest {
         Set<String> rootList = new HashSet<>();
         treeAU4.buildAncestors(parentMap, allUnitNode, rootList);
 
-
         assertEquals(rootList.size(), 2);
         assertEquals(allUnitNode.size(), 5);
 
@@ -108,7 +116,5 @@ public class UnitNodeTest {
 
         assertEquals(treeAU3FromAU4, treeAU3FromAllUnitNode);
         assertEquals(treeAU2FromAU4, treeAU2FromAllUnitNode);
-
     }
-
 }

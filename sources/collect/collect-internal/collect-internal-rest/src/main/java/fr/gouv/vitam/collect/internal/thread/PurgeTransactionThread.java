@@ -62,15 +62,20 @@ public class PurgeTransactionThread implements Runnable {
 
     private final int purgeTransactionThreadPoolSize;
 
-    public PurgeTransactionThread(CollectInternalConfiguration collectInternalConfiguration,
-        TransactionService transactionService) {
+    public PurgeTransactionThread(
+        CollectInternalConfiguration collectInternalConfiguration,
+        TransactionService transactionService
+    ) {
         this.transactionService = transactionService;
         purgeTransactionDelayInMinutes = collectInternalConfiguration.getPurgeTransactionDelayInMinutes();
         this.purgeTransactionThreadPoolSize = collectInternalConfiguration.getPurgeTransactionThreadPoolSize();
 
-        Executors.newScheduledThreadPool(1, VitamThreadFactory.getInstance())
-            .scheduleAtFixedRate(this, collectInternalConfiguration.getPurgeTransactionThreadFrequency(),
-                collectInternalConfiguration.getPurgeTransactionThreadFrequency(), TimeUnit.MINUTES);
+        Executors.newScheduledThreadPool(1, VitamThreadFactory.getInstance()).scheduleAtFixedRate(
+            this,
+            collectInternalConfiguration.getPurgeTransactionThreadFrequency(),
+            collectInternalConfiguration.getPurgeTransactionThreadFrequency(),
+            TimeUnit.MINUTES
+        );
     }
 
     @Override
@@ -93,7 +98,6 @@ public class PurgeTransactionThread implements Runnable {
                 transactionService.deleteTransactionContent(transactionModel.getId());
             }
         }
-
     }
 
     private boolean isToDelete(String transactionDate, Integer delay) throws ParseException {
@@ -103,29 +107,33 @@ public class PurgeTransactionThread implements Runnable {
         return differenceInMinutes >= delay;
     }
 
-
     public void process() throws CollectInternalException {
         Thread.currentThread().setName(PurgeTransactionThread.class.getName());
         VitamThreadUtils.getVitamSession()
             .setRequestId(GUIDFactory.newRequestIdGUID(VitamConfiguration.getAdminTenant()));
-        ExecutorService executorService =
-            ExecutorUtils.createScalableBatchExecutorService(this.purgeTransactionThreadPoolSize);
+        ExecutorService executorService = ExecutorUtils.createScalableBatchExecutorService(
+            this.purgeTransactionThreadPoolSize
+        );
         try {
             List<CompletableFuture<Void>> completableFuturesList = new ArrayList<>();
             for (var entry : purgeTransactionDelayInMinutes.entrySet()) {
-                CompletableFuture<Void> traceabilityCompletableFuture = CompletableFuture.runAsync(() -> {
-                    VitamThreadUtils.getVitamSession().setTenantId(entry.getKey());
-                    try {
-                        deleteTransaction(entry.getKey(), entry.getValue());
-                    } catch (ParseException | CollectInternalException e) {
-                        LOGGER.error("Error when deleting transaction: {}", e);
-                    }
-                }, executorService);
+                CompletableFuture<Void> traceabilityCompletableFuture = CompletableFuture.runAsync(
+                    () -> {
+                        VitamThreadUtils.getVitamSession().setTenantId(entry.getKey());
+                        try {
+                            deleteTransaction(entry.getKey(), entry.getValue());
+                        } catch (ParseException | CollectInternalException e) {
+                            LOGGER.error("Error when deleting transaction: {}", e);
+                        }
+                    },
+                    executorService
+                );
 
                 completableFuturesList.add(traceabilityCompletableFuture);
             }
-            CompletableFuture<Void> combinedFuture =
-                CompletableFuture.allOf(completableFuturesList.toArray(new CompletableFuture[0]));
+            CompletableFuture<Void> combinedFuture = CompletableFuture.allOf(
+                completableFuturesList.toArray(new CompletableFuture[0])
+            );
             combinedFuture.get();
         } catch (InterruptedException e) {
             LOGGER.error("Error when executing threads: {}", e);

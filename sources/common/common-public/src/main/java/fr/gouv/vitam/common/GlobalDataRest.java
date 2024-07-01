@@ -31,6 +31,7 @@ package fr.gouv.vitam.common;
  * Global Variables and eventually method used by REST services
  */
 public class GlobalDataRest {
+
     /**
      * X_HTTP_METHOD_OVERRIDE : used in case of POST methods overriding GET methods
      */
@@ -218,7 +219,6 @@ public class GlobalDataRest {
      */
     public static final String X_EVENT_STATUS = "X-Event-Status";
 
-
     /**
      * Tenant List for Initialisation of Tenant Filter
      */
@@ -243,12 +243,10 @@ public class GlobalDataRest {
      */
     public static final String X_GLOBAL_EXECUTION_STATUS = "X-Global-Execution-Status";
 
-
     /**
      * Force update Header
      */
     public static final String FORCE_UPDATE = "Force-Update";
-
 
     /**
      * The X_DATA_CATEGORY header, used in requests to give data category
@@ -280,5 +278,4 @@ public class GlobalDataRest {
     private GlobalDataRest() {
         // empty
     }
-
 }

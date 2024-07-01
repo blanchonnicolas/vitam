@@ -121,16 +121,24 @@ public class LogbookOperationsImpl implements LogbookOperations {
     private final IndexationHelper indexationHelper;
     private final ElasticsearchLogbookIndexManager indexManager;
 
-    public LogbookOperationsImpl(LogbookDbAccess mongoDbAccess,
-        ElasticsearchLogbookIndexManager indexManager) {
-        this(mongoDbAccess, WorkspaceClientFactory.getInstance(), StorageClientFactory.getInstance(),
-            IndexationHelper.getInstance(), indexManager);
+    public LogbookOperationsImpl(LogbookDbAccess mongoDbAccess, ElasticsearchLogbookIndexManager indexManager) {
+        this(
+            mongoDbAccess,
+            WorkspaceClientFactory.getInstance(),
+            StorageClientFactory.getInstance(),
+            IndexationHelper.getInstance(),
+            indexManager
+        );
     }
 
     @VisibleForTesting
-    public LogbookOperationsImpl(LogbookDbAccess mongoDbAccess, WorkspaceClientFactory workspaceClientFactory,
-        StorageClientFactory storageClientFactory, IndexationHelper indexationHelper,
-        ElasticsearchLogbookIndexManager indexManager) {
+    public LogbookOperationsImpl(
+        LogbookDbAccess mongoDbAccess,
+        WorkspaceClientFactory workspaceClientFactory,
+        StorageClientFactory storageClientFactory,
+        IndexationHelper indexationHelper,
+        ElasticsearchLogbookIndexManager indexManager
+    ) {
         this.mongoDbAccess = mongoDbAccess;
         this.workspaceClientFactory = workspaceClientFactory;
         this.storageClientFactory = storageClientFactory;
@@ -140,8 +148,7 @@ public class LogbookOperationsImpl implements LogbookOperations {
 
     @Override
     public void create(LogbookOperationParameters parameters)
-        throws LogbookAlreadyExistsException,
-        LogbookDatabaseException {
+        throws LogbookAlreadyExistsException, LogbookDatabaseException {
         mongoDbAccess.createLogbookOperation(parameters);
         String idOperation = parameters.getParameterValue(LogbookParameterName.eventIdentifierProcess);
         backupOperation(idOperation);
@@ -156,8 +163,7 @@ public class LogbookOperationsImpl implements LogbookOperations {
     }
 
     @Override
-    public List<LogbookOperation> selectOperations(JsonNode select)
-        throws VitamDBException, LogbookDatabaseException {
+    public List<LogbookOperation> selectOperations(JsonNode select) throws VitamDBException, LogbookDatabaseException {
         return selectOperations(select, false, false);
     }
 
@@ -177,9 +183,11 @@ public class LogbookOperationsImpl implements LogbookOperations {
     }
 
     @Override
-    public RequestResponseOK<LogbookOperation> selectOperationsAsRequestResponse(JsonNode select, boolean sliced,
-        boolean crossTenant)
-        throws VitamDBException, LogbookDatabaseException {
+    public RequestResponseOK<LogbookOperation> selectOperationsAsRequestResponse(
+        JsonNode select,
+        boolean sliced,
+        boolean crossTenant
+    ) throws VitamDBException, LogbookDatabaseException {
         VitamMongoCursor<LogbookOperation> cursor = mongoDbAccess.getLogbookOperations(select, sliced, crossTenant);
 
         List<LogbookOperation> operations = new ArrayList<>();
@@ -191,9 +199,7 @@ public class LogbookOperationsImpl implements LogbookOperations {
         }
 
         return new RequestResponseOK<>(select, operations, (int) cursor.getTotal());
-
     }
-
 
     private void filterFinalResponse(VitamDocument<?> document) {
         for (final ParserTokens.PROJECTIONARGS projection : ParserTokens.PROJECTIONARGS.values()) {
@@ -220,7 +226,6 @@ public class LogbookOperationsImpl implements LogbookOperations {
                     break;
                 default:
                     break;
-
             }
         }
     }
@@ -233,8 +238,7 @@ public class LogbookOperationsImpl implements LogbookOperations {
     }
 
     @Override
-    public LogbookOperation getById(String idProcess)
-        throws LogbookDatabaseException, LogbookNotFoundException {
+    public LogbookOperation getById(String idProcess) throws LogbookDatabaseException, LogbookNotFoundException {
         return mongoDbAccess.getLogbookOperationById(idProcess);
     }
 
@@ -248,9 +252,10 @@ public class LogbookOperationsImpl implements LogbookOperations {
     public final void createBulkLogbookOperation(final LogbookOperationParameters[] operationArray)
         throws LogbookDatabaseException, LogbookAlreadyExistsException {
         mongoDbAccess.createBulkLogbookOperation(operationArray);
-        String idOperation =
-            Arrays.stream(operationArray).map(e -> e.getParameterValue(LogbookParameterName.eventIdentifierProcess))
-                .findFirst().orElseThrow();
+        String idOperation = Arrays.stream(operationArray)
+            .map(e -> e.getParameterValue(LogbookParameterName.eventIdentifierProcess))
+            .findFirst()
+            .orElseThrow();
         backupOperation(idOperation);
     }
 
@@ -258,30 +263,39 @@ public class LogbookOperationsImpl implements LogbookOperations {
     public final void updateBulkLogbookOperation(final LogbookOperationParameters[] operationArray)
         throws LogbookDatabaseException, LogbookNotFoundException {
         mongoDbAccess.updateBulkLogbookOperation(operationArray);
-        String idOperation =
-            Arrays.stream(operationArray).map(e -> e.getParameterValue(LogbookParameterName.eventIdentifierProcess))
-                .findFirst().orElseThrow();
+        String idOperation = Arrays.stream(operationArray)
+            .map(e -> e.getParameterValue(LogbookParameterName.eventIdentifierProcess))
+            .findFirst()
+            .orElseThrow();
         backupOperation(idOperation);
     }
 
     @Override
-    public MongoCursor<LogbookOperation> selectOperationsByLastPersistenceDateInterval(LocalDateTime startDate,
-        LocalDateTime endDate)
-        throws LogbookDatabaseException, InvalidCreateOperationException,
-        InvalidParseOperationException {
-
+    public MongoCursor<LogbookOperation> selectOperationsByLastPersistenceDateInterval(
+        LocalDateTime startDate,
+        LocalDateTime endDate
+    ) throws LogbookDatabaseException, InvalidCreateOperationException, InvalidParseOperationException {
         Select select = new Select();
-        select.setQuery(QueryHelper.and()
-            .add(QueryHelper
-                .gte(VitamFieldsHelper.lastPersistedDate(), LocalDateUtil.getFormattedDateForMongo(startDate)))
-            .add(QueryHelper
-                .lte(VitamFieldsHelper.lastPersistedDate(), LocalDateUtil.getFormattedDateForMongo(endDate))));
+        select.setQuery(
+            QueryHelper.and()
+                .add(
+                    QueryHelper.gte(
+                        VitamFieldsHelper.lastPersistedDate(),
+                        LocalDateUtil.getFormattedDateForMongo(startDate)
+                    )
+                )
+                .add(
+                    QueryHelper.lte(
+                        VitamFieldsHelper.lastPersistedDate(),
+                        LocalDateUtil.getFormattedDateForMongo(endDate)
+                    )
+                )
+        );
         select.addOrderByAscFilter(VitamFieldsHelper.lastPersistedDate());
 
         MongoCursor<LogbookOperation> cursor = null;
         try {
-            cursor =
-                mongoDbAccess.getLogbookOperations(select.getFinalSelect(), false);
+            cursor = mongoDbAccess.getLogbookOperations(select.getFinalSelect(), false);
         } catch (VitamDBException e) {
             LOGGER.error(e);
         }
@@ -294,14 +308,15 @@ public class LogbookOperationsImpl implements LogbookOperations {
         final Select select = new Select();
         final Query query = QueryHelper.gt("evDateTime", date.toString());
         final Query type = QueryHelper.eq("evTypeProc", LogbookTypeProcess.TRACEABILITY.name());
-        final Query status =
-            QueryHelper.eq(LogbookDocument.EVENTS + "." + outcomeDetail.getDbname(), "STP_OP_SECURISATION.OK");
+        final Query status = QueryHelper.eq(
+            LogbookDocument.EVENTS + "." + outcomeDetail.getDbname(),
+            "STP_OP_SECURISATION.OK"
+        );
         select.setQuery(QueryHelper.and().add(query, type, status));
         select.setLimitFilter(0, 1);
         LogbookOperation logbookOperation = null;
         try {
-            logbookOperation =
-                mongoDbAccess.getLogbookOperations(select.getFinalSelect(), false).next();
+            logbookOperation = mongoDbAccess.getLogbookOperations(select.getFinalSelect(), false).next();
         } catch (VitamDBException e) {
             LOGGER.error(e);
         }
@@ -310,12 +325,13 @@ public class LogbookOperationsImpl implements LogbookOperations {
 
     @Override
     public LogbookOperation findLastTraceabilityOperationOK()
-        throws InvalidCreateOperationException, LogbookDatabaseException,
-        InvalidParseOperationException {
+        throws InvalidCreateOperationException, LogbookDatabaseException, InvalidParseOperationException {
         final Select select = new Select();
         final Query type = QueryHelper.eq("evTypeProc", LogbookTypeProcess.TRACEABILITY.name());
-        final Query findEvent = QueryHelper
-            .eq(String.format("%s.%s", LogbookDocument.EVENTS, outcomeDetail.getDbname()), "STP_OP_SECURISATION.OK");
+        final Query findEvent = QueryHelper.eq(
+            String.format("%s.%s", LogbookDocument.EVENTS, outcomeDetail.getDbname()),
+            "STP_OP_SECURISATION.OK"
+        );
         select.setLimitFilter(0, 1);
         select.setQuery(QueryHelper.and().add(type, findEvent));
         select.addOrderByDescFilter("evDateTime");
@@ -332,9 +348,11 @@ public class LogbookOperationsImpl implements LogbookOperations {
         try {
             final Select query = new Select();
             final Query type = QueryHelper.eq("evTypeProc", LogbookTypeProcess.TRACEABILITY.name());
-            final Query eventStatus = QueryHelper
-                .in(String.format("%s.%s", LogbookDocument.EVENTS, LogbookMongoDbName.outcomeDetail.getDbname()),
-                    eventType + ".OK", eventType + ".WARNING");
+            final Query eventStatus = QueryHelper.in(
+                String.format("%s.%s", LogbookDocument.EVENTS, LogbookMongoDbName.outcomeDetail.getDbname()),
+                eventType + ".OK",
+                eventType + ".WARNING"
+            );
 
             BooleanQuery add = and().add(type, eventStatus);
             if (traceabilityWithZipOnly) {
@@ -352,7 +370,6 @@ public class LogbookOperationsImpl implements LogbookOperations {
                 return null;
             }
             return operations.get(0);
-
         } catch (InvalidCreateOperationException e) {
             throw new VitamException("Could not find last LFC traceability", e);
         }
@@ -385,15 +402,19 @@ public class LogbookOperationsImpl implements LogbookOperations {
             return indexationHelper.getFullKOResult(indexParameters, message);
         }
         if (!LogbookCollections.OPERATION.equals(collection)) {
-            String message = String.format("Try to reindex a non operation logbook collection '%s' with operation " +
-                "logbook module", indexParameters.getCollectionName());
+            String message = String.format(
+                "Try to reindex a non operation logbook collection '%s' with operation " + "logbook module",
+                indexParameters.getCollectionName()
+            );
             LOGGER.error(message);
             return indexationHelper.getFullKOResult(indexParameters, message);
         }
 
         if (CollectionUtils.isEmpty(indexParameters.getTenants())) {
-            String message = String.format("Missing tenants for %s collection reindexation",
-                indexParameters.getCollectionName());
+            String message = String.format(
+                "Missing tenants for %s collection reindexation",
+                indexParameters.getCollectionName()
+            );
             LOGGER.error(message);
             return indexationHelper.getFullKOResult(indexParameters, message);
         }
@@ -407,22 +428,33 @@ public class LogbookOperationsImpl implements LogbookOperations {
         return reindexationResult;
     }
 
-    private void processDedicatedTenants(IndexParameters indexParameters, LogbookCollections collection,
-        ReindexationResult reindexationResult) {
+    private void processDedicatedTenants(
+        IndexParameters indexParameters,
+        LogbookCollections collection,
+        ReindexationResult reindexationResult
+    ) {
+        ElasticsearchIndexAliasResolver indexAliasResolver = indexManager.getElasticsearchIndexAliasResolver(
+            collection
+        );
 
-        ElasticsearchIndexAliasResolver indexAliasResolver =
-            indexManager.getElasticsearchIndexAliasResolver(collection);
-
-        List<Integer> dedicatedTenantToProcess = indexParameters.getTenants().stream()
+        List<Integer> dedicatedTenantToProcess = indexParameters
+            .getTenants()
+            .stream()
             .filter(not(this.indexManager::isGroupedTenant))
             .collect(Collectors.toList());
 
         for (Integer tenantId : dedicatedTenantToProcess) {
             try {
-                ReindexationOK reindexResult = this.indexationHelper.reindex(collection.getCollection(),
-                    collection.getEsClient(), indexAliasResolver.resolveIndexName(tenantId),
-                    this.indexManager.getElasticsearchIndexSettings(collection, tenantId),
-                    collection.getElasticsearchCollection(), Collections.singletonList(tenantId), null);
+                ReindexationOK reindexResult =
+                    this.indexationHelper.reindex(
+                            collection.getCollection(),
+                            collection.getEsClient(),
+                            indexAliasResolver.resolveIndexName(tenantId),
+                            this.indexManager.getElasticsearchIndexSettings(collection, tenantId),
+                            collection.getElasticsearchCollection(),
+                            Collections.singletonList(tenantId),
+                            null
+                        );
                 reindexationResult.addIndexOK(reindexResult);
             } catch (Exception exc) {
                 String message =
@@ -433,13 +465,19 @@ public class LogbookOperationsImpl implements LogbookOperations {
         }
     }
 
-    private void processGroupedTenants(IndexParameters indexParameters, LogbookCollections collection,
-        ReindexationResult reindexationResult) {
-        ElasticsearchIndexAliasResolver indexAliasResolver =
-            indexManager.getElasticsearchIndexAliasResolver(collection);
+    private void processGroupedTenants(
+        IndexParameters indexParameters,
+        LogbookCollections collection,
+        ReindexationResult reindexationResult
+    ) {
+        ElasticsearchIndexAliasResolver indexAliasResolver = indexManager.getElasticsearchIndexAliasResolver(
+            collection
+        );
 
         SetValuedMap<String, Integer> tenantGroupTenantsMap = new HashSetValuedHashMap<>();
-        indexParameters.getTenants().stream()
+        indexParameters
+            .getTenants()
+            .stream()
             .filter(this.indexManager::isGroupedTenant)
             .forEach(tenantId -> tenantGroupTenantsMap.put(this.indexManager.getTenantGroup(tenantId), tenantId));
 
@@ -447,9 +485,17 @@ public class LogbookOperationsImpl implements LogbookOperations {
             Collection<Integer> allTenantGroupTenants = this.indexManager.getTenantGroupTenants(tenantGroupName);
             if (allTenantGroupTenants.size() != tenantGroupTenantsMap.get(tenantGroupName).size()) {
                 SetUtils.SetView<Integer> missingTenants = SetUtils.difference(
-                    new HashSet<>(allTenantGroupTenants), tenantGroupTenantsMap.get(tenantGroupName));
-                LOGGER.warn("Missing tenants " + missingTenants + " of tenant group " + tenantGroupName +
-                    " will also be reindexed for collection " + collection);
+                    new HashSet<>(allTenantGroupTenants),
+                    tenantGroupTenantsMap.get(tenantGroupName)
+                );
+                LOGGER.warn(
+                    "Missing tenants " +
+                    missingTenants +
+                    " of tenant group " +
+                    tenantGroupName +
+                    " will also be reindexed for collection " +
+                    collection
+                );
             }
         }
 
@@ -457,14 +503,24 @@ public class LogbookOperationsImpl implements LogbookOperations {
         for (String tenantGroupName : tenantGroupNamesToProcess) {
             List<Integer> tenantIds = this.indexManager.getTenantGroupTenants(tenantGroupName);
             try {
-                ReindexationOK reindexResult = this.indexationHelper.reindex(collection.getCollection(),
-                    collection.getEsClient(), indexAliasResolver.resolveIndexName(tenantIds.get(0)),
-                    this.indexManager.getElasticsearchIndexSettings(collection, tenantIds.get(0)),
-                    collection.getElasticsearchCollection(), tenantIds, tenantGroupName);
+                ReindexationOK reindexResult =
+                    this.indexationHelper.reindex(
+                            collection.getCollection(),
+                            collection.getEsClient(),
+                            indexAliasResolver.resolveIndexName(tenantIds.get(0)),
+                            this.indexManager.getElasticsearchIndexSettings(collection, tenantIds.get(0)),
+                            collection.getElasticsearchCollection(),
+                            tenantIds,
+                            tenantGroupName
+                        );
                 reindexationResult.addIndexOK(reindexResult);
             } catch (Exception exc) {
-                String message = "Cannot reindex collection " + collection.name()
-                    + " for tenant group " + tenantGroupName + ". Unexpected error";
+                String message =
+                    "Cannot reindex collection " +
+                    collection.name() +
+                    " for tenant group " +
+                    tenantGroupName +
+                    ". Unexpected error";
                 LOGGER.error(message, exc);
                 reindexationResult.addIndexKO(new ReindexationKO(tenantIds, tenantGroupName, message));
             }
@@ -477,7 +533,8 @@ public class LogbookOperationsImpl implements LogbookOperations {
             return indexationHelper.switchIndex(
                 ElasticsearchIndexAlias.ofFullIndexName(alias),
                 ElasticsearchIndexAlias.ofFullIndexName(newIndexName),
-                LogbookCollections.OPERATION.getEsClient());
+                LogbookCollections.OPERATION.getEsClient()
+            );
         } catch (DatabaseException exc) {
             LOGGER.error("Cannot switch alias {} to index {}", alias, newIndexName, exc);
             throw exc;
@@ -486,21 +543,32 @@ public class LogbookOperationsImpl implements LogbookOperations {
 
     @Override
     public boolean checkNewEligibleLogbookOperationsSinceLastTraceabilityOperation(
-        LocalDateTime traceabilityStartDate, LocalDateTime traceabilityEndDate)
-        throws LogbookDatabaseException {
-
+        LocalDateTime traceabilityStartDate,
+        LocalDateTime traceabilityEndDate
+    ) throws LogbookDatabaseException {
         try {
             Select select = new Select();
             // Ignore scheduled background operations : TRACEABILITY, STORAGE_BACKUP...
             String[] ignoredBackgroundLogbookTypeProcesses =
                 BackgroundLogbookTypeProcessHelper.getBackgroundLogbookTypeProcesses()
-                    .stream().map(Enum::name).toArray(String[]::new);
-            select.setQuery(and()
-                .add(gte(VitamFieldsHelper.lastPersistedDate(),
-                    LocalDateUtil.getFormattedDateForMongo(traceabilityStartDate)))
-                .add(lte(VitamFieldsHelper.lastPersistedDate(),
-                    LocalDateUtil.getFormattedDateForMongo(traceabilityEndDate)))
-                .add(not().add(in("evTypeProc", ignoredBackgroundLogbookTypeProcesses)))
+                    .stream()
+                    .map(Enum::name)
+                    .toArray(String[]::new);
+            select.setQuery(
+                and()
+                    .add(
+                        gte(
+                            VitamFieldsHelper.lastPersistedDate(),
+                            LocalDateUtil.getFormattedDateForMongo(traceabilityStartDate)
+                        )
+                    )
+                    .add(
+                        lte(
+                            VitamFieldsHelper.lastPersistedDate(),
+                            LocalDateUtil.getFormattedDateForMongo(traceabilityEndDate)
+                        )
+                    )
+                    .add(not().add(in("evTypeProc", ignoredBackgroundLogbookTypeProcesses)))
             );
 
             // Limit to 1 result
@@ -511,7 +579,6 @@ public class LogbookOperationsImpl implements LogbookOperations {
                 LOGGER.debug("No new logbook operations since last traceability");
             }
             return !logbookOperations.isEmpty();
-
         } catch (InvalidCreateOperationException | VitamDBException e) {
             throw new LogbookDatabaseException("Could not parse last traceability operation information", e);
         }
@@ -522,8 +589,10 @@ public class LogbookOperationsImpl implements LogbookOperations {
         try {
             logbookOperation = mongoDbAccess.getLogbookOperationById(operationId);
         } catch (LogbookNotFoundException e) {
-            throw new LogbookDatabaseException("Cannot find operation with GUID " + operationId + ", cannot backup " +
-                "it", e);
+            throw new LogbookDatabaseException(
+                "Cannot find operation with GUID " + operationId + ", cannot backup " + "it",
+                e
+            );
         }
         Integer tenantId = ParameterHelper.getTenantParameter();
         // tenant_backup_operation
@@ -531,8 +600,7 @@ public class LogbookOperationsImpl implements LogbookOperations {
         // Ugly hack to mock workspaceFactoryClient
         try (WorkspaceClient workspaceClient = workspaceClientFactory.getClient()) {
             workspaceClient.createContainer(containerName);
-            workspaceClient.putObject(containerName, operationId, JsonHandler.writeToInpustream
-                (logbookOperation));
+            workspaceClient.putObject(containerName, operationId, JsonHandler.writeToInpustream(logbookOperation));
             try (StorageClient storageClient = storageClientFactory.getClient()) {
                 ObjectDescription objectDescription = new ObjectDescription();
                 objectDescription.setWorkspaceContainerGUID(containerName);
@@ -540,12 +608,15 @@ public class LogbookOperationsImpl implements LogbookOperations {
                 objectDescription.setType(DataCategory.BACKUP_OPERATION);
                 objectDescription.setWorkspaceObjectURI(operationId);
 
-                storageClient
-                    .storeFileFromWorkspace(VitamConfiguration.getDefaultStrategy(), DataCategory.BACKUP_OPERATION,
-                        operationId,
-                        objectDescription);
-            } catch (StorageAlreadyExistsClientException | StorageNotFoundClientException |
-                     StorageServerClientException e) {
+                storageClient.storeFileFromWorkspace(
+                    VitamConfiguration.getDefaultStrategy(),
+                    DataCategory.BACKUP_OPERATION,
+                    operationId,
+                    objectDescription
+                );
+            } catch (
+                StorageAlreadyExistsClientException | StorageNotFoundClientException | StorageServerClientException e
+            ) {
                 throw new LogbookDatabaseException("Cannot backup operation with GUID " + operationId, e);
             }
             workspaceClient.deleteObject(containerName, operationId);

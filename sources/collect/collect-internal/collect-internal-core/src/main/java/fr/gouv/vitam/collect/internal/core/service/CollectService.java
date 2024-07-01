@@ -100,15 +100,17 @@ public class CollectService {
     private final WorkspaceClientFactory workspaceCollectClientFactory;
     private final FormatIdentifierFactory formatIdentifierFactory;
 
-    public CollectService(MetadataRepository metadataRepository, WorkspaceClientFactory workspaceCollectClientFactory,
-        FormatIdentifierFactory formatIdentifierFactory) {
+    public CollectService(
+        MetadataRepository metadataRepository,
+        WorkspaceClientFactory workspaceCollectClientFactory,
+        FormatIdentifierFactory formatIdentifierFactory
+    ) {
         this.metadataRepository = metadataRepository;
         this.workspaceCollectClientFactory = workspaceCollectClientFactory;
         this.formatIdentifierFactory = formatIdentifierFactory;
     }
 
     public CollectUnitModel getArchiveUnitModel(String unitId) throws CollectInternalException {
-
         try {
             JsonNode jsonNode = metadataRepository.selectUnitById(unitId);
             final CollectUnitModel unitModel = JsonHandler.getFromJsonNode(jsonNode, CollectUnitModel.class);
@@ -123,9 +125,12 @@ public class CollectService {
         }
     }
 
-    public ObjectDto updateOrSaveObjectGroup(CollectUnitModel unitModel, DataObjectVersionType usage, int version,
-        ObjectDto objectDto) throws CollectInternalException {
-
+    public ObjectDto updateOrSaveObjectGroup(
+        CollectUnitModel unitModel,
+        DataObjectVersionType usage,
+        int version,
+        ObjectDto objectDto
+    ) throws CollectInternalException {
         try {
             objectDto.setId(GUIDFactory.newObjectGUID(VitamThreadUtils.getVitamSession().getTenantId()).getId());
             if (unitModel.getOg() == null) {
@@ -140,33 +145,48 @@ public class CollectService {
         }
     }
 
-    private void updateExistingObjectGroup(CollectUnitModel unitModel, DataObjectVersionType usage, int version,
-        ObjectDto objectDto) throws CollectInternalException {
-
+    private void updateExistingObjectGroup(
+        CollectUnitModel unitModel,
+        DataObjectVersionType usage,
+        int version,
+        ObjectDto objectDto
+    ) throws CollectInternalException {
         try {
             JsonNode objectGroup = metadataRepository.selectObjectGroupById(unitModel.getOg(), true);
 
             DbObjectGroupModel dbObjectGroupModel = JsonHandler.getFromJsonNode(objectGroup, DbObjectGroupModel.class);
-            DbQualifiersModel qualifierModelToUpdate =
-                CollectHelper.findQualifier(dbObjectGroupModel.getQualifiers(), usage);
+            DbQualifiersModel qualifierModelToUpdate = CollectHelper.findQualifier(
+                dbObjectGroupModel.getQualifiers(),
+                usage
+            );
 
             if (qualifierModelToUpdate == null) {
                 CollectHelper.checkVersion(version, 1);
                 addQualifierToObjectGroups(dbObjectGroupModel, usage, version, objectDto);
             } else {
-                DbVersionsModel dbVersionsModel =
-                    CollectHelper.getObjectVersionsModel(dbObjectGroupModel, usage, version);
+                DbVersionsModel dbVersionsModel = CollectHelper.getObjectVersionsModel(
+                    dbObjectGroupModel,
+                    usage,
+                    version
+                );
 
                 if (dbVersionsModel != null) {
                     LOGGER.error("Qualifier already exist with usage {} and version {})", usage, version);
                     throw new CollectInternalException(
-                        "Qualifier already exist with usage " + usage + " and version " + version + "");
+                        "Qualifier already exist with usage " + usage + " and version " + version + ""
+                    );
                 }
 
                 int lastVersion = CollectHelper.getLastVersion(qualifierModelToUpdate) + 1;
                 CollectHelper.checkVersion(version, lastVersion);
-                addVersionToObjectGroups(qualifierModelToUpdate, dbObjectGroupModel, usage, lastVersion,
-                    dbObjectGroupModel.getQualifiers(), objectDto);
+                addVersionToObjectGroups(
+                    qualifierModelToUpdate,
+                    dbObjectGroupModel,
+                    usage,
+                    lastVersion,
+                    dbObjectGroupModel.getQualifiers(),
+                    objectDto
+                );
             }
         } catch (InvalidParseOperationException e) {
             LOGGER.error("Error when updating existing Object : {}", e);
@@ -174,23 +194,26 @@ public class CollectService {
         }
     }
 
-    private void insertNewObjectGroup(CollectUnitModel unitModel, DataObjectVersionType usage, int version,
-        ObjectDto objectDto) throws CollectInternalException {
-
+    private void insertNewObjectGroup(
+        CollectUnitModel unitModel,
+        DataObjectVersionType usage,
+        int version,
+        ObjectDto objectDto
+    ) throws CollectInternalException {
         boolean gotCreated = false;
         String gotId = null;
         try {
             CollectHelper.checkVersion(version, 1);
-            DbObjectGroupModel dbObjectGroupModel =
-                new DbObjectGroupModelBuilder()
-                    .withId(GUIDFactory.newObjectGroupGUID(VitamThreadUtils.getVitamSession().getTenantId()).getId())
-                    .withOpi(unitModel.getOpi())
-                    .withFileInfoModel(objectDto.getFileInfo().getFileName())
-                    .withQualifiers(objectDto.getId(), objectDto.getFileInfo().getFileName(), usage, version)
-                    .build();
+            DbObjectGroupModel dbObjectGroupModel = new DbObjectGroupModelBuilder()
+                .withId(GUIDFactory.newObjectGroupGUID(VitamThreadUtils.getVitamSession().getTenantId()).getId())
+                .withOpi(unitModel.getOpi())
+                .withFileInfoModel(objectDto.getFileInfo().getFileName())
+                .withQualifiers(objectDto.getId(), objectDto.getFileInfo().getFileName(), usage, version)
+                .build();
 
-            JsonNode jsonNode =
-                metadataRepository.saveObjectGroup((ObjectNode) JsonHandler.toJsonNode(dbObjectGroupModel));
+            JsonNode jsonNode = metadataRepository.saveObjectGroup(
+                (ObjectNode) JsonHandler.toJsonNode(dbObjectGroupModel)
+            );
             if (jsonNode == null) {
                 LOGGER.error("Error when trying to insert ObjectGroup : {})", dbObjectGroupModel);
                 throw new CollectInternalException("Error when trying to insert ObjectGroup : : " + dbObjectGroupModel);
@@ -212,9 +235,12 @@ public class CollectService {
         }
     }
 
-    private void addQualifierToObjectGroups(DbObjectGroupModel objectGroup, DataObjectVersionType usage, int version,
-        ObjectDto objectDto) throws CollectInternalException {
-
+    private void addQualifierToObjectGroups(
+        DbObjectGroupModel objectGroup,
+        DataObjectVersionType usage,
+        int version,
+        ObjectDto objectDto
+    ) throws CollectInternalException {
         try {
             UpdateMultiQuery query = QueryHandler.getQualifiersAddMultiQuery(objectGroup, usage, version, objectDto);
             metadataRepository.updateObjectGroupById(query, objectGroup.getId(), objectGroup.getOpi());
@@ -224,14 +250,23 @@ public class CollectService {
         }
     }
 
-    private void addVersionToObjectGroups(DbQualifiersModel qualifierModelToUpdate, DbObjectGroupModel objectGroup,
-        DataObjectVersionType usage, int version, List<DbQualifiersModel> qualifiers, ObjectDto objectDto)
-        throws CollectInternalException {
-
+    private void addVersionToObjectGroups(
+        DbQualifiersModel qualifierModelToUpdate,
+        DbObjectGroupModel objectGroup,
+        DataObjectVersionType usage,
+        int version,
+        List<DbQualifiersModel> qualifiers,
+        ObjectDto objectDto
+    ) throws CollectInternalException {
         try {
-            UpdateMultiQuery query =
-                QueryHandler.getQualifiersUpdateMultiQuery(qualifierModelToUpdate, usage, version, qualifiers,
-                    objectDto, objectGroup.getNbc());
+            UpdateMultiQuery query = QueryHandler.getQualifiersUpdateMultiQuery(
+                qualifierModelToUpdate,
+                usage,
+                version,
+                qualifiers,
+                objectDto,
+                objectGroup.getNbc()
+            );
 
             metadataRepository.updateObjectGroupById(query, objectGroup.getId(), objectGroup.getOpi());
         } catch (InvalidParseOperationException | InvalidCreateOperationException e) {
@@ -245,7 +280,8 @@ public class CollectService {
             if (unitModel.getOg() == null) {
                 LOGGER.debug("Cannot found any got attached to unit with id({}))", unitModel.getId());
                 throw new IllegalArgumentException(
-                    "Cannot found any object attached to unit with id(" + unitModel.getId() + ")");
+                    "Cannot found any object attached to unit with id(" + unitModel.getId() + ")"
+                );
             }
 
             JsonNode objectGroup = metadataRepository.selectObjectGroupById(unitModel.getOg(), true);
@@ -256,16 +292,22 @@ public class CollectService {
         }
     }
 
-    public void addBinaryInfoToQualifier(DbObjectGroupModel dbObjectGroupModel, DataObjectVersionType usage,
-        int version, InputStream uploadedInputStream) throws CollectInternalException {
-
-        DbQualifiersModel qualifierModelToUpdate =
-            CollectHelper.findQualifier(dbObjectGroupModel.getQualifiers(), usage);
+    public void addBinaryInfoToQualifier(
+        DbObjectGroupModel dbObjectGroupModel,
+        DataObjectVersionType usage,
+        int version,
+        InputStream uploadedInputStream
+    ) throws CollectInternalException {
+        DbQualifiersModel qualifierModelToUpdate = CollectHelper.findQualifier(
+            dbObjectGroupModel.getQualifiers(),
+            usage
+        );
 
         if (qualifierModelToUpdate == null) {
             LOGGER.debug("Cannot found usage for object  with id({}))", dbObjectGroupModel.getId());
             throw new IllegalArgumentException(
-                "Cannot found usage for object with id(" + dbObjectGroupModel.getId() + ")");
+                "Cannot found usage for object with id(" + dbObjectGroupModel.getId() + ")"
+            );
         }
 
         DbVersionsModel dbVersionsModel = CollectHelper.getObjectVersionsModel(dbObjectGroupModel, usage, version);
@@ -273,7 +315,8 @@ public class CollectService {
         if (dbVersionsModel == null) {
             LOGGER.debug("Cannot found version for object  with id({}))", dbObjectGroupModel.getId());
             throw new IllegalArgumentException(
-                "Cannot found version for object with id(" + dbObjectGroupModel.getId() + ")");
+                "Cannot found version for object with id(" + dbObjectGroupModel.getId() + ")"
+            );
         }
 
         File file = null;
@@ -283,9 +326,11 @@ public class CollectService {
             file = writeToTemporaryFile(uploadedInputStream, extension);
 
             CountingInputStream countingInputStream = new CountingInputStream(new FileInputStream(file));
-            String digest = pushStreamToWorkspace(dbObjectGroupModel.getOpi(), countingInputStream,
-                CONTENT_FOLDER.concat(File.separator).concat(fileName));
-
+            String digest = pushStreamToWorkspace(
+                dbObjectGroupModel.getOpi(),
+                countingInputStream,
+                CONTENT_FOLDER.concat(File.separator).concat(fileName)
+            );
 
             FormatIdentifierResponse formatIdentifierResponse = detectFileFormat(file);
             if (null != formatIdentifierResponse) {
@@ -303,7 +348,6 @@ public class CollectService {
             dbVersionsModel.setMessageDigest(digest);
             dbVersionsModel.setAlgorithm(DigestType.SHA512.getName());
             dbVersionsModel.setSize(countingInputStream.getByteCount());
-
 
             qualifierModelToUpdate.getVersions().set(indexVersionsModel, dbVersionsModel);
             dbObjectGroupModel.getQualifiers().set(indexQualifier, qualifierModelToUpdate);
@@ -361,19 +405,25 @@ public class CollectService {
             FormatIdentifier formatIdentifier = formatIdentifierFactory.getFormatIdentifierFor(FORMAT_IDENTIFIER_ID);
             final List<FormatIdentifierResponse> formats = formatIdentifier.analysePath(fileToDetect.toPath());
             return CollectHelper.getFirstPronomFormat(formats);
-        } catch (FormatIdentifierNotFoundException | FormatIdentifierBadRequestException |
-                 FormatIdentifierTechnicalException | FormatIdentifierFactoryException |
-                 FileFormatNotFoundException e) {
+        } catch (
+            FormatIdentifierNotFoundException
+            | FormatIdentifierBadRequestException
+            | FormatIdentifierTechnicalException
+            | FormatIdentifierFactoryException
+            | FileFormatNotFoundException e
+        ) {
             throw new CollectInternalException("Can't detect format for the object : ", e);
         }
     }
 
     public Response getBinaryByUsageAndVersion(CollectUnitModel unitModel, DataObjectVersionType usage, int version)
         throws StorageNotFoundException, CollectInternalException {
-
         DbObjectGroupModel dbObjectGroupModel = getDbObjectGroup(unitModel);
-        DbVersionsModel finalversionsResponse =
-            CollectHelper.getObjectVersionsModel(dbObjectGroupModel, usage, version);
+        DbVersionsModel finalversionsResponse = CollectHelper.getObjectVersionsModel(
+            dbObjectGroupModel,
+            usage,
+            version
+        );
 
         String filename = null;
         if (finalversionsResponse != null) {
@@ -385,8 +435,11 @@ public class CollectService {
         }
         try (WorkspaceClient workspaceClient = workspaceCollectClientFactory.getClient()) {
             Response binary = workspaceClient.getObject(unitModel.getOpi(), filename);
-            return new VitamAsyncInputStreamResponse(binary, Response.Status.OK,
-                MediaType.APPLICATION_OCTET_STREAM_TYPE);
+            return new VitamAsyncInputStreamResponse(
+                binary,
+                Response.Status.OK,
+                MediaType.APPLICATION_OCTET_STREAM_TYPE
+            );
         } catch (ContentAddressableStorageServerException | ContentAddressableStorageNotFoundException e) {
             LOGGER.error("Cannot found got with id ");
             throw new CollectInternalException("Cannot found got with id");

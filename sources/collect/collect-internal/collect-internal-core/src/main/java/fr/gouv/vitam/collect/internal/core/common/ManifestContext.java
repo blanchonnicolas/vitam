@@ -62,13 +62,21 @@ public class ManifestContext {
     @JsonProperty("Comment")
     private String comment;
 
-    public ManifestContext() {
-    }
+    public ManifestContext() {}
 
-    public ManifestContext(String acquisitionInformation, String legalStatus,
-        String archivalAgreement, String messageIdentifier, String archivalAgencyIdentifier,
-        String transferingAgencyIdentifier, String originatingAgencyIdentifier, String submissionAgencyIdentifier,
-        String archivalProfile, String comment, String unitUp) {
+    public ManifestContext(
+        String acquisitionInformation,
+        String legalStatus,
+        String archivalAgreement,
+        String messageIdentifier,
+        String archivalAgencyIdentifier,
+        String transferingAgencyIdentifier,
+        String originatingAgencyIdentifier,
+        String submissionAgencyIdentifier,
+        String archivalProfile,
+        String comment,
+        String unitUp
+    ) {
         this.acquisitionInformation = acquisitionInformation;
         this.legalStatus = legalStatus;
         this.archivalAgreement = archivalAgreement;

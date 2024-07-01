@@ -38,7 +38,6 @@ import fr.gouv.culture.archivesdefrance.seda.v2.OrganizationType;
 import fr.gouv.culture.archivesdefrance.seda.v2.RelatedObjectReferenceType;
 import fr.gouv.culture.archivesdefrance.seda.v2.TextType;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -179,7 +178,6 @@ public class DescriptiveMetadataModel {
 
     @JsonProperty("TextContent")
     private List<String> textContent;
-
 
     @JsonProperty("OriginatingSystemIdReplyTo")
     private String originatingSystemIdReplyTo;
@@ -796,14 +794,12 @@ public class DescriptiveMetadataModel {
         this.gps = gps;
     }
 
-
     /**
      * @return
      */
     public List<String> getTextContent() {
         return textContent;
     }
-
 
     /**
      * @param textContent

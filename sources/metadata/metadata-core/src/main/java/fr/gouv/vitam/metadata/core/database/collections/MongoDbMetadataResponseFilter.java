@@ -162,12 +162,18 @@ public class MongoDbMetadataResponseFilter {
                     replace(document, Unit.ELIMINATION, PROJECTIONARGS.ELIMINATION.exactToken());
                     break;
                 case COMPUTEDINHERITEDRULES:
-                    replace(document, Unit.COMPUTED_INHERITED_RULES,
-                        PROJECTIONARGS.COMPUTEDINHERITEDRULES.exactToken());
+                    replace(
+                        document,
+                        Unit.COMPUTED_INHERITED_RULES,
+                        PROJECTIONARGS.COMPUTEDINHERITEDRULES.exactToken()
+                    );
                     break;
                 case VALIDCOMPUTEDINHERITEDRULES:
-                    replace(document, Unit.VALID_COMPUTED_INHERITED_RULES,
-                        PROJECTIONARGS.VALIDCOMPUTEDINHERITEDRULES.exactToken());
+                    replace(
+                        document,
+                        Unit.VALID_COMPUTED_INHERITED_RULES,
+                        PROJECTIONARGS.VALIDCOMPUTEDINHERITEDRULES.exactToken()
+                    );
                     break;
                 case OPTS:
                     replace(document, Unit.OPERATION_TRANSFERS, PROJECTIONARGS.OPTS.exactToken());
@@ -176,14 +182,25 @@ public class MongoDbMetadataResponseFilter {
                     replace(document, MetadataDocument.SEDAVERSION, VitamFieldsHelper.sedaVersion());
                     break;
                 case IMPLEMENTATIONVERSION:
-                    replace(document, MetadataDocument.IMPLEMENTATIONVERSION,
-                        VitamFieldsHelper.implementationVersion());
+                    replace(
+                        document,
+                        MetadataDocument.IMPLEMENTATIONVERSION,
+                        VitamFieldsHelper.implementationVersion()
+                    );
                     break;
                 case APPROXIMATE_CREATION_DATE:
-                    replace(document, MetadataDocument.APPROXIMATE_CREATION_DATE, VitamFieldsHelper.approximateCreationDate());
+                    replace(
+                        document,
+                        MetadataDocument.APPROXIMATE_CREATION_DATE,
+                        VitamFieldsHelper.approximateCreationDate()
+                    );
                     break;
                 case APPROXIMATE_UPDATE_DATE:
-                    replace(document, MetadataDocument.APPROXIMATE_UPDATE_DATE, VitamFieldsHelper.approximateUpdateDate());
+                    replace(
+                        document,
+                        MetadataDocument.APPROXIMATE_UPDATE_DATE,
+                        VitamFieldsHelper.approximateUpdateDate()
+                    );
                     break;
                 case DUA:
                 case ALL:

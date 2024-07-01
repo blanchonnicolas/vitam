@@ -30,6 +30,7 @@ import fr.gouv.vitam.common.database.builder.request.configuration.BuilderToken;
 import fr.gouv.vitam.common.logging.SysErrLogger;
 
 public class ParserTokens extends BuilderToken {
+
     public static final char DEFAULT_HASH_PREFIX_CHAR = '#';
     public static final char DEFAULT_UNDERSCORE_PREFIX_CHAR = '_';
     private static final String DEFAULT_HASH_PREFIX = "#";
@@ -210,7 +211,6 @@ public class ParserTokens extends BuilderToken {
          */
         OPTS("opts");
 
-
         private static final String NOT_FOUND = "Not found";
         private final String exactToken;
 
@@ -229,8 +229,12 @@ public class ParserTokens extends BuilderToken {
          */
         public static boolean isValid(String token) {
             // Exception for getObject sliced projection
-            return token.startsWith("_qualifiers.") || token.equals("mgt") || token.startsWith("_mgt.") ||
-                token.startsWith("_storage.");
+            return (
+                token.startsWith("_qualifiers.") ||
+                token.equals("mgt") ||
+                token.startsWith("_mgt.") ||
+                token.startsWith("_storage.")
+            );
         }
 
         /**

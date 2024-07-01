@@ -65,6 +65,7 @@ import java.util.Map;
  * XML: check if XML file is not exceed the limit size, and it does not contain CDATA, ENTITY or SCRIPT tag
  */
 public class SanityChecker {
+
     private static final String JSON_IS_NOT_VALID_FROM_SANITIZE_CHECK = "Json is not valid from Sanitize check";
     private static final int DEFAULT_LIMIT_PARAMETER_SIZE = 5000;
     private static final int DEFAULT_LIMIT_FIELD_SIZE = 10000000;
@@ -103,7 +104,6 @@ public class SanityChecker {
         // Empty constructor
     }
 
-
     /**
      * checkXMLAll : check xml sanity all aspect : size, tag size, invalid tag
      *
@@ -138,7 +138,6 @@ public class SanityChecker {
             throw new InvalidParseOperationException(JSON_IS_NOT_VALID_FROM_SANITIZE_CHECK, e);
         }
     }
-
 
     /**
      * checkJsonAll : Check sanity of json : size, invalid tag
@@ -181,7 +180,6 @@ public class SanityChecker {
         checkJsonFileSize(json);
         checkJsonSanity(JsonHandler.getFromString(json));
     }
-
 
     /**
      * checkParameter : Check sanity of String: no javascript/xml tag, neither html tag
@@ -236,7 +234,6 @@ public class SanityChecker {
      */
     public static void checkHeadersMap(MultivaluedMap<String, String> requestHeaders)
         throws InvalidParseOperationException {
-
         if (requestHeaders != null && !requestHeaders.isEmpty()) {
             for (final String header : requestHeaders.keySet()) {
                 // Validate Header's name
@@ -251,8 +248,12 @@ public class SanityChecker {
 
                 // Validate Header's values
                 final List<String> values = requestHeaders.get(header);
-                if (values != null && values.stream()
-                    .anyMatch(value -> isStringInfected(value, HTTP_HEADER_VALUE) | isIssueOnParam(value))) {
+                if (
+                    values != null &&
+                    values
+                        .stream()
+                        .anyMatch(value -> isStringInfected(value, HTTP_HEADER_VALUE) | isIssueOnParam(value))
+                ) {
                     throw new InvalidParseOperationException(String.format("%s header has wrong value", header));
                 }
             }
@@ -265,7 +266,8 @@ public class SanityChecker {
 
         if (values.size() > 1) {
             throw new InvalidParseOperationException(
-                String.format("Multiple %s headers detected. SSL Certificate injection attack?", header));
+                String.format("Multiple %s headers detected. SSL Certificate injection attack?", header)
+            );
         }
         if (isStringInfected(requestHeaders.getFirst(header), HTTP_HEADER_SSL_CLIENT_CERT_VALUE, false)) {
             throw new InvalidParseOperationException(String.format("%s header has wrong value", header));
@@ -280,7 +282,6 @@ public class SanityChecker {
      */
     public static void checkUriParametersMap(MultivaluedMap<String, String> uriParameters)
         throws InvalidParseOperationException {
-
         if (uriParameters != null && !uriParameters.isEmpty()) {
             for (final String parameter : uriParameters.keySet()) {
                 // Validate Parameter's name
@@ -290,8 +291,12 @@ public class SanityChecker {
 
                 // Validate Parameter's values
                 final List<String> values = uriParameters.get(parameter);
-                if (values != null && values.stream()
-                    .anyMatch(value -> isStringInfected(value, HTTP_PARAMETER_VALUE) | isIssueOnParam(value))) {
+                if (
+                    values != null &&
+                    values
+                        .stream()
+                        .anyMatch(value -> isStringInfected(value, HTTP_PARAMETER_VALUE) | isIssueOnParam(value))
+                ) {
                     throw new InvalidParseOperationException(String.format("%s parameter has wrong value", parameter));
                 }
             }
@@ -335,10 +340,8 @@ public class SanityChecker {
      * @throws IOException when read file error
      * @throws InvalidParseOperationException when Sanity Check is in error
      */
-    protected static void checkXmlSanityTagValueSize(File xmlFile)
-        throws InvalidParseOperationException, IOException {
+    protected static void checkXmlSanityTagValueSize(File xmlFile) throws InvalidParseOperationException, IOException {
         try (final InputStream xmlStream = new FileInputStream(xmlFile)) {
-
             final XMLInputFactory xmlInputFactory = XMLInputFactoryUtils.newInstance();
             // read XML input stream
             XMLStreamReader reader = null;
@@ -346,9 +349,11 @@ public class SanityChecker {
                 reader = xmlInputFactory.createXMLStreamReader(xmlStream);
                 while (reader.hasNext()) {
                     final int event = reader.next();
-                    if (event == XMLStreamConstants.CDATA ||
+                    if (
+                        event == XMLStreamConstants.CDATA ||
                         event == XMLStreamConstants.ENTITY_DECLARATION ||
-                        event == XMLStreamConstants.ENTITY_REFERENCE) {
+                        event == XMLStreamConstants.ENTITY_REFERENCE
+                    ) {
                         throw new InvalidParseOperationException("XML contains CDATA or ENTITY");
                     }
                     if (event == XMLStreamConstants.CHARACTERS) {
@@ -457,8 +462,7 @@ public class SanityChecker {
      * @param invalidTag data to check as String
      * @throws InvalidParseOperationException when Sanity Check is in error
      */
-    private static void checkSanityTags(String dataLine, String invalidTag)
-        throws InvalidParseOperationException {
+    private static void checkSanityTags(String dataLine, String invalidTag) throws InvalidParseOperationException {
         if (dataLine != null && invalidTag != null && dataLine.contains(invalidTag)) {
             throw new InvalidParseOperationException("Invalid tag sanity check");
         }
@@ -528,8 +532,7 @@ public class SanityChecker {
      */
     private static void checkJsonFileSize(String json) throws InvalidParseOperationException {
         if (json.length() > getLimitJsonSize()) {
-            throw new InvalidParseOperationException(
-                "Json size exceeds sanity check : " + getLimitJsonSize());
+            throw new InvalidParseOperationException("Json size exceeds sanity check : " + getLimitJsonSize());
         }
     }
 

@@ -92,15 +92,25 @@ public class MetadataServiceTest {
     private static final String UNIT_FILE = "collect_unit.json";
     private static final String UNIT_UP = "UNIT_UP";
 
-    @Rule public MockitoRule mockitoRule = MockitoJUnit.rule();
-    @Rule public TempFolderRule tempFolder = new TempFolderRule();
-    @Rule public RunWithCustomExecutorRule runInThread =
-        new RunWithCustomExecutorRule(VitamThreadPoolExecutor.getDefaultExecutor());
+    @Rule
+    public MockitoRule mockitoRule = MockitoJUnit.rule();
 
-    @Mock private MetadataRepository metadataRepository;
-    @Mock private ProjectRepository projectRepository;
+    @Rule
+    public TempFolderRule tempFolder = new TempFolderRule();
 
-    @InjectMocks private MetadataService metadataService;
+    @Rule
+    public RunWithCustomExecutorRule runInThread = new RunWithCustomExecutorRule(
+        VitamThreadPoolExecutor.getDefaultExecutor()
+    );
+
+    @Mock
+    private MetadataRepository metadataRepository;
+
+    @Mock
+    private ProjectRepository projectRepository;
+
+    @InjectMocks
+    private MetadataService metadataService;
 
     private TransactionModel transactionModel;
 
@@ -156,7 +166,8 @@ public class MetadataServiceTest {
             when(projectRepository.findProjectById(eq(PROJECT_ID))).thenReturn(Optional.of(projectModel));
 
             when(metadataRepository.selectUnits(any(JsonNode.class), anyString())).thenReturn(
-                new RequestResponseOK<>());
+                new RequestResponseOK<>()
+            );
 
             AtomicReference<String> unitUp = new AtomicReference<>();
             when(metadataRepository.saveArchiveUnits(anyList())).thenAnswer(a -> {
@@ -167,9 +178,13 @@ public class MetadataServiceTest {
 
             metadataService.saveArchiveUnit(unit, transactionModel);
 
-            verify(metadataRepository).saveArchiveUnit(ArgumentMatchers.argThat(
-                e -> !e.get(VitamFieldsHelper.unitups()).get(0).asText().equals(unitUp.get()) &&
-                    e.get(VitamFieldsHelper.unitups()).get(0).asText().equals("ID")));
+            verify(metadataRepository).saveArchiveUnit(
+                ArgumentMatchers.argThat(
+                    e ->
+                        !e.get(VitamFieldsHelper.unitups()).get(0).asText().equals(unitUp.get()) &&
+                        e.get(VitamFieldsHelper.unitups()).get(0).asText().equals("ID")
+                )
+            );
         }
     }
 
@@ -184,7 +199,8 @@ public class MetadataServiceTest {
             when(projectRepository.findProjectById(eq(PROJECT_ID))).thenReturn(Optional.of(projectModel));
 
             when(metadataRepository.selectUnits(any(JsonNode.class), anyString())).thenReturn(
-                new RequestResponseOK<>());
+                new RequestResponseOK<>()
+            );
 
             AtomicReference<String> unitUp = new AtomicReference<>();
             when(metadataRepository.saveArchiveUnits(anyList())).thenAnswer(a -> {
@@ -196,7 +212,8 @@ public class MetadataServiceTest {
             metadataService.saveArchiveUnit(unit, transactionModel);
 
             verify(metadataRepository).saveArchiveUnit(
-                ArgumentMatchers.argThat(e -> e.get(VitamFieldsHelper.unitups()).get(0).asText().equals(unitUp.get())));
+                ArgumentMatchers.argThat(e -> e.get(VitamFieldsHelper.unitups()).get(0).asText().equals(unitUp.get()))
+            );
         }
     }
 
@@ -209,7 +226,6 @@ public class MetadataServiceTest {
             // Given
             projectModel.setUnitUp(UNIT_UP);
 
-
             MetadataUnitUp metadataUnitUp = new MetadataUnitUp();
             metadataUnitUp.setMetadataKey("Status");
             metadataUnitUp.setMetadataValue("Pret");
@@ -220,7 +236,8 @@ public class MetadataServiceTest {
             when(projectRepository.findProjectById(eq("PROJECT_ID"))).thenReturn(Optional.of(projectModel));
 
             when(metadataRepository.selectUnits(any(JsonNode.class), anyString())).thenReturn(
-                new RequestResponseOK<>());
+                new RequestResponseOK<>()
+            );
 
             AtomicReference<String> unitUp = new AtomicReference<>();
             when(metadataRepository.saveArchiveUnits(anyList())).thenAnswer(a -> {
@@ -234,8 +251,9 @@ public class MetadataServiceTest {
 
             // Then
             verify(metadataRepository).saveArchiveUnits(anyList());
-            verify(metadataRepository).saveArchiveUnit(ArgumentMatchers.argThat(
-                e -> !e.get(VitamFieldsHelper.unitups()).get(0).asText().equals(unitUp.get())));
+            verify(metadataRepository).saveArchiveUnit(
+                ArgumentMatchers.argThat(e -> !e.get(VitamFieldsHelper.unitups()).get(0).asText().equals(unitUp.get()))
+            );
         }
     }
 
@@ -255,21 +273,32 @@ public class MetadataServiceTest {
         VitamThreadUtils.getVitamSession().setRequestId(GUIDFactory.newRequestIdGUID(0).getId());
         AtomicReference<List<JsonNode>> requestReference = new AtomicReference<>();
 
-        final List<JsonNode> unitsJson =
-            JsonHandler.getFromFileAsTypeReference(PropertiesUtils.getResourceFile(UNITS_WITH_GRAPH_PATH),
-                new TypeReference<>() {
-                });
+        final List<JsonNode> unitsJson = JsonHandler.getFromFileAsTypeReference(
+            PropertiesUtils.getResourceFile(UNITS_WITH_GRAPH_PATH),
+            new TypeReference<>() {}
+        );
 
-        when(metadataRepository.atomicBulkUpdate(any())).thenAnswer((e) -> {
+        when(metadataRepository.atomicBulkUpdate(any())).thenAnswer(e -> {
             final List<JsonNode> argument = e.getArgument(0);
             requestReference.set(argument);
-            return new RequestResponseOK<>().addAllResults(List.of(JsonHandler.toJsonNode(
-                new RequestResponseOK<>().addResult(JsonHandler.createObjectNode().put("#status", "OK")))));
+            return new RequestResponseOK<>()
+                .addAllResults(
+                    List.of(
+                        JsonHandler.toJsonNode(
+                            new RequestResponseOK<>().addResult(JsonHandler.createObjectNode().put("#status", "OK"))
+                        )
+                    )
+                );
         });
 
         when(metadataRepository.selectUnits(any(SelectMultiQuery.class), any())).thenReturn(
-            new ScrollSpliterator<>(mock(SelectMultiQuery.class),
-                (query) -> new RequestResponseOK<JsonNode>().addAllResults(new ArrayList<>(unitsJson)), 0, 0));
+            new ScrollSpliterator<>(
+                mock(SelectMultiQuery.class),
+                query -> new RequestResponseOK<JsonNode>().addAllResults(new ArrayList<>(unitsJson)),
+                0,
+                0
+            )
+        );
 
         try (InputStream is = PropertiesUtils.getResourceAsStream(METADATA_FILE)) {
             metadataService.updateUnits(transactionModel, is);
@@ -286,7 +315,8 @@ public class MetadataServiceTest {
         JsonNode unitJson = createAttachmentUnit();
 
         when(metadataRepository.selectUnits(any(JsonNode.class), eq(TRANSACTION_ID))).thenReturn(
-            new RequestResponseOK<JsonNode>().addResult(unitJson));
+            new RequestResponseOK<JsonNode>().addResult(unitJson)
+        );
         HashMap<String, String> result = metadataService.prepareAttachmentUnits(projectModel, TRANSACTION_ID);
 
         assertThat(result).containsOnlyKeys(MetadataHelper.STATIC_ATTACHMENT);
@@ -300,7 +330,8 @@ public class MetadataServiceTest {
         VitamThreadUtils.getVitamSession().setTenantId(TENANT_ID);
         projectModel.setUnitUp("SYSTEM_ID");
         when(metadataRepository.selectUnits(any(JsonNode.class), eq(TRANSACTION_ID))).thenReturn(
-            new RequestResponseOK<>());
+            new RequestResponseOK<>()
+        );
         HashMap<String, String> result = metadataService.prepareAttachmentUnits(projectModel, TRANSACTION_ID);
 
         assertThat(result).containsOnlyKeys(MetadataHelper.STATIC_ATTACHMENT);
@@ -318,7 +349,8 @@ public class MetadataServiceTest {
         up.setMetadataKey("VALUE");
         projectModel.setUnitUps(List.of(up));
         when(metadataRepository.selectUnits(any(JsonNode.class), eq(TRANSACTION_ID))).thenReturn(
-            new RequestResponseOK<>());
+            new RequestResponseOK<>()
+        );
         HashMap<String, String> result = metadataService.prepareAttachmentUnits(projectModel, TRANSACTION_ID);
 
         assertThat(result).containsOnlyKeys(MetadataHelper.DYNAMIC_ATTACHEMENT + "_" + "SYSTEM_ID");
@@ -336,7 +368,8 @@ public class MetadataServiceTest {
         JsonNode unitJson = createAttachmentUnit();
 
         when(metadataRepository.selectUnits(any(JsonNode.class), eq(TRANSACTION_ID))).thenReturn(
-            new RequestResponseOK<JsonNode>().addResult(unitJson));
+            new RequestResponseOK<JsonNode>().addResult(unitJson)
+        );
         HashMap<String, String> result = metadataService.prepareAttachmentUnits(projectModel, TRANSACTION_ID);
 
         assertThat(result).containsOnlyKeys(MetadataHelper.DYNAMIC_ATTACHEMENT + "_" + "SYSTEM_ID");

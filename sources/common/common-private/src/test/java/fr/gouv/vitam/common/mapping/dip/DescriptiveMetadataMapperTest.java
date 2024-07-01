@@ -69,8 +69,10 @@ public class DescriptiveMetadataMapperTest {
         descriptiveMetadataModel.setTitle_(title_);
 
         // When
-        DescriptiveMetadataContentType contentType =
-            descriptiveMetadataMapper.map(descriptiveMetadataModel, new ArrayList<>());
+        DescriptiveMetadataContentType contentType = descriptiveMetadataMapper.map(
+            descriptiveMetadataModel,
+            new ArrayList<>()
+        );
 
         // Then
         assertThat(contentType.getTitle())
@@ -93,8 +95,10 @@ public class DescriptiveMetadataMapperTest {
         descriptiveMetadataModel.setDescription_(description_);
 
         // When
-        DescriptiveMetadataContentType contentType =
-            descriptiveMetadataMapper.map(descriptiveMetadataModel, new ArrayList<>());
+        DescriptiveMetadataContentType contentType = descriptiveMetadataMapper.map(
+            descriptiveMetadataModel,
+            new ArrayList<>()
+        );
 
         // Then
         assertThat(contentType.getDescription())
@@ -118,8 +122,10 @@ public class DescriptiveMetadataMapperTest {
         listeCustodialHistoryItemType.add(custodialHistoryItemType);
         listeCustodialHistoryItemType.add(custodialHistoryItemType2);
 
-        List<String> custodialHistoryItem =
-            listeCustodialHistoryItemType.stream().map(x -> x.getValue()).collect(Collectors.toList());
+        List<String> custodialHistoryItem = listeCustodialHistoryItemType
+            .stream()
+            .map(x -> x.getValue())
+            .collect(Collectors.toList());
 
         DataObjectReference reference = new DataObjectReference();
         reference.setDataObjectReferenceId("ID222");
@@ -131,13 +137,15 @@ public class DescriptiveMetadataMapperTest {
         descriptiveMetadataModel.setCustodialHistory(custodialHistoryModel);
 
         // When
-        DescriptiveMetadataContentType contentType =
-            descriptiveMetadataMapper.map(descriptiveMetadataModel, new ArrayList<>());
+        DescriptiveMetadataContentType contentType = descriptiveMetadataMapper.map(
+            descriptiveMetadataModel,
+            new ArrayList<>()
+        );
 
         // Then
-        assertThat(contentType.getCustodialHistory().getCustodialHistoryFile().getDataObjectReferenceId())
-            .isEqualTo(reference.getDataObjectReferenceId());
+        assertThat(contentType.getCustodialHistory().getCustodialHistoryFile().getDataObjectReferenceId()).isEqualTo(
+            reference.getDataObjectReferenceId()
+        );
         assertThat(contentType.getCustodialHistory().getCustodialHistoryItem().size()).isEqualTo(2);
     }
-
 }

@@ -69,7 +69,6 @@ public class IngestContractModel extends AbstractContractModel {
 
     public static final String TAG_MANAGEMENT_CONTRACT_ID = "ManagementContractId";
 
-
     @JsonProperty(LINK_PARENT_ID)
     private String linkParentId;
 
@@ -78,11 +77,13 @@ public class IngestContractModel extends AbstractContractModel {
 
     @JsonProperty(TAG_CHECK_PARENT_LINK)
     private IngestContractCheckState checkParentLink;
+
     /**
      * masterMandatory is true by default if no value is specified
      */
     @JsonProperty(MASTER_MANDATORY)
     private boolean masterMandatory = true;
+
     /**
      * everyDataObjectVersion is false by default if no value is specified
      */
@@ -91,16 +92,19 @@ public class IngestContractModel extends AbstractContractModel {
 
     @JsonProperty(DATA_OBJECT_VERSION)
     private Set<String> dataObjectVersion;
+
     /**
      * formatUnidentifiedAuthorized is false  by default if no value is specified
      */
     @JsonProperty(FORMAT_UNIDENTIFIED_AUTHORIZED)
     private boolean formatUnidentifiedAuthorized = false;
+
     /**
      * computedInheritedRules is false  by default if no value is specified
      */
     @JsonProperty(COMPUTE_INHERITED_RULES_AT_INGEST)
     private boolean computeInheritedRulesAtIngest = false;
+
     /**
      * everyFormatType is True by default if no value is specified.
      */
@@ -116,12 +120,9 @@ public class IngestContractModel extends AbstractContractModel {
     @JsonProperty(TAG_MANAGEMENT_CONTRACT_ID)
     private String managementContractId;
 
-
-
     public IngestContractModel() {
         super();
     }
-
 
     /**
      * @return linkParentId
@@ -157,7 +158,6 @@ public class IngestContractModel extends AbstractContractModel {
     public IngestContractCheckState getCheckParentLink() {
         return this.checkParentLink;
     }
-
 
     /**
      * Set or change the check parent link status
@@ -196,7 +196,6 @@ public class IngestContractModel extends AbstractContractModel {
         this.dataObjectVersion = dataObjectVersion;
         return this;
     }
-
 
     public boolean isFormatUnidentifiedAuthorized() {
         return formatUnidentifiedAuthorized;

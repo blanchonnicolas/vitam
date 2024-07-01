@@ -32,9 +32,9 @@ import fr.gouv.vitam.access.internal.client.AccessInternalClient;
 import fr.gouv.vitam.access.internal.client.AccessInternalClientFactory;
 import fr.gouv.vitam.collect.common.dto.ProjectDto;
 import fr.gouv.vitam.collect.common.dto.TransactionDto;
+import fr.gouv.vitam.collect.common.enums.TransactionStatus;
 import fr.gouv.vitam.collect.common.exception.CollectInternalException;
 import fr.gouv.vitam.collect.internal.core.common.TransactionModel;
-import fr.gouv.vitam.collect.common.enums.TransactionStatus;
 import fr.gouv.vitam.collect.internal.core.repository.MetadataRepository;
 import fr.gouv.vitam.collect.internal.core.repository.TransactionRepository;
 import fr.gouv.vitam.common.PropertiesUtils;
@@ -91,8 +91,9 @@ public class TransactionServiceTest {
     public MockitoRule rule = MockitoJUnit.rule();
 
     @Rule
-    public RunWithCustomExecutorRule runInThread =
-        new RunWithCustomExecutorRule(VitamThreadPoolExecutor.getDefaultExecutor());
+    public RunWithCustomExecutorRule runInThread = new RunWithCustomExecutorRule(
+        VitamThreadPoolExecutor.getDefaultExecutor()
+    );
 
     @InjectMocks
     private TransactionService transactionService;
@@ -102,19 +103,25 @@ public class TransactionServiceTest {
 
     @Mock
     private ProjectService projectService;
+
     @Mock
     private WorkspaceClientFactory workspaceCollectClientFactory;
+
     @Mock
     private WorkspaceClient workspaceClient;
+
     @Mock
     private AccessInternalClient accessInternalClient;
+
     @Mock
     private AccessInternalClientFactory accessInternalClientFactory;
+
     @Mock
     private IngestInternalClientFactory ingestInternalClientFactory;
 
     @Mock
     private IngestInternalClient ingestInternalClient;
+
     @Mock
     private MetadataRepository metadataRepository;
 
@@ -126,12 +133,23 @@ public class TransactionServiceTest {
     @Test
     public void createCollectTest() throws CollectInternalException {
         // Given
-        TransactionDto transactionDto =
-            new TransactionDto("XXXX00000111111", null, null, null, null, null, null, null, null, null, null, null,
-                null, null,
-                TransactionStatus.OPEN.toString());
-
-
+        TransactionDto transactionDto = new TransactionDto(
+            "XXXX00000111111",
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            TransactionStatus.OPEN.toString()
+        );
 
         // When
         ProjectDto project = new ProjectDto();
@@ -142,39 +160,60 @@ public class TransactionServiceTest {
         ArgumentCaptor<TransactionModel> collectModelCaptor = ArgumentCaptor.forClass(TransactionModel.class);
         then(transactionRepository).should().createTransaction(collectModelCaptor.capture());
         TransactionModel transactionModelAdded = collectModelCaptor.getValue();
-        Assertions.assertThat(transactionModelAdded.getId()).isEqualTo(
-            transactionDto.getId());
-
+        Assertions.assertThat(transactionModelAdded.getId()).isEqualTo(transactionDto.getId());
     }
 
     @Test
     public void testFindCollect() throws CollectInternalException {
         // Given
         final String idCollect = "XXXX000002222222";
-        TransactionDto transactionDto =
-            new TransactionDto("XXXX00000111111", null, null, null, null, null, null, null, null, null, null, null,
-                null, null,
-                TransactionStatus.OPEN.toString());
+        TransactionDto transactionDto = new TransactionDto(
+            "XXXX00000111111",
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            TransactionStatus.OPEN.toString()
+        );
         doReturn(Optional.of(transactionDto)).when(transactionRepository).findTransaction(any());
 
         // When
         transactionService.findTransaction(idCollect);
 
         // Then
-        then(transactionRepository).should()
-            .findTransaction(idCollect);
+        then(transactionRepository).should().findTransaction(idCollect);
     }
 
     @Test
     public void testCheckStatus_OK() {
         // Given
         final String idCollect = "XXXX000002222222";
-        TransactionModel transactionModel =
-            new TransactionModel(idCollect, null, null, TransactionStatus.OPEN, null, null, null, null);
+        TransactionModel transactionModel = new TransactionModel(
+            idCollect,
+            null,
+            null,
+            TransactionStatus.OPEN,
+            null,
+            null,
+            null,
+            null
+        );
 
         // When
-        boolean checkStatus =
-            transactionService.checkStatus(transactionModel, TransactionStatus.OPEN, TransactionStatus.ACK_KO);
+        boolean checkStatus = transactionService.checkStatus(
+            transactionModel,
+            TransactionStatus.OPEN,
+            TransactionStatus.ACK_KO
+        );
 
         // Then
         Assertions.assertThat(checkStatus).isTrue();
@@ -184,12 +223,23 @@ public class TransactionServiceTest {
     public void testCheckStatus_KO() {
         // Given
         final String idCollect = "XXXX000002222222";
-        TransactionModel transactionModel =
-            new TransactionModel(idCollect, null, null, TransactionStatus.OPEN, null, null, null, null);
+        TransactionModel transactionModel = new TransactionModel(
+            idCollect,
+            null,
+            null,
+            TransactionStatus.OPEN,
+            null,
+            null,
+            null,
+            null
+        );
 
         // When
-        boolean checkStatus =
-            transactionService.checkStatus(transactionModel, TransactionStatus.READY, TransactionStatus.ACK_KO);
+        boolean checkStatus = transactionService.checkStatus(
+            transactionModel,
+            TransactionStatus.READY,
+            TransactionStatus.ACK_KO
+        );
 
         // Then
         Assertions.assertThat(checkStatus).isFalse();
@@ -203,28 +253,29 @@ public class TransactionServiceTest {
         LogbookOperation logbookOperation = new LogbookOperation();
         logbookOperation.setId("5");
         LogbookEventOperation logbookEventOperation = new LogbookEventOperation();
-        logbookEventOperation
-            .setEvDetData(JsonHandler.unprettyPrint(JsonHandler.createObjectNode().put("data", "data")));
+        logbookEventOperation.setEvDetData(
+            JsonHandler.unprettyPrint(JsonHandler.createObjectNode().put("data", "data"))
+        );
         logbookEventOperation.setEvType("PROCESS_SIP_UNITARY");
         logbookOperation.setOutcome(StatusCode.OK.name());
-        logbookEventOperation.setOutMessg(
-            "My awesome message" + DETAILS + "OK:" + 3 + " WARNING:" + 0 + " KO:" + 0);
+        logbookEventOperation.setOutMessg("My awesome message" + DETAILS + "OK:" + 3 + " WARNING:" + 0 + " KO:" + 0);
         logbookEventOperation.setOutcome(StatusCode.OK.name());
         LogbookEventOperation logbookEventOperation2 = new LogbookEventOperation();
 
-        logbookEventOperation2
-            .setEvDetData(JsonHandler.unprettyPrint(JsonHandler.createObjectNode().put("data", "data")));
+        logbookEventOperation2.setEvDetData(
+            JsonHandler.unprettyPrint(JsonHandler.createObjectNode().put("data", "data"))
+        );
         logbookEventOperation2.setEvType("PROCESS_SIP_UNITARY");
         logbookEventOperation2.setOutcome(StatusCode.OK.name());
-        logbookEventOperation2.setOutMessg(
-            "My awesome message" + DETAILS + "OK:" + 3 + " WARNING:" + 0 + " KO:" + 0);
+        logbookEventOperation2.setOutMessg("My awesome message" + DETAILS + "OK:" + 3 + " WARNING:" + 0 + " KO:" + 0);
         List<LogbookEventOperation> logbookEventOperations = new ArrayList<>();
         logbookEventOperations.add(logbookEventOperation);
         logbookEventOperations.add(logbookEventOperation2);
         logbookOperation.setEvents(logbookEventOperations);
         JsonNode logbookOperationsNode = JsonHandler.toJsonNode(logbookOperation);
         when(accessInternalClient.selectOperation(any(), eq(true), eq(true))).thenReturn(
-            new RequestResponseOK<JsonNode>().addAllResults(Collections.singletonList(logbookOperationsNode)));
+            new RequestResponseOK<JsonNode>().addAllResults(Collections.singletonList(logbookOperationsNode))
+        );
         when(ingestInternalClientFactory.getClient()).thenReturn(ingestInternalClient);
         ProcessDetail processDetail1 = new ProcessDetail();
         processDetail1.setOperationId("4321");
@@ -235,7 +286,8 @@ public class TransactionServiceTest {
         processDetail2.setGlobalState("RUNNING");
         processDetail2.setStepStatus("OK");
         when(ingestInternalClient.listOperationsDetails(any())).thenReturn(
-            new RequestResponseOK<ProcessDetail>().addAllResults(Arrays.asList(processDetail1, processDetail2)));
+            new RequestResponseOK<ProcessDetail>().addAllResults(Arrays.asList(processDetail1, processDetail2))
+        );
         TransactionModel transactionModel1 = new TransactionModel();
         transactionModel1.setVitamOperationId("1234");
         transactionModel1.setId("1234");
@@ -248,8 +300,7 @@ public class TransactionServiceTest {
         when(transactionRepository.findTransactionsByQuery(any())).thenReturn(transactionModels);
         VitamThreadUtils.getVitamSession().setTenantId(1);
         // When - Then
-        assertThatCode(() -> transactionService.manageTransactionsStatus())
-            .doesNotThrowAnyException();
+        assertThatCode(() -> transactionService.manageTransactionsStatus()).doesNotThrowAnyException();
     }
 
     @Test
@@ -257,22 +308,33 @@ public class TransactionServiceTest {
         // Given
         when(workspaceCollectClientFactory.getClient()).thenReturn(workspaceClient);
         when(workspaceClient.isExistingContainer(any())).thenReturn(true);
-        final List<JsonNode> unitsJson =
-            JsonHandler.getFromFileAsTypeReference(PropertiesUtils.getResourceFile(UNITS_WITH_GRAPH_PATH),
-                new TypeReference<>() {
-                });
+        final List<JsonNode> unitsJson = JsonHandler.getFromFileAsTypeReference(
+            PropertiesUtils.getResourceFile(UNITS_WITH_GRAPH_PATH),
+            new TypeReference<>() {}
+        );
         when(metadataRepository.selectUnits(any(SelectMultiQuery.class), any())).thenReturn(
-            new ScrollSpliterator<>(mock(SelectMultiQuery.class),
-                (query) -> new RequestResponseOK<JsonNode>().addAllResults(new ArrayList<>(unitsJson)), 0, 0));
+            new ScrollSpliterator<>(
+                mock(SelectMultiQuery.class),
+                query -> new RequestResponseOK<JsonNode>().addAllResults(new ArrayList<>(unitsJson)),
+                0,
+                0
+            )
+        );
         doNothing().when(workspaceClient).deleteContainer(any(), eq(true));
         // When
         transactionService.deleteTransaction("1");
         // Then
         verify(metadataRepository, times(1)).deleteUnits(
-            List.of("aeaqaaaaaacpbveraqxzuamdvda5j5yaaaaq", "aeaqaaaaaacpbveraqxzuamdvda5l4qaaaaq",
-                "aeaqaaaaaacpbveraqxzuamdvda5l4qaaaba", "aeaqaaaaaacpbveraqxzuamdvda5lcyaaaaq",
-                "aeaqaaaaaacpbveraqxzuamdvda5l5qaaaaq", "aeaqaaaaaacpbveraqxzuamdvda5lcqaaaaq",
-                "aeaqaaaaaacpbveraqxzuamdvda5l3qaaaaq"));
+            List.of(
+                "aeaqaaaaaacpbveraqxzuamdvda5j5yaaaaq",
+                "aeaqaaaaaacpbveraqxzuamdvda5l4qaaaaq",
+                "aeaqaaaaaacpbveraqxzuamdvda5l4qaaaba",
+                "aeaqaaaaaacpbveraqxzuamdvda5lcyaaaaq",
+                "aeaqaaaaaacpbveraqxzuamdvda5l5qaaaaq",
+                "aeaqaaaaaacpbveraqxzuamdvda5lcqaaaaq",
+                "aeaqaaaaaacpbveraqxzuamdvda5l3qaaaaq"
+            )
+        );
     }
 
     @Test
@@ -281,8 +343,7 @@ public class TransactionServiceTest {
         // Given
         when(workspaceClient.isExistingContainer(any())).thenReturn(true);
         // When - Then
-        assertThatCode(() -> transactionService.isTransactionContentEmpty(idTransaction))
-            .doesNotThrowAnyException();
+        assertThatCode(() -> transactionService.isTransactionContentEmpty(idTransaction)).doesNotThrowAnyException();
     }
 
     @Test
@@ -291,7 +352,8 @@ public class TransactionServiceTest {
         // Given
         when(workspaceClient.isExistingContainer(any())).thenReturn(false);
         // When _ Then
-        assertThatCode(() -> transactionService.isTransactionContentEmpty(idTransaction))
-            .isInstanceOf(CollectInternalException.class);
+        assertThatCode(() -> transactionService.isTransactionContentEmpty(idTransaction)).isInstanceOf(
+            CollectInternalException.class
+        );
     }
 }

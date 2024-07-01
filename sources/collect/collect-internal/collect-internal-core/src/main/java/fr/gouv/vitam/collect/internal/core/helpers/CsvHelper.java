@@ -43,20 +43,23 @@ import java.util.List;
 
 public class CsvHelper {
 
-    private CsvHelper() {
-    }
+    private CsvHelper() {}
 
     public static void convertCsvToMetadataFile(InputStream is, File metadataFile) throws IOException {
-        try (final InputStreamReader reader = new InputStreamReader(is, StandardCharsets.UTF_8);
-            CSVParser parser = new CSVParser(reader,
-                CSVFormat.DEFAULT.withHeader().withTrim().withIgnoreEmptyLines(false).withDelimiter(';'));
-            JsonLineWriter writer = new JsonLineWriter(new FileOutputStream(metadataFile, true), true)) {
+        try (
+            final InputStreamReader reader = new InputStreamReader(is, StandardCharsets.UTF_8);
+            CSVParser parser = new CSVParser(
+                reader,
+                CSVFormat.DEFAULT.withHeader().withTrim().withIgnoreEmptyLines(false).withDelimiter(';')
+            );
+            JsonLineWriter writer = new JsonLineWriter(new FileOutputStream(metadataFile, true), true)
+        ) {
             final List<String> headerNames = parser.getHeaderNames();
 
             Iterator<JsonLineModel> iterator = IteratorUtils.transformedIterator(
-                IteratorUtils.transformedIterator(parser.iterator(),
-                    e -> CsvMetadataMapper.map(e, headerNames)),
-                e -> new JsonLineModel(e.getKey(), null, e.getValue()));
+                IteratorUtils.transformedIterator(parser.iterator(), e -> CsvMetadataMapper.map(e, headerNames)),
+                e -> new JsonLineModel(e.getKey(), null, e.getValue())
+            );
 
             while (iterator.hasNext()) {
                 writer.addEntry(iterator.next());

@@ -82,7 +82,7 @@ public class VitamConstants {
 
     private static List<String> ruleTypes = null;
 
-    public final static String URL_ENCODED_SEPARATOR;
+    public static final String URL_ENCODED_SEPARATOR;
 
     public static final String JSON_EXTENSION = ".json";
 
@@ -142,7 +142,6 @@ public class VitamConstants {
             throw new IllegalArgumentException(v);
         }
     }
-
 
     public enum StorageRuleFinalAction {
         RESTRICT_ACCESS("RestrictAccess"),

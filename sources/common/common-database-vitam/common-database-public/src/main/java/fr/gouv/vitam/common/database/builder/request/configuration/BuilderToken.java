@@ -69,7 +69,6 @@ public abstract class BuilderToken {
      * Global model
      */
     public enum GLOBAL {
-
         /**
          * Roots part (departure of the request)
          */
@@ -127,9 +126,7 @@ public abstract class BuilderToken {
         public final String exactToken() {
             return exactToken;
         }
-
     }
-
 
     /**
      * Query model
@@ -318,7 +315,6 @@ public abstract class BuilderToken {
          */
         SUBOBJECT("subobject");
 
-
         private final String exactToken;
 
         /**
@@ -334,9 +330,7 @@ public abstract class BuilderToken {
         public final String exactToken() {
             return exactToken;
         }
-
     }
-
 
     /**
      * SelectFilter model
@@ -392,7 +386,6 @@ public abstract class BuilderToken {
         }
     }
 
-
     /**
      * Projection model
      */
@@ -423,16 +416,13 @@ public abstract class BuilderToken {
         }
     }
 
-
     /**
      * FACET model
      */
     public enum FACET {
-
         TERMS("terms"),
         DATE_RANGE("date_range"),
         FILTERS("filters");
-
 
         private final String exactToken;
 
@@ -450,7 +440,6 @@ public abstract class BuilderToken {
             return exactToken;
         }
     }
-
 
     /**
      * Query args model
@@ -493,7 +482,6 @@ public abstract class BuilderToken {
             return exactToken;
         }
     }
-
 
     /**
      * FACET args model
@@ -540,6 +528,7 @@ public abstract class BuilderToken {
          */
         ORDER("order"),
         SUBOBJECT("subobject");
+
         private final String exactToken;
 
         /**
@@ -556,7 +545,6 @@ public abstract class BuilderToken {
             return exactToken;
         }
     }
-
 
     /**
      * Range args model
@@ -595,7 +583,6 @@ public abstract class BuilderToken {
             return exactToken;
         }
     }
-
 
     /**
      * Projection args model <br>
@@ -759,8 +746,6 @@ public abstract class BuilderToken {
 
         OPERATION_TRANSFERS("opts");
 
-
-
         private final String exactToken;
 
         /**
@@ -776,9 +761,7 @@ public abstract class BuilderToken {
         public final String exactToken() {
             return exactToken;
         }
-
     }
-
 
     /**
      * Specific values for Filter arguments
@@ -859,7 +842,6 @@ public abstract class BuilderToken {
      * </pre>
      */
 
-
     /**
      * Update model
      */
@@ -933,7 +915,6 @@ public abstract class BuilderToken {
             return exactToken;
         }
     }
-
 
     /**
      * Action Filter model

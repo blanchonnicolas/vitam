@@ -70,8 +70,9 @@ public class DeleteGotVersionsPreparationPluginTest {
     public MockitoRule mockitoRule = MockitoJUnit.rule();
 
     @Rule
-    public RunWithCustomExecutorRule runInThread =
-        new RunWithCustomExecutorRule(VitamThreadPoolExecutor.getDefaultExecutor());
+    public RunWithCustomExecutorRule runInThread = new RunWithCustomExecutorRule(
+        VitamThreadPoolExecutor.getDefaultExecutor()
+    );
 
     @Rule
     public TemporaryFolder temporaryFolder = new TemporaryFolder();
@@ -101,17 +102,20 @@ public class DeleteGotVersionsPreparationPluginTest {
 
     @Before
     public void setUp() throws Exception {
-
         when(metaDataClientFactory.getClient()).thenReturn(metaDataClient);
 
-        deleteGotVersionsPreparationPlugin =
-            new DeleteGotVersionsPreparationPlugin(metaDataClientFactory, reportService);
+        deleteGotVersionsPreparationPlugin = new DeleteGotVersionsPreparationPlugin(
+            metaDataClientFactory,
+            reportService
+        );
 
-        when(metaDataClient.selectUnits(any()))
-            .thenReturn(getFromInputStream(getClass().getResourceAsStream(DELETE_GOT_VERSIONS_RESULT_REQUEST_JSON)));
+        when(metaDataClient.selectUnits(any())).thenReturn(
+            getFromInputStream(getClass().getResourceAsStream(DELETE_GOT_VERSIONS_RESULT_REQUEST_JSON))
+        );
 
         when(metaDataClient.selectObjectGroups(any())).thenReturn(
-            getFromInputStream(getClass().getResourceAsStream(DELETE_GOT_VERSIONS_OBJECT_GROUP_RESULT_JSON)));
+            getFromInputStream(getClass().getResourceAsStream(DELETE_GOT_VERSIONS_OBJECT_GROUP_RESULT_JSON))
+        );
 
         VitamThreadUtils.getVitamSession().setTenantId(0);
     }
@@ -119,10 +123,14 @@ public class DeleteGotVersionsPreparationPluginTest {
     @Test
     @RunWithCustomExecutor
     public void givenInvalidUsageNameInRequestThenReturnKO() throws Exception {
-        DeleteGotVersionsRequest deleteGotVersionsRequest =
-            new DeleteGotVersionsRequest(new Select().getFinalSelect(), "UsageNameTest", List.of(1, 2));
-        when(handlerIO.getJsonFromWorkspace(DELETE_GOT_VERSIONS_REQUEST))
-            .thenReturn(toJsonNode(deleteGotVersionsRequest));
+        DeleteGotVersionsRequest deleteGotVersionsRequest = new DeleteGotVersionsRequest(
+            new Select().getFinalSelect(),
+            "UsageNameTest",
+            List.of(1, 2)
+        );
+        when(handlerIO.getJsonFromWorkspace(DELETE_GOT_VERSIONS_REQUEST)).thenReturn(
+            toJsonNode(deleteGotVersionsRequest)
+        );
 
         ItemStatus itemStatus = deleteGotVersionsPreparationPlugin.execute(params, handlerIO);
 
@@ -135,10 +143,14 @@ public class DeleteGotVersionsPreparationPluginTest {
     @Test
     @RunWithCustomExecutor
     public void givenInvalidSpecificVersionsInRequestThenReturnKO() throws Exception {
-        DeleteGotVersionsRequest deleteGotVersionsRequest =
-            new DeleteGotVersionsRequest(new Select().getFinalSelect(), BINARY_MASTER.getName(), null);
-        when(handlerIO.getJsonFromWorkspace(DELETE_GOT_VERSIONS_REQUEST))
-            .thenReturn(toJsonNode(deleteGotVersionsRequest));
+        DeleteGotVersionsRequest deleteGotVersionsRequest = new DeleteGotVersionsRequest(
+            new Select().getFinalSelect(),
+            BINARY_MASTER.getName(),
+            null
+        );
+        when(handlerIO.getJsonFromWorkspace(DELETE_GOT_VERSIONS_REQUEST)).thenReturn(
+            toJsonNode(deleteGotVersionsRequest)
+        );
 
         ItemStatus itemStatus = deleteGotVersionsPreparationPlugin.execute(params, handlerIO);
 
@@ -151,10 +163,14 @@ public class DeleteGotVersionsPreparationPluginTest {
     @Test
     @RunWithCustomExecutor
     public void givenDuplicatedSpecificVersionsInRequestThenReturnKO() throws Exception {
-        DeleteGotVersionsRequest deleteGotVersionsRequest =
-            new DeleteGotVersionsRequest(new Select().getFinalSelect(), BINARY_MASTER.getName(), List.of(2, 2));
-        when(handlerIO.getJsonFromWorkspace(DELETE_GOT_VERSIONS_REQUEST))
-            .thenReturn(toJsonNode(deleteGotVersionsRequest));
+        DeleteGotVersionsRequest deleteGotVersionsRequest = new DeleteGotVersionsRequest(
+            new Select().getFinalSelect(),
+            BINARY_MASTER.getName(),
+            List.of(2, 2)
+        );
+        when(handlerIO.getJsonFromWorkspace(DELETE_GOT_VERSIONS_REQUEST)).thenReturn(
+            toJsonNode(deleteGotVersionsRequest)
+        );
 
         ItemStatus itemStatus = deleteGotVersionsPreparationPlugin.execute(params, handlerIO);
 
@@ -168,11 +184,15 @@ public class DeleteGotVersionsPreparationPluginTest {
     @RunWithCustomExecutor
     public void givenValidRequestThenReturnOK() throws Exception {
         // GIVEN
-        DeleteGotVersionsRequest deleteGotVersionsRequest =
-            new DeleteGotVersionsRequest(new Select().getFinalSelect(), BINARY_MASTER.getName(), List.of(5));
-        when(handlerIO.getJsonFromWorkspace(DELETE_GOT_VERSIONS_REQUEST))
-            .thenReturn(toJsonNode(deleteGotVersionsRequest));
-        doAnswer((args) -> temporaryFolder.newFile()).when(handlerIO).getNewLocalFile(anyString());
+        DeleteGotVersionsRequest deleteGotVersionsRequest = new DeleteGotVersionsRequest(
+            new Select().getFinalSelect(),
+            BINARY_MASTER.getName(),
+            List.of(5)
+        );
+        when(handlerIO.getJsonFromWorkspace(DELETE_GOT_VERSIONS_REQUEST)).thenReturn(
+            toJsonNode(deleteGotVersionsRequest)
+        );
+        doAnswer(args -> temporaryFolder.newFile()).when(handlerIO).getNewLocalFile(anyString());
 
         // WHEN
         ItemStatus itemStatus = deleteGotVersionsPreparationPlugin.execute(params, handlerIO);

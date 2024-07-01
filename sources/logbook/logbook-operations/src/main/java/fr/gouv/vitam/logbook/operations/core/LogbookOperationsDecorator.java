@@ -63,14 +63,12 @@ public abstract class LogbookOperationsDecorator implements LogbookOperations {
     public void create(LogbookOperationParameters parameters)
         throws LogbookAlreadyExistsException, LogbookDatabaseException {
         logbookOperations.create(parameters);
-
     }
 
     @Override
     public void update(LogbookOperationParameters parameters)
         throws LogbookNotFoundException, LogbookDatabaseException {
         logbookOperations.update(parameters);
-
     }
 
     @Override
@@ -82,21 +80,20 @@ public abstract class LogbookOperationsDecorator implements LogbookOperations {
     public void createBulkLogbookOperation(LogbookOperationParameters[] operationArray)
         throws LogbookDatabaseException, LogbookAlreadyExistsException {
         logbookOperations.createBulkLogbookOperation(operationArray);
-
     }
 
     @Override
     public void updateBulkLogbookOperation(LogbookOperationParameters[] operationArray)
         throws LogbookDatabaseException, LogbookNotFoundException {
         logbookOperations.updateBulkLogbookOperation(operationArray);
-
     }
 
     @Override
-    public MongoCursor<LogbookOperation> selectOperationsByLastPersistenceDateInterval(LocalDateTime startDate,
-        LocalDateTime endDate)
-        throws LogbookDatabaseException,
-        LogbookNotFoundException, InvalidParseOperationException, InvalidCreateOperationException {
+    public MongoCursor<LogbookOperation> selectOperationsByLastPersistenceDateInterval(
+        LocalDateTime startDate,
+        LocalDateTime endDate
+    )
+        throws LogbookDatabaseException, LogbookNotFoundException, InvalidParseOperationException, InvalidCreateOperationException {
         return logbookOperations.selectOperationsByLastPersistenceDateInterval(startDate, endDate);
     }
 
@@ -107,8 +104,8 @@ public abstract class LogbookOperationsDecorator implements LogbookOperations {
     }
 
     @Override
-    public LogbookOperation findLastTraceabilityOperationOK() throws InvalidCreateOperationException,
-        LogbookNotFoundException, LogbookDatabaseException, InvalidParseOperationException {
+    public LogbookOperation findLastTraceabilityOperationOK()
+        throws InvalidCreateOperationException, LogbookNotFoundException, LogbookDatabaseException, InvalidParseOperationException {
         return logbookOperations.findLastTraceabilityOperationOK();
     }
 
@@ -129,9 +126,13 @@ public abstract class LogbookOperationsDecorator implements LogbookOperations {
     }
 
     @Override
-    public boolean checkNewEligibleLogbookOperationsSinceLastTraceabilityOperation(LocalDateTime traceabilityStartDate,
-        LocalDateTime traceabilityEndDate) throws LogbookDatabaseException {
+    public boolean checkNewEligibleLogbookOperationsSinceLastTraceabilityOperation(
+        LocalDateTime traceabilityStartDate,
+        LocalDateTime traceabilityEndDate
+    ) throws LogbookDatabaseException {
         return logbookOperations.checkNewEligibleLogbookOperationsSinceLastTraceabilityOperation(
-            traceabilityStartDate, traceabilityEndDate);
+            traceabilityStartDate,
+            traceabilityEndDate
+        );
     }
 }

@@ -46,23 +46,28 @@ public final class ReferentialFileUtils {
      * @param logbookParameters logbookoperation parameters
      * @throws InvalidParseOperationException if the existing evDetData is not valid
      */
-    public static void addFilenameInLogbookOperation(String filename,
-        final LogbookOperationParameters logbookParameters)
-        throws InvalidParseOperationException {
+    public static void addFilenameInLogbookOperation(
+        String filename,
+        final LogbookOperationParameters logbookParameters
+    ) throws InvalidParseOperationException {
         if (StringUtils.isNotBlank(filename)) {
             ObjectNode evDetData = null;
-            if (logbookParameters.getParameterValue(LogbookParameterName.eventDetailData) != null &&
-                !logbookParameters.getParameterValue(LogbookParameterName.eventDetailData).isEmpty()) {
-                evDetData = (ObjectNode) JsonHandler
-                    .getFromString(logbookParameters.getParameterValue(LogbookParameterName.eventDetailData));
+            if (
+                logbookParameters.getParameterValue(LogbookParameterName.eventDetailData) != null &&
+                !logbookParameters.getParameterValue(LogbookParameterName.eventDetailData).isEmpty()
+            ) {
+                evDetData = (ObjectNode) JsonHandler.getFromString(
+                    logbookParameters.getParameterValue(LogbookParameterName.eventDetailData)
+                );
             } else {
                 evDetData = JsonHandler.createObjectNode();
             }
             evDetData.put("FileName", filename);
-            logbookParameters.putParameterValue(LogbookParameterName.eventDetailData,
-                JsonHandler.unprettyPrint(evDetData));
-            logbookParameters.putParameterValue(LogbookParameterName.masterData,
-                JsonHandler.unprettyPrint(evDetData));
+            logbookParameters.putParameterValue(
+                LogbookParameterName.eventDetailData,
+                JsonHandler.unprettyPrint(evDetData)
+            );
+            logbookParameters.putParameterValue(LogbookParameterName.masterData, JsonHandler.unprettyPrint(evDetData));
         }
     }
 }
