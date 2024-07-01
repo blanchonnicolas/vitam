@@ -40,7 +40,6 @@ import fr.gouv.vitam.common.database.builder.query.VitamFieldsHelper;
 import fr.gouv.vitam.common.database.builder.request.exception.InvalidCreateOperationException;
 import fr.gouv.vitam.common.database.builder.request.multiple.SelectMultiQuery;
 import fr.gouv.vitam.common.database.utils.ScrollSpliterator;
-import fr.gouv.vitam.common.error.VitamError;
 import fr.gouv.vitam.common.exception.InvalidParseOperationException;
 import fr.gouv.vitam.common.json.JsonHandler;
 import fr.gouv.vitam.common.model.RequestResponseOK;
@@ -62,6 +61,7 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 
 public class TransactionInternalResourceIT extends CollectInternalResourceBaseIT {
+
     @Test
     public void shouldUpdateUnits() throws CollectInternalException {
         final String metadataResourcePath = "transaction/units/update/metadata.csv";
@@ -71,17 +71,23 @@ public class TransactionInternalResourceIT extends CollectInternalResourceBaseIT
         final String updateResultsResourcePath = "transaction/units/update/update-results.json";
 
         try {
-            final ProjectModel[] projects =
-                JsonHandler.getFromString(PropertiesUtils.getResourceAsString(projectsResourcePath),
-                    ProjectModel[].class);
-            final TransactionModel[] transactions =
-                JsonHandler.getFromString(PropertiesUtils.getResourceAsString(transactionsResourcePath),
-                    TransactionModel[].class);
-            final JsonNode getUnitsResults = JsonHandler.getFromString(PropertiesUtils.getResourceAsString(getUnitsResultsResourcePath), JsonNode.class);
+            final ProjectModel[] projects = JsonHandler.getFromString(
+                PropertiesUtils.getResourceAsString(projectsResourcePath),
+                ProjectModel[].class
+            );
+            final TransactionModel[] transactions = JsonHandler.getFromString(
+                PropertiesUtils.getResourceAsString(transactionsResourcePath),
+                TransactionModel[].class
+            );
+            final JsonNode getUnitsResults = JsonHandler.getFromString(
+                PropertiesUtils.getResourceAsString(getUnitsResultsResourcePath),
+                JsonNode.class
+            );
 
-            final JsonNode updateResults =
-                JsonHandler.getFromString(PropertiesUtils.getResourceAsString(updateResultsResourcePath),
-                    JsonNode.class);
+            final JsonNode updateResults = JsonHandler.getFromString(
+                PropertiesUtils.getResourceAsString(updateResultsResourcePath),
+                JsonNode.class
+            );
             final ProjectModel project = projects[0];
             final TransactionModel transaction = transactions[0];
             final SelectMultiQuery select = new SelectMultiQuery();
@@ -90,22 +96,41 @@ public class TransactionInternalResourceIT extends CollectInternalResourceBaseIT
             } catch (InvalidCreateOperationException e) {
                 throw new RuntimeException(e);
             }
-            select.addUsedProjection(VitamFieldsHelper.id(), "Title", VitamFieldsHelper.unitups(),
-                VitamFieldsHelper.allunitups());
+            select.addUsedProjection(
+                VitamFieldsHelper.id(),
+                "Title",
+                VitamFieldsHelper.unitups(),
+                VitamFieldsHelper.allunitups()
+            );
 
             when(transactionService.findTransaction(transaction.getId())).thenReturn(Optional.of(transaction));
             when(transactionService.checkStatus(any(TransactionModel.class), eq(TransactionStatus.OPEN))).thenReturn(
-                true);
+                true
+            );
             when(projectService.findProject(project.getId())).thenReturn(
-                Optional.of(CollectHelper.convertProjectModeltoProjectDto(project)));
-            when(metadataRepository.selectUnits(any(SelectMultiQuery.class), eq(transaction.getId()))).thenReturn(new ScrollSpliterator<>(select, selectMultiQuery -> {
-                try {
-                    return JsonHandler.getFromJsonNode(getUnitsResults, RequestResponseOK.class, JsonNode.class);
-                } catch (InvalidParseOperationException e) {
-                    throw new RuntimeException(e);
-                }
-            }, VitamConfiguration.getElasticSearchScrollTimeoutInMilliseconds(), VitamConfiguration.getElasticSearchScrollLimit()));
-            when(metadataRepository.atomicBulkUpdate(any())).thenReturn(RequestResponseOK.getFromJsonNode(updateResults));
+                Optional.of(CollectHelper.convertProjectModeltoProjectDto(project))
+            );
+            when(metadataRepository.selectUnits(any(SelectMultiQuery.class), eq(transaction.getId()))).thenReturn(
+                new ScrollSpliterator<>(
+                    select,
+                    selectMultiQuery -> {
+                        try {
+                            return JsonHandler.getFromJsonNode(
+                                getUnitsResults,
+                                RequestResponseOK.class,
+                                JsonNode.class
+                            );
+                        } catch (InvalidParseOperationException e) {
+                            throw new RuntimeException(e);
+                        }
+                    },
+                    VitamConfiguration.getElasticSearchScrollTimeoutInMilliseconds(),
+                    VitamConfiguration.getElasticSearchScrollLimit()
+                )
+            );
+            when(metadataRepository.atomicBulkUpdate(any())).thenReturn(
+                RequestResponseOK.getFromJsonNode(updateResults)
+            );
 
             try (final InputStream resourceAsStream = PropertiesUtils.getResourceAsStream(metadataResourcePath)) {
                 given()
@@ -137,16 +162,22 @@ public class TransactionInternalResourceIT extends CollectInternalResourceBaseIT
         final String updateResultsResourcePath = "transaction/units/update/update-results-with-error.json";
 
         try {
-            final ProjectModel[] projects =
-                JsonHandler.getFromString(PropertiesUtils.getResourceAsString(projectsResourcePath),
-                    ProjectModel[].class);
-            final TransactionModel[] transactions =
-                JsonHandler.getFromString(PropertiesUtils.getResourceAsString(transactionsResourcePath),
-                    TransactionModel[].class);
-            final JsonNode getUnitsResults = JsonHandler.getFromString(PropertiesUtils.getResourceAsString(getUnitsResultsResourcePath), JsonNode.class);
-            final JsonNode updateResults =
-                JsonHandler.getFromString(PropertiesUtils.getResourceAsString(updateResultsResourcePath),
-                    JsonNode.class);
+            final ProjectModel[] projects = JsonHandler.getFromString(
+                PropertiesUtils.getResourceAsString(projectsResourcePath),
+                ProjectModel[].class
+            );
+            final TransactionModel[] transactions = JsonHandler.getFromString(
+                PropertiesUtils.getResourceAsString(transactionsResourcePath),
+                TransactionModel[].class
+            );
+            final JsonNode getUnitsResults = JsonHandler.getFromString(
+                PropertiesUtils.getResourceAsString(getUnitsResultsResourcePath),
+                JsonNode.class
+            );
+            final JsonNode updateResults = JsonHandler.getFromString(
+                PropertiesUtils.getResourceAsString(updateResultsResourcePath),
+                JsonNode.class
+            );
             final ProjectModel project = projects[0];
             final TransactionModel transaction = transactions[0];
             final SelectMultiQuery select = new SelectMultiQuery();
@@ -155,22 +186,41 @@ public class TransactionInternalResourceIT extends CollectInternalResourceBaseIT
             } catch (InvalidCreateOperationException e) {
                 throw new RuntimeException(e);
             }
-            select.addUsedProjection(VitamFieldsHelper.id(), "Title", VitamFieldsHelper.unitups(),
-                VitamFieldsHelper.allunitups());
+            select.addUsedProjection(
+                VitamFieldsHelper.id(),
+                "Title",
+                VitamFieldsHelper.unitups(),
+                VitamFieldsHelper.allunitups()
+            );
 
             when(transactionService.findTransaction(transaction.getId())).thenReturn(Optional.of(transaction));
             when(transactionService.checkStatus(any(TransactionModel.class), eq(TransactionStatus.OPEN))).thenReturn(
-                true);
+                true
+            );
             when(projectService.findProject(project.getId())).thenReturn(
-                Optional.of(CollectHelper.convertProjectModeltoProjectDto(project)));
-            when(metadataRepository.selectUnits(any(SelectMultiQuery.class), eq(transaction.getId()))).thenReturn(new ScrollSpliterator<>(select, selectMultiQuery -> {
-                try {
-                    return JsonHandler.getFromJsonNode(getUnitsResults, RequestResponseOK.class, JsonNode.class);
-                } catch (InvalidParseOperationException e) {
-                    throw new RuntimeException(e);
-                }
-            }, VitamConfiguration.getElasticSearchScrollTimeoutInMilliseconds(), VitamConfiguration.getElasticSearchScrollLimit()));
-            when(metadataRepository.atomicBulkUpdate(any())).thenReturn(RequestResponseOK.getFromJsonNode(updateResults));
+                Optional.of(CollectHelper.convertProjectModeltoProjectDto(project))
+            );
+            when(metadataRepository.selectUnits(any(SelectMultiQuery.class), eq(transaction.getId()))).thenReturn(
+                new ScrollSpliterator<>(
+                    select,
+                    selectMultiQuery -> {
+                        try {
+                            return JsonHandler.getFromJsonNode(
+                                getUnitsResults,
+                                RequestResponseOK.class,
+                                JsonNode.class
+                            );
+                        } catch (InvalidParseOperationException e) {
+                            throw new RuntimeException(e);
+                        }
+                    },
+                    VitamConfiguration.getElasticSearchScrollTimeoutInMilliseconds(),
+                    VitamConfiguration.getElasticSearchScrollLimit()
+                )
+            );
+            when(metadataRepository.atomicBulkUpdate(any())).thenReturn(
+                RequestResponseOK.getFromJsonNode(updateResults)
+            );
 
             try (final InputStream resourceAsStream = PropertiesUtils.getResourceAsStream(metadataResourcePath)) {
                 given()
@@ -204,17 +254,23 @@ public class TransactionInternalResourceIT extends CollectInternalResourceBaseIT
         final String updateResultsResourcePath = "transaction/units/update/update-results.json";
 
         try {
-            final ProjectModel[] projects =
-                JsonHandler.getFromString(PropertiesUtils.getResourceAsString(projectsResourcePath),
-                    ProjectModel[].class);
-            final TransactionModel[] transactions =
-                JsonHandler.getFromString(PropertiesUtils.getResourceAsString(transactionsResourcePath),
-                    TransactionModel[].class);
-            final JsonNode getUnitsResults = JsonHandler.getFromString(PropertiesUtils.getResourceAsString(getUnitsResultsResourcePath), JsonNode.class);
+            final ProjectModel[] projects = JsonHandler.getFromString(
+                PropertiesUtils.getResourceAsString(projectsResourcePath),
+                ProjectModel[].class
+            );
+            final TransactionModel[] transactions = JsonHandler.getFromString(
+                PropertiesUtils.getResourceAsString(transactionsResourcePath),
+                TransactionModel[].class
+            );
+            final JsonNode getUnitsResults = JsonHandler.getFromString(
+                PropertiesUtils.getResourceAsString(getUnitsResultsResourcePath),
+                JsonNode.class
+            );
 
-            final JsonNode updateResults =
-                JsonHandler.getFromString(PropertiesUtils.getResourceAsString(updateResultsResourcePath),
-                    JsonNode.class);
+            final JsonNode updateResults = JsonHandler.getFromString(
+                PropertiesUtils.getResourceAsString(updateResultsResourcePath),
+                JsonNode.class
+            );
             final ProjectModel project = projects[0];
             final TransactionModel transaction = transactions[0];
             final SelectMultiQuery select = new SelectMultiQuery();
@@ -223,22 +279,41 @@ public class TransactionInternalResourceIT extends CollectInternalResourceBaseIT
             } catch (InvalidCreateOperationException e) {
                 throw new RuntimeException(e);
             }
-            select.addUsedProjection(VitamFieldsHelper.id(), "Title", VitamFieldsHelper.unitups(),
-                VitamFieldsHelper.allunitups());
+            select.addUsedProjection(
+                VitamFieldsHelper.id(),
+                "Title",
+                VitamFieldsHelper.unitups(),
+                VitamFieldsHelper.allunitups()
+            );
 
             when(transactionService.findTransaction(transaction.getId())).thenReturn(Optional.of(transaction));
             when(transactionService.checkStatus(any(TransactionModel.class), eq(TransactionStatus.OPEN))).thenReturn(
-                true);
+                true
+            );
             when(projectService.findProject(project.getId())).thenReturn(
-                Optional.of(CollectHelper.convertProjectModeltoProjectDto(project)));
-            when(metadataRepository.selectUnits(any(SelectMultiQuery.class), eq(transaction.getId()))).thenReturn(new ScrollSpliterator<>(select, selectMultiQuery -> {
-                try {
-                    return JsonHandler.getFromJsonNode(getUnitsResults, RequestResponseOK.class, JsonNode.class);
-                } catch (InvalidParseOperationException e) {
-                    throw new RuntimeException(e);
-                }
-            }, VitamConfiguration.getElasticSearchScrollTimeoutInMilliseconds(), VitamConfiguration.getElasticSearchScrollLimit()));
-            when(metadataRepository.atomicBulkUpdate(any())).thenReturn(RequestResponseOK.getFromJsonNode(updateResults));
+                Optional.of(CollectHelper.convertProjectModeltoProjectDto(project))
+            );
+            when(metadataRepository.selectUnits(any(SelectMultiQuery.class), eq(transaction.getId()))).thenReturn(
+                new ScrollSpliterator<>(
+                    select,
+                    selectMultiQuery -> {
+                        try {
+                            return JsonHandler.getFromJsonNode(
+                                getUnitsResults,
+                                RequestResponseOK.class,
+                                JsonNode.class
+                            );
+                        } catch (InvalidParseOperationException e) {
+                            throw new RuntimeException(e);
+                        }
+                    },
+                    VitamConfiguration.getElasticSearchScrollTimeoutInMilliseconds(),
+                    VitamConfiguration.getElasticSearchScrollLimit()
+                )
+            );
+            when(metadataRepository.atomicBulkUpdate(any())).thenReturn(
+                RequestResponseOK.getFromJsonNode(updateResults)
+            );
 
             try (final InputStream resourceAsStream = PropertiesUtils.getResourceAsStream(metadataResourcePath)) {
                 given()
@@ -250,7 +325,12 @@ public class TransactionInternalResourceIT extends CollectInternalResourceBaseIT
                     .then()
                     .statusCode(INTERNAL_SERVER_ERROR.getStatusCode())
                     .body("message", Matchers.equalTo("Internal Server Error"))
-                    .body("description", Matchers.equalTo("Mapping for File not found, expected one of [File,Content.DescriptionLevel,Content.Title,Content.Description,Content.StartDate,Content.EndDate]"));
+                    .body(
+                        "description",
+                        Matchers.equalTo(
+                            "Mapping for File not found, expected one of [File,Content.DescriptionLevel,Content.Title,Content.Description,Content.StartDate,Content.EndDate]"
+                        )
+                    );
             } catch (FileNotFoundException e) {
                 Assert.fail(String.format("File not found on %s: %s", metadataResourcePath, e.getLocalizedMessage()));
             } catch (IOException e) {
@@ -272,17 +352,23 @@ public class TransactionInternalResourceIT extends CollectInternalResourceBaseIT
         final String updateResultsResourcePath = "transaction/units/update/update-results.json";
 
         try {
-            final ProjectModel[] projects =
-                JsonHandler.getFromString(PropertiesUtils.getResourceAsString(projectsResourcePath),
-                    ProjectModel[].class);
-            final TransactionModel[] transactions =
-                JsonHandler.getFromString(PropertiesUtils.getResourceAsString(transactionsResourcePath),
-                    TransactionModel[].class);
-            final JsonNode getUnitsResults = JsonHandler.getFromString(PropertiesUtils.getResourceAsString(getUnitsResultsResourcePath), JsonNode.class);
+            final ProjectModel[] projects = JsonHandler.getFromString(
+                PropertiesUtils.getResourceAsString(projectsResourcePath),
+                ProjectModel[].class
+            );
+            final TransactionModel[] transactions = JsonHandler.getFromString(
+                PropertiesUtils.getResourceAsString(transactionsResourcePath),
+                TransactionModel[].class
+            );
+            final JsonNode getUnitsResults = JsonHandler.getFromString(
+                PropertiesUtils.getResourceAsString(getUnitsResultsResourcePath),
+                JsonNode.class
+            );
 
-            final JsonNode updateResults =
-                JsonHandler.getFromString(PropertiesUtils.getResourceAsString(updateResultsResourcePath),
-                    JsonNode.class);
+            final JsonNode updateResults = JsonHandler.getFromString(
+                PropertiesUtils.getResourceAsString(updateResultsResourcePath),
+                JsonNode.class
+            );
             final ProjectModel project = projects[0];
             final TransactionModel transaction = transactions[0];
             final SelectMultiQuery select = new SelectMultiQuery();
@@ -291,22 +377,41 @@ public class TransactionInternalResourceIT extends CollectInternalResourceBaseIT
             } catch (InvalidCreateOperationException e) {
                 throw new RuntimeException(e);
             }
-            select.addUsedProjection(VitamFieldsHelper.id(), "Title", VitamFieldsHelper.unitups(),
-                VitamFieldsHelper.allunitups());
+            select.addUsedProjection(
+                VitamFieldsHelper.id(),
+                "Title",
+                VitamFieldsHelper.unitups(),
+                VitamFieldsHelper.allunitups()
+            );
 
             when(transactionService.findTransaction(transaction.getId())).thenReturn(Optional.of(transaction));
             when(transactionService.checkStatus(any(TransactionModel.class), eq(TransactionStatus.OPEN))).thenReturn(
-                true);
+                true
+            );
             when(projectService.findProject(project.getId())).thenReturn(
-                Optional.of(CollectHelper.convertProjectModeltoProjectDto(project)));
-            when(metadataRepository.selectUnits(any(SelectMultiQuery.class), eq(transaction.getId()))).thenReturn(new ScrollSpliterator<>(select, selectMultiQuery -> {
-                try {
-                    return JsonHandler.getFromJsonNode(getUnitsResults, RequestResponseOK.class, JsonNode.class);
-                } catch (InvalidParseOperationException e) {
-                    throw new RuntimeException(e);
-                }
-            }, VitamConfiguration.getElasticSearchScrollTimeoutInMilliseconds(), VitamConfiguration.getElasticSearchScrollLimit()));
-            when(metadataRepository.atomicBulkUpdate(any())).thenReturn(RequestResponseOK.getFromJsonNode(updateResults));
+                Optional.of(CollectHelper.convertProjectModeltoProjectDto(project))
+            );
+            when(metadataRepository.selectUnits(any(SelectMultiQuery.class), eq(transaction.getId()))).thenReturn(
+                new ScrollSpliterator<>(
+                    select,
+                    selectMultiQuery -> {
+                        try {
+                            return JsonHandler.getFromJsonNode(
+                                getUnitsResults,
+                                RequestResponseOK.class,
+                                JsonNode.class
+                            );
+                        } catch (InvalidParseOperationException e) {
+                            throw new RuntimeException(e);
+                        }
+                    },
+                    VitamConfiguration.getElasticSearchScrollTimeoutInMilliseconds(),
+                    VitamConfiguration.getElasticSearchScrollLimit()
+                )
+            );
+            when(metadataRepository.atomicBulkUpdate(any())).thenReturn(
+                RequestResponseOK.getFromJsonNode(updateResults)
+            );
 
             try (final InputStream resourceAsStream = PropertiesUtils.getResourceAsStream(metadataResourcePath)) {
                 given()
@@ -330,6 +435,7 @@ public class TransactionInternalResourceIT extends CollectInternalResourceBaseIT
             Assert.fail("Fail while parsing resources: " + e.getLocalizedMessage());
         }
     }
+
     @Test
     public void shouldGetErrorWhenUpdateUnitsWithDuplicateFilesInCsv() throws CollectInternalException {
         final String metadataResourcePath = "transaction/units/update/metadata-with-duplicates.csv";
@@ -339,17 +445,23 @@ public class TransactionInternalResourceIT extends CollectInternalResourceBaseIT
         final String updateResultsResourcePath = "transaction/units/update/update-results.json";
 
         try {
-            final ProjectModel[] projects =
-                JsonHandler.getFromString(PropertiesUtils.getResourceAsString(projectsResourcePath),
-                    ProjectModel[].class);
-            final TransactionModel[] transactions =
-                JsonHandler.getFromString(PropertiesUtils.getResourceAsString(transactionsResourcePath),
-                    TransactionModel[].class);
-            final JsonNode getUnitsResults = JsonHandler.getFromString(PropertiesUtils.getResourceAsString(getUnitsResultsResourcePath), JsonNode.class);
+            final ProjectModel[] projects = JsonHandler.getFromString(
+                PropertiesUtils.getResourceAsString(projectsResourcePath),
+                ProjectModel[].class
+            );
+            final TransactionModel[] transactions = JsonHandler.getFromString(
+                PropertiesUtils.getResourceAsString(transactionsResourcePath),
+                TransactionModel[].class
+            );
+            final JsonNode getUnitsResults = JsonHandler.getFromString(
+                PropertiesUtils.getResourceAsString(getUnitsResultsResourcePath),
+                JsonNode.class
+            );
 
-            final JsonNode updateResults =
-                JsonHandler.getFromString(PropertiesUtils.getResourceAsString(updateResultsResourcePath),
-                    JsonNode.class);
+            final JsonNode updateResults = JsonHandler.getFromString(
+                PropertiesUtils.getResourceAsString(updateResultsResourcePath),
+                JsonNode.class
+            );
             final ProjectModel project = projects[0];
             final TransactionModel transaction = transactions[0];
             final SelectMultiQuery select = new SelectMultiQuery();
@@ -358,22 +470,41 @@ public class TransactionInternalResourceIT extends CollectInternalResourceBaseIT
             } catch (InvalidCreateOperationException e) {
                 throw new RuntimeException(e);
             }
-            select.addUsedProjection(VitamFieldsHelper.id(), "Title", VitamFieldsHelper.unitups(),
-                VitamFieldsHelper.allunitups());
+            select.addUsedProjection(
+                VitamFieldsHelper.id(),
+                "Title",
+                VitamFieldsHelper.unitups(),
+                VitamFieldsHelper.allunitups()
+            );
 
             when(transactionService.findTransaction(transaction.getId())).thenReturn(Optional.of(transaction));
             when(transactionService.checkStatus(any(TransactionModel.class), eq(TransactionStatus.OPEN))).thenReturn(
-                true);
+                true
+            );
             when(projectService.findProject(project.getId())).thenReturn(
-                Optional.of(CollectHelper.convertProjectModeltoProjectDto(project)));
-            when(metadataRepository.selectUnits(any(SelectMultiQuery.class), eq(transaction.getId()))).thenReturn(new ScrollSpliterator<>(select, selectMultiQuery -> {
-                try {
-                    return JsonHandler.getFromJsonNode(getUnitsResults, RequestResponseOK.class, JsonNode.class);
-                } catch (InvalidParseOperationException e) {
-                    throw new RuntimeException(e);
-                }
-            }, VitamConfiguration.getElasticSearchScrollTimeoutInMilliseconds(), VitamConfiguration.getElasticSearchScrollLimit()));
-            when(metadataRepository.atomicBulkUpdate(any())).thenReturn(RequestResponseOK.getFromJsonNode(updateResults));
+                Optional.of(CollectHelper.convertProjectModeltoProjectDto(project))
+            );
+            when(metadataRepository.selectUnits(any(SelectMultiQuery.class), eq(transaction.getId()))).thenReturn(
+                new ScrollSpliterator<>(
+                    select,
+                    selectMultiQuery -> {
+                        try {
+                            return JsonHandler.getFromJsonNode(
+                                getUnitsResults,
+                                RequestResponseOK.class,
+                                JsonNode.class
+                            );
+                        } catch (InvalidParseOperationException e) {
+                            throw new RuntimeException(e);
+                        }
+                    },
+                    VitamConfiguration.getElasticSearchScrollTimeoutInMilliseconds(),
+                    VitamConfiguration.getElasticSearchScrollLimit()
+                )
+            );
+            when(metadataRepository.atomicBulkUpdate(any())).thenReturn(
+                RequestResponseOK.getFromJsonNode(updateResults)
+            );
 
             try (final InputStream resourceAsStream = PropertiesUtils.getResourceAsStream(metadataResourcePath)) {
                 given()
@@ -407,17 +538,23 @@ public class TransactionInternalResourceIT extends CollectInternalResourceBaseIT
         final String updateResultsResourcePath = "transaction/units/update/update-results.json";
 
         try {
-            final ProjectModel[] projects =
-                JsonHandler.getFromString(PropertiesUtils.getResourceAsString(projectsResourcePath),
-                    ProjectModel[].class);
-            final TransactionModel[] transactions =
-                JsonHandler.getFromString(PropertiesUtils.getResourceAsString(transactionsResourcePath),
-                    TransactionModel[].class);
-            final JsonNode getUnitsResults = JsonHandler.getFromString(PropertiesUtils.getResourceAsString(getUnitsResultsResourcePath), JsonNode.class);
+            final ProjectModel[] projects = JsonHandler.getFromString(
+                PropertiesUtils.getResourceAsString(projectsResourcePath),
+                ProjectModel[].class
+            );
+            final TransactionModel[] transactions = JsonHandler.getFromString(
+                PropertiesUtils.getResourceAsString(transactionsResourcePath),
+                TransactionModel[].class
+            );
+            final JsonNode getUnitsResults = JsonHandler.getFromString(
+                PropertiesUtils.getResourceAsString(getUnitsResultsResourcePath),
+                JsonNode.class
+            );
 
-            final JsonNode updateResults =
-                JsonHandler.getFromString(PropertiesUtils.getResourceAsString(updateResultsResourcePath),
-                    JsonNode.class);
+            final JsonNode updateResults = JsonHandler.getFromString(
+                PropertiesUtils.getResourceAsString(updateResultsResourcePath),
+                JsonNode.class
+            );
             final ProjectModel project = projects[0];
             final TransactionModel transaction = transactions[0];
             final SelectMultiQuery select = new SelectMultiQuery();
@@ -426,22 +563,41 @@ public class TransactionInternalResourceIT extends CollectInternalResourceBaseIT
             } catch (InvalidCreateOperationException e) {
                 throw new RuntimeException(e);
             }
-            select.addUsedProjection(VitamFieldsHelper.id(), "Title", VitamFieldsHelper.unitups(),
-                VitamFieldsHelper.allunitups());
+            select.addUsedProjection(
+                VitamFieldsHelper.id(),
+                "Title",
+                VitamFieldsHelper.unitups(),
+                VitamFieldsHelper.allunitups()
+            );
 
             when(transactionService.findTransaction(transaction.getId())).thenReturn(Optional.of(transaction));
             when(transactionService.checkStatus(any(TransactionModel.class), eq(TransactionStatus.OPEN))).thenReturn(
-                true);
+                true
+            );
             when(projectService.findProject(project.getId())).thenReturn(
-                Optional.of(CollectHelper.convertProjectModeltoProjectDto(project)));
-            when(metadataRepository.selectUnits(any(SelectMultiQuery.class), eq(transaction.getId()))).thenReturn(new ScrollSpliterator<>(select, selectMultiQuery -> {
-                try {
-                    return JsonHandler.getFromJsonNode(getUnitsResults, RequestResponseOK.class, JsonNode.class);
-                } catch (InvalidParseOperationException e) {
-                    throw new RuntimeException(e);
-                }
-            }, VitamConfiguration.getElasticSearchScrollTimeoutInMilliseconds(), VitamConfiguration.getElasticSearchScrollLimit()));
-            when(metadataRepository.atomicBulkUpdate(any())).thenReturn(RequestResponseOK.getFromJsonNode(updateResults));
+                Optional.of(CollectHelper.convertProjectModeltoProjectDto(project))
+            );
+            when(metadataRepository.selectUnits(any(SelectMultiQuery.class), eq(transaction.getId()))).thenReturn(
+                new ScrollSpliterator<>(
+                    select,
+                    selectMultiQuery -> {
+                        try {
+                            return JsonHandler.getFromJsonNode(
+                                getUnitsResults,
+                                RequestResponseOK.class,
+                                JsonNode.class
+                            );
+                        } catch (InvalidParseOperationException e) {
+                            throw new RuntimeException(e);
+                        }
+                    },
+                    VitamConfiguration.getElasticSearchScrollTimeoutInMilliseconds(),
+                    VitamConfiguration.getElasticSearchScrollLimit()
+                )
+            );
+            when(metadataRepository.atomicBulkUpdate(any())).thenReturn(
+                RequestResponseOK.getFromJsonNode(updateResults)
+            );
 
             try (final InputStream resourceAsStream = PropertiesUtils.getResourceAsStream(metadataResourcePath)) {
                 given()

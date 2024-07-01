@@ -31,11 +31,11 @@ import com.google.common.collect.Sets;
 import fr.gouv.culture.archivesdefrance.seda.v2.LegalStatusType;
 import fr.gouv.vitam.collect.common.dto.ProjectDto;
 import fr.gouv.vitam.collect.common.dto.TransactionDto;
+import fr.gouv.vitam.collect.common.enums.TransactionStatus;
 import fr.gouv.vitam.collect.external.client.CollectExternalClient;
 import fr.gouv.vitam.collect.external.client.CollectExternalClientFactory;
 import fr.gouv.vitam.collect.external.external.rest.CollectExternalMain;
 import fr.gouv.vitam.collect.internal.CollectInternalMain;
-import fr.gouv.vitam.collect.common.enums.TransactionStatus;
 import fr.gouv.vitam.common.DataLoader;
 import fr.gouv.vitam.common.PropertiesUtils;
 import fr.gouv.vitam.common.VitamRuleRunner;
@@ -75,11 +75,19 @@ public class TransactionIT extends VitamRuleRunner {
     private static final String AU_TO_UPLOAD = "collect/upload_au_collect.json";
     private final VitamContext vitamContext = new VitamContext(TENANT_ID);
 
-    @ClassRule public static VitamServerRunner runner =
-        new VitamServerRunner(ProjectIT.class, mongoRule.getMongoDatabase().getName(),
-            ElasticsearchRule.getClusterName(),
-            Sets.newHashSet(AdminManagementMain.class, LogbookMain.class, WorkspaceMain.class,
-                CollectInternalMain.class, CollectExternalMain.class));
+    @ClassRule
+    public static VitamServerRunner runner = new VitamServerRunner(
+        ProjectIT.class,
+        mongoRule.getMongoDatabase().getName(),
+        ElasticsearchRule.getClusterName(),
+        Sets.newHashSet(
+            AdminManagementMain.class,
+            LogbookMain.class,
+            WorkspaceMain.class,
+            CollectInternalMain.class,
+            CollectExternalMain.class
+        )
+    );
 
     @BeforeClass
     public static void setUpBeforeClass() throws Exception {
@@ -101,20 +109,25 @@ public class TransactionIT extends VitamRuleRunner {
             final RequestResponse<JsonNode> projectResponse = collectClient.initProject(vitamContext, projectDto);
             Assertions.assertThat(projectResponse.getStatus()).isEqualTo(200);
 
-            ProjectDto projectDtoResult =
-                JsonHandler.getFromJsonNode(((RequestResponseOK<JsonNode>) projectResponse).getFirstResult(),
-                    ProjectDto.class);
+            ProjectDto projectDtoResult = JsonHandler.getFromJsonNode(
+                ((RequestResponseOK<JsonNode>) projectResponse).getFirstResult(),
+                ProjectDto.class
+            );
 
             TransactionDto transactiondto = initTransaction();
 
-            RequestResponse<JsonNode> transactionResponse =
-                collectClient.initTransaction(vitamContext, transactiondto, projectDtoResult.getId());
+            RequestResponse<JsonNode> transactionResponse = collectClient.initTransaction(
+                vitamContext,
+                transactiondto,
+                projectDtoResult.getId()
+            );
             Assertions.assertThat(transactionResponse.getStatus()).isEqualTo(200);
 
             RequestResponseOK<JsonNode> requestResponseOK = (RequestResponseOK<JsonNode>) transactionResponse;
-            TransactionDto transactionDtoResult =
-                JsonHandler.getFromJsonNode(requestResponseOK.getFirstResult(), TransactionDto.class);
-
+            TransactionDto transactionDtoResult = JsonHandler.getFromJsonNode(
+                requestResponseOK.getFirstResult(),
+                TransactionDto.class
+            );
 
             String transactionId = transactionDtoResult.getId();
             collectClient.closeTransaction(vitamContext, transactionId);
@@ -123,7 +136,6 @@ public class TransactionIT extends VitamRuleRunner {
             //test reopen
             collectClient.reopenTransaction(vitamContext, transactionId);
             verifyTransactionStatus(TransactionStatus.OPEN, transactionId);
-
 
             //test abort
             collectClient.abortTransaction(vitamContext, transactionId);
@@ -150,43 +162,58 @@ public class TransactionIT extends VitamRuleRunner {
             final RequestResponse<JsonNode> projectResponse = collectClient.initProject(vitamContext, projectDto);
             Assertions.assertThat(projectResponse.getStatus()).isEqualTo(200);
 
-            ProjectDto projectDtoResult =
-                JsonHandler.getFromJsonNode(((RequestResponseOK<JsonNode>) projectResponse).getFirstResult(),
-                    ProjectDto.class);
+            ProjectDto projectDtoResult = JsonHandler.getFromJsonNode(
+                ((RequestResponseOK<JsonNode>) projectResponse).getFirstResult(),
+                ProjectDto.class
+            );
             TransactionDto initialTransaction = initTransaction();
 
             // INSERT TRANSACTION
-            RequestResponse<JsonNode> transactionResponse =
-                collectClient.initTransaction(vitamContext, initialTransaction, projectDtoResult.getId());
+            RequestResponse<JsonNode> transactionResponse = collectClient.initTransaction(
+                vitamContext,
+                initialTransaction,
+                projectDtoResult.getId()
+            );
             Assertions.assertThat(transactionResponse.getStatus()).isEqualTo(SC_OK);
             RequestResponseOK<JsonNode> requestResponseOK = (RequestResponseOK<JsonNode>) transactionResponse;
-            TransactionDto transactionDtoResult =
-                JsonHandler.getFromJsonNode(requestResponseOK.getFirstResult(), TransactionDto.class);
+            TransactionDto transactionDtoResult = JsonHandler.getFromJsonNode(
+                requestResponseOK.getFirstResult(),
+                TransactionDto.class
+            );
 
             // GET PERSISTED TRANSACTION
-            RequestResponse<JsonNode> persistedTransactionResponse =
-                collectClient.getTransactionById(vitamContext, transactionDtoResult.getId());
+            RequestResponse<JsonNode> persistedTransactionResponse = collectClient.getTransactionById(
+                vitamContext,
+                transactionDtoResult.getId()
+            );
             Assertions.assertThat(persistedTransactionResponse.getStatus()).isEqualTo(SC_OK);
             TransactionDto persistedTransaction = JsonHandler.getFromJsonNode(
-                (((RequestResponseOK<JsonNode>) persistedTransactionResponse).getFirstResult()), TransactionDto.class);
+                (((RequestResponseOK<JsonNode>) persistedTransactionResponse).getFirstResult()),
+                TransactionDto.class
+            );
             assertNotNull(persistedTransaction.getCreationDate());
             assertEquals(persistedTransaction.getCreationDate(), persistedTransaction.getLastUpdate());
             assertEquals(TransactionStatus.OPEN.toString(), persistedTransaction.getStatus());
             assertEquals(initialTransaction.getName(), persistedTransaction.getName());
             assertEquals(initialTransaction.getArchivalProfile(), persistedTransaction.getArchivalProfile());
-            assertEquals(initialTransaction.getAcquisitionInformation(),
-                persistedTransaction.getAcquisitionInformation());
+            assertEquals(
+                initialTransaction.getAcquisitionInformation(),
+                persistedTransaction.getAcquisitionInformation()
+            );
             assertEquals(initialTransaction.getMessageIdentifier(), persistedTransaction.getMessageIdentifier());
 
             assertThat(persistedTransaction.getComment()).isNotEqualTo(newComment);
 
             // Update Transaction
             transactionDtoResult.setComment(newComment);
-            RequestResponseOK<JsonNode> updatedTransactionResponse =
-                (RequestResponseOK<JsonNode>) collectClient.updateTransaction(vitamContext, transactionDtoResult);
+            RequestResponseOK<JsonNode> updatedTransactionResponse = (RequestResponseOK<
+                    JsonNode
+                >) collectClient.updateTransaction(vitamContext, transactionDtoResult);
             assertThat(updatedTransactionResponse.getStatus()).isEqualTo(SC_OK);
-            TransactionDto updatedTransaction =
-                JsonHandler.getFromJsonNode(updatedTransactionResponse.getFirstResult(), TransactionDto.class);
+            TransactionDto updatedTransaction = JsonHandler.getFromJsonNode(
+                updatedTransactionResponse.getFirstResult(),
+                TransactionDto.class
+            );
 
             assertThat(transactionDtoResult.getComment()).isEqualTo(newComment);
             assertNotNull(updatedTransaction.getCreationDate());
@@ -194,8 +221,6 @@ public class TransactionIT extends VitamRuleRunner {
             assertThat(updatedTransaction.getLastUpdate()).isGreaterThan(updatedTransaction.getCreationDate());
         }
     }
-
-
 
     @Test
     public void initTransactionFromProject() throws Exception {
@@ -205,27 +230,37 @@ public class TransactionIT extends VitamRuleRunner {
             final RequestResponse<JsonNode> projectResponse = collectClient.initProject(vitamContext, projectDto);
             Assertions.assertThat(projectResponse.getStatus()).isEqualTo(200);
 
-            ProjectDto projectDtoResult =
-                JsonHandler.getFromJsonNode(((RequestResponseOK<JsonNode>) projectResponse).getFirstResult(),
-                    ProjectDto.class);
+            ProjectDto projectDtoResult = JsonHandler.getFromJsonNode(
+                ((RequestResponseOK<JsonNode>) projectResponse).getFirstResult(),
+                ProjectDto.class
+            );
 
             TransactionDto initialTransaction = new TransactionDto();
             initialTransaction.setName("Transaction1");
 
             // INSERT TRANSACTION
-            RequestResponse<JsonNode> transactionResponse =
-                collectClient.initTransaction(vitamContext, initialTransaction, projectDtoResult.getId());
+            RequestResponse<JsonNode> transactionResponse = collectClient.initTransaction(
+                vitamContext,
+                initialTransaction,
+                projectDtoResult.getId()
+            );
             Assertions.assertThat(transactionResponse.getStatus()).isEqualTo(SC_OK);
             RequestResponseOK<JsonNode> requestResponseOK = (RequestResponseOK<JsonNode>) transactionResponse;
-            TransactionDto transactionDtoResult =
-                JsonHandler.getFromJsonNode(requestResponseOK.getFirstResult(), TransactionDto.class);
+            TransactionDto transactionDtoResult = JsonHandler.getFromJsonNode(
+                requestResponseOK.getFirstResult(),
+                TransactionDto.class
+            );
 
             // GET PERSISTED TRANSACTION
-            RequestResponse<JsonNode> persistedTransactionResponse =
-                collectClient.getTransactionById(vitamContext, transactionDtoResult.getId());
+            RequestResponse<JsonNode> persistedTransactionResponse = collectClient.getTransactionById(
+                vitamContext,
+                transactionDtoResult.getId()
+            );
             Assertions.assertThat(persistedTransactionResponse.getStatus()).isEqualTo(SC_OK);
             TransactionDto persistedTransaction = JsonHandler.getFromJsonNode(
-                (((RequestResponseOK<JsonNode>) persistedTransactionResponse).getFirstResult()), TransactionDto.class);
+                (((RequestResponseOK<JsonNode>) persistedTransactionResponse).getFirstResult()),
+                TransactionDto.class
+            );
             assertNotNull(persistedTransaction.getCreationDate());
             assertEquals(persistedTransaction.getCreationDate(), persistedTransaction.getLastUpdate());
             assertEquals(TransactionStatus.OPEN.toString(), persistedTransaction.getStatus());
@@ -235,8 +270,6 @@ public class TransactionIT extends VitamRuleRunner {
             assertEquals(projectDto.getMessageIdentifier(), persistedTransaction.getMessageIdentifier());
 
             assertThat(persistedTransaction.getComment()).isNotEqualTo(newComment);
-
-
         }
     }
 
@@ -249,26 +282,33 @@ public class TransactionIT extends VitamRuleRunner {
             final RequestResponse<JsonNode> projectResponse = client.initProject(vitamContext, projectDto);
             Assertions.assertThat(projectResponse.getStatus()).isEqualTo(200);
 
-            ProjectDto projectDtoResult =
-                JsonHandler.getFromJsonNode(((RequestResponseOK<JsonNode>) projectResponse).getFirstResult(),
-                    ProjectDto.class);
+            ProjectDto projectDtoResult = JsonHandler.getFromJsonNode(
+                ((RequestResponseOK<JsonNode>) projectResponse).getFirstResult(),
+                ProjectDto.class
+            );
 
             TransactionDto transactiondto = initTransaction();
 
-            RequestResponse<JsonNode> transactionResponse =
-                client.initTransaction(vitamContext, transactiondto, projectDtoResult.getId());
+            RequestResponse<JsonNode> transactionResponse = client.initTransaction(
+                vitamContext,
+                transactiondto,
+                projectDtoResult.getId()
+            );
             Assertions.assertThat(transactionResponse.getStatus()).isEqualTo(200);
 
             RequestResponseOK<JsonNode> requestResponseOK = (RequestResponseOK<JsonNode>) transactionResponse;
-            TransactionDto transactionDtoResult =
-                JsonHandler.getFromJsonNode(requestResponseOK.getFirstResult(), TransactionDto.class);
+            TransactionDto transactionDtoResult = JsonHandler.getFromJsonNode(
+                requestResponseOK.getFirstResult(),
+                TransactionDto.class
+            );
 
             try (InputStream is = PropertiesUtils.getResourceAsStream(AU_TO_UPLOAD)) {
-                RequestResponse<JsonNode> response =
-                    client.uploadArchiveUnit(vitamContext, JsonHandler.getFromInputStream(is),
-                        transactionDtoResult.getId());
+                RequestResponse<JsonNode> response = client.uploadArchiveUnit(
+                    vitamContext,
+                    JsonHandler.getFromInputStream(is),
+                    transactionDtoResult.getId()
+                );
                 assertThat(response.getStatus()).isEqualTo(200);
-
             }
         }
     }
@@ -282,22 +322,30 @@ public class TransactionIT extends VitamRuleRunner {
             final RequestResponse<JsonNode> projectResponse = client.initProject(vitamContext, projectDto);
             Assertions.assertThat(projectResponse.getStatus()).isEqualTo(200);
 
-            ProjectDto projectDtoResult =
-                JsonHandler.getFromJsonNode(((RequestResponseOK<JsonNode>) projectResponse).getFirstResult(),
-                    ProjectDto.class);
+            ProjectDto projectDtoResult = JsonHandler.getFromJsonNode(
+                ((RequestResponseOK<JsonNode>) projectResponse).getFirstResult(),
+                ProjectDto.class
+            );
 
             TransactionDto transactiondto = initTransaction();
 
-            RequestResponse<JsonNode> transactionResponse =
-                client.initTransaction(vitamContext, transactiondto, projectDtoResult.getId());
+            RequestResponse<JsonNode> transactionResponse = client.initTransaction(
+                vitamContext,
+                transactiondto,
+                projectDtoResult.getId()
+            );
             Assertions.assertThat(transactionResponse.getStatus()).isEqualTo(200);
 
             RequestResponseOK<JsonNode> requestResponseOK = (RequestResponseOK<JsonNode>) transactionResponse;
-            TransactionDto transactionDtoResult =
-                JsonHandler.getFromJsonNode(requestResponseOK.getFirstResult(), TransactionDto.class);
+            TransactionDto transactionDtoResult = JsonHandler.getFromJsonNode(
+                requestResponseOK.getFirstResult(),
+                TransactionDto.class
+            );
 
-            RequestResponse<JsonNode> response =
-                client.deleteTransactionById(vitamContext, transactionDtoResult.getId());
+            RequestResponse<JsonNode> response = client.deleteTransactionById(
+                vitamContext,
+                transactionDtoResult.getId()
+            );
             assertThat(response.getStatus()).isEqualTo(200);
         }
     }

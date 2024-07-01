@@ -122,18 +122,29 @@ public class IngestAttachementIT extends VitamRuleRunner {
 
     private static final String SIP_FILE_ADD_AU_LINK_OK_NAME_TARGET = "integration-processing";
 
-
     private static final String SIP_BASE_INIT = "integration-ingest-internal/base_init.zip";
     private static final String SIP_BASE_WITH_UNIT = "integration-ingest-internal/base_with_unit";
     private static final String SIP_BASE_WITH_GOT = "integration-ingest-internal/base_with_got";
     private static final String LINK_AU_TO_EXISTING_GOT = "integration-ingest-internal/LINK_AU_TO_EXISTING_GOT";
 
-    @ClassRule public static VitamServerRunner runner =
-        new VitamServerRunner(fr.gouv.vitam.ingest.internal.IngestInternalIT.class,
-            mongoRule.getMongoDatabase().getName(), ElasticsearchRule.getClusterName(),
-            Sets.newHashSet(MetadataMain.class, WorkerMain.class, AdminManagementMain.class, LogbookMain.class,
-                WorkspaceMain.class, StorageMain.class, DefaultOfferMain.class, ProcessManagementMain.class,
-                AccessInternalMain.class, IngestInternalMain.class));
+    @ClassRule
+    public static VitamServerRunner runner = new VitamServerRunner(
+        fr.gouv.vitam.ingest.internal.IngestInternalIT.class,
+        mongoRule.getMongoDatabase().getName(),
+        ElasticsearchRule.getClusterName(),
+        Sets.newHashSet(
+            MetadataMain.class,
+            WorkerMain.class,
+            AdminManagementMain.class,
+            LogbookMain.class,
+            WorkspaceMain.class,
+            StorageMain.class,
+            DefaultOfferMain.class,
+            ProcessManagementMain.class,
+            AccessInternalMain.class,
+            IngestInternalMain.class
+        )
+    );
 
     private static ProcessingManagementClientFactory processingManagementClientFactory;
 
@@ -204,8 +215,8 @@ public class IngestAttachementIT extends VitamRuleRunner {
         String operationId = doIngestToStep(SIP_BASE_INIT, 7);
 
         // prepare 2nd zip to ingest
-        MongoIterable<Document> resultUnits =
-            MetadataCollections.UNIT.getCollection().find(Filters.eq("_opi", operationId));
+        MongoIterable<Document> resultUnits = MetadataCollections.UNIT.getCollection()
+            .find(Filters.eq("_opi", operationId));
         Document unit = resultUnits.first();
         assertNotNull(unit);
         String idUnit = unit.getString("_id");
@@ -214,12 +225,10 @@ public class IngestAttachementIT extends VitamRuleRunner {
         replaceStringInFile(SIP_BASE_WITH_UNIT + "/manifest.xml", "(?<=<SystemId>).*?(?=</SystemId>)", idUnit);
         InputStream streamSip = createZipFile(SIP_BASE_WITH_UNIT);
 
-
         String ingestOperationGuid = doIngest(TENANT_ID, streamSip);
         verifyOperation(ingestOperationGuid, KO);
         verifyLogbook(ingestOperationGuid);
     }
-
 
     @RunWithCustomExecutor
     @Test
@@ -230,15 +239,18 @@ public class IngestAttachementIT extends VitamRuleRunner {
         String operationId = doIngestToStep(SIP_BASE_INIT, 7);
 
         // prepare 2nd zip to ingest
-        MongoIterable<Document> resultGots =
-            MetadataCollections.OBJECTGROUP.getCollection().find(Filters.eq("_opi", operationId));
+        MongoIterable<Document> resultGots = MetadataCollections.OBJECTGROUP.getCollection()
+            .find(Filters.eq("_opi", operationId));
         Document got = resultGots.first();
         assertNotNull(got);
         String idGot = got.getString("_id");
         assertThat(idGot).isNotNull();
 
-        replaceStringInFile(SIP_BASE_WITH_GOT + "/manifest.xml", "(?<=<MetadataName>).*?(?=</MetadataName>)",
-            "#object");
+        replaceStringInFile(
+            SIP_BASE_WITH_GOT + "/manifest.xml",
+            "(?<=<MetadataName>).*?(?=</MetadataName>)",
+            "#object"
+        );
         replaceStringInFile(SIP_BASE_WITH_GOT + "/manifest.xml", "(?<=<MetadataValue>).*?(?=</MetadataValue>)", idGot);
 
         InputStream streamSip = createZipFile(SIP_BASE_WITH_GOT);
@@ -256,16 +268,19 @@ public class IngestAttachementIT extends VitamRuleRunner {
         String operationId = doIngestToStep(SIP_BASE_INIT, 7);
 
         // prepare 2nd zip to ingest
-        MongoIterable<Document> resultUnits =
-            MetadataCollections.UNIT.getCollection().find(Filters.eq("_opi", operationId)).skip(1);
+        MongoIterable<Document> resultUnits = MetadataCollections.UNIT.getCollection()
+            .find(Filters.eq("_opi", operationId))
+            .skip(1);
         Document unit = resultUnits.first();
         assertNotNull(unit);
         String idGot = unit.getString("_og");
         assertThat(idGot).isNotNull();
 
-
-        replaceStringInFile(LINK_AU_TO_EXISTING_GOT + "/manifest.xml",
-            "(?<=<DataObjectGroupExistingReferenceId>).*?(?=</DataObjectGroupExistingReferenceId>)", idGot);
+        replaceStringInFile(
+            LINK_AU_TO_EXISTING_GOT + "/manifest.xml",
+            "(?<=<DataObjectGroupExistingReferenceId>).*?(?=</DataObjectGroupExistingReferenceId>)",
+            idGot
+        );
 
         InputStream streamSip = createZipFile(LINK_AU_TO_EXISTING_GOT);
 
@@ -292,9 +307,11 @@ public class IngestAttachementIT extends VitamRuleRunner {
         String idGot = unit.getString("_og");
         assertThat(idGot).isNotNull();
 
-
-        replaceStringInFile(LINK_AU_TO_EXISTING_GOT + "/manifest.xml",
-            "(?<=<DataObjectGroupExistingReferenceId>).*?(?=</DataObjectGroupExistingReferenceId>)", idGot);
+        replaceStringInFile(
+            LINK_AU_TO_EXISTING_GOT + "/manifest.xml",
+            "(?<=<DataObjectGroupExistingReferenceId>).*?(?=</DataObjectGroupExistingReferenceId>)",
+            idGot
+        );
 
         InputStream streamSip = createZipFile(LINK_AU_TO_EXISTING_GOT);
 
@@ -308,7 +325,6 @@ public class IngestAttachementIT extends VitamRuleRunner {
         assertEquals(lfc, lfCfromOffer);
     }
 
-
     @RunWithCustomExecutor
     @Test
     public void testIngestWithExistingObjectGroupLFCInProcess() throws Exception {
@@ -316,7 +332,6 @@ public class IngestAttachementIT extends VitamRuleRunner {
         IngestInternalClientFactory.getInstance().changeServerPort(VitamServerRunner.PORT_SERVICE_INGEST_INTERNAL);
         String operationId = VitamTestHelper.doIngest(TENANT_ID, SIP_BASE_INIT);
         verifyOperation(operationId, OK);
-
 
         // prepare 2nd zip to ingest
         MongoIterable<Document> resultUnits = MetadataCollections.UNIT.getCollection()
@@ -326,9 +341,11 @@ public class IngestAttachementIT extends VitamRuleRunner {
         String idGot = unit.getString("_og");
         assertThat(idGot).isNotNull();
 
-
-        replaceStringInFile(LINK_AU_TO_EXISTING_GOT + "/manifest.xml",
-            "(?<=<DataObjectGroupExistingReferenceId>).*?(?=</DataObjectGroupExistingReferenceId>)", idGot);
+        replaceStringInFile(
+            LINK_AU_TO_EXISTING_GOT + "/manifest.xml",
+            "(?<=<DataObjectGroupExistingReferenceId>).*?(?=</DataObjectGroupExistingReferenceId>)",
+            idGot
+        );
 
         InputStream streamSip = createZipFile(LINK_AU_TO_EXISTING_GOT);
         File file = File.createTempFile("sip", "");
@@ -365,8 +382,11 @@ public class IngestAttachementIT extends VitamRuleRunner {
             PropertiesUtils.getResourcePath(SIP_FILE_ADD_AU_LINK_OK_NAME_TARGET).toAbsolutePath() + "/" + zipName;
         zipFolder(PropertiesUtils.getResourcePath(folderToZip), zipPath);
 
-        return new FileInputStream(new File(
-            PropertiesUtils.getResourcePath(SIP_FILE_ADD_AU_LINK_OK_NAME_TARGET).toAbsolutePath() + "/" + zipName));
+        return new FileInputStream(
+            new File(
+                PropertiesUtils.getResourcePath(SIP_FILE_ADD_AU_LINK_OK_NAME_TARGET).toAbsolutePath() + "/" + zipName
+            )
+        );
     }
 
     private void replaceStringInFile(String targetFilename, String textToReplace, String replacementText)
@@ -381,23 +401,25 @@ public class IngestAttachementIT extends VitamRuleRunner {
 
     private void zipFolder(final Path path, final String zipFilePath) throws IOException {
         try (FileOutputStream fos = new FileOutputStream(zipFilePath); ZipOutputStream zos = new ZipOutputStream(fos)) {
-            Files.walkFileTree(path, new SimpleFileVisitor<>() {
-                public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
-                    zos.putNextEntry(new ZipEntry(path.relativize(file).toString()));
-                    Files.copy(file, zos);
-                    zos.closeEntry();
-                    return FileVisitResult.CONTINUE;
-                }
+            Files.walkFileTree(
+                path,
+                new SimpleFileVisitor<>() {
+                    public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
+                        zos.putNextEntry(new ZipEntry(path.relativize(file).toString()));
+                        Files.copy(file, zos);
+                        zos.closeEntry();
+                        return FileVisitResult.CONTINUE;
+                    }
 
-                public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs) throws IOException {
-                    zos.putNextEntry(new ZipEntry(path.relativize(dir) + "/"));
-                    zos.closeEntry();
-                    return FileVisitResult.CONTINUE;
+                    public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs) throws IOException {
+                        zos.putNextEntry(new ZipEntry(path.relativize(dir) + "/"));
+                        zos.closeEntry();
+                        return FileVisitResult.CONTINUE;
+                    }
                 }
-            });
+            );
         }
     }
-
 
     private String doIngestToStep(String sip, int step) throws VitamException {
         String operationId = VitamTestHelper.doIngestNext(TENANT_ID, sip);
@@ -405,9 +427,14 @@ public class IngestAttachementIT extends VitamRuleRunner {
         verifyProcessState(operationId, TENANT_ID, PAUSE);
 
         for (int i = 0; i <= step; i++) {
-            try (ProcessingManagementClient processingManagementClient = processingManagementClientFactory.getClient()) {
-                processingManagementClient.executeOperationProcess(operationId, Contexts.DEFAULT_WORKFLOW.toString(),
-                    ProcessAction.NEXT.getValue());
+            try (
+                ProcessingManagementClient processingManagementClient = processingManagementClientFactory.getClient()
+            ) {
+                processingManagementClient.executeOperationProcess(
+                    operationId,
+                    Contexts.DEFAULT_WORKFLOW.toString(),
+                    ProcessAction.NEXT.getValue()
+                );
             }
             waitOperation(operationId, PAUSE);
             verifyOperation(operationId, OK);
@@ -432,9 +459,14 @@ public class IngestAttachementIT extends VitamRuleRunner {
         verifyProcessState(operationId, TENANT_ID, PAUSE);
 
         for (int i = 0; i <= step; i++) {
-            try (ProcessingManagementClient processingManagementClient = processingManagementClientFactory.getClient()) {
-                processingManagementClient.executeOperationProcess(operationId, Contexts.DEFAULT_WORKFLOW.toString(),
-                    ProcessAction.NEXT.getValue());
+            try (
+                ProcessingManagementClient processingManagementClient = processingManagementClientFactory.getClient()
+            ) {
+                processingManagementClient.executeOperationProcess(
+                    operationId,
+                    Contexts.DEFAULT_WORKFLOW.toString(),
+                    ProcessAction.NEXT.getValue()
+                );
             }
             waitOperation(operationId, PAUSE);
             verifyOperation(operationId, OK, WARNING);

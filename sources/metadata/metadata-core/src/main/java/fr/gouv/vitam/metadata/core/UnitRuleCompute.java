@@ -70,8 +70,8 @@ public class UnitRuleCompute extends UnitNode {
 
         if (getUnit().getDirectParent().isEmpty()) {
             // init
-            this.heritedRules =
-                new UnitInheritedRule().createNewInheritedRule(getUnit().getManagement(), getUnit().getId());
+            this.heritedRules = new UnitInheritedRule()
+                .createNewInheritedRule(getUnit().getManagement(), getUnit().getId());
         } else {
             this.heritedRules = new UnitInheritedRule();
         }
@@ -79,8 +79,10 @@ public class UnitRuleCompute extends UnitNode {
         for (String parentId : getUnit().getDirectParent()) {
             UnitRuleCompute parentNode = new UnitRuleCompute(getAllUnitNode().get(parentId));
             parentNode.computeRule();
-            UnitInheritedRule rule =
-                parentNode.heritedRules.createNewInheritedRule(getUnit().getManagement(), getUnit().getId());
+            UnitInheritedRule rule = parentNode.heritedRules.createNewInheritedRule(
+                getUnit().getManagement(),
+                getUnit().getId()
+            );
             heritedRules.concatRule(rule);
         }
         isComputed = true;

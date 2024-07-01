@@ -95,31 +95,42 @@ public class MetadataRepository {
             applyTransactionToQuery(transactionId, parser.getRequest());
             JsonNode jsonNode = metaDataClient.selectUnits(parser.getRequest().getFinalSelect());
             return JsonHandler.getFromJsonNode(jsonNode, RequestResponseOK.class, JsonNode.class);
-        } catch (MetaDataExecutionException | MetaDataClientServerException | InvalidParseOperationException |
-                 MetaDataDocumentSizeException | InvalidCreateOperationException e) {
+        } catch (
+            MetaDataExecutionException
+            | MetaDataClientServerException
+            | InvalidParseOperationException
+            | MetaDataDocumentSizeException
+            | InvalidCreateOperationException e
+        ) {
             LOGGER.error("Error when getting units in metadata: {}", e);
             throw new CollectInternalException("Error when getting units in metadata: " + e);
         }
     }
 
     public ScrollSpliterator<JsonNode> selectUnits(SelectMultiQuery request, @Nonnull String transactionId) {
-        return new ScrollSpliterator<>(request, query -> {
-            try {
-                return selectUnits(request.getFinalSelect(), transactionId);
-            } catch (CollectInternalException e) {
-                throw new IllegalStateException(e);
-            }
-        }, VitamConfiguration.getElasticSearchScrollTimeoutInMilliseconds(),
-            VitamConfiguration.getElasticSearchScrollLimit());
-
+        return new ScrollSpliterator<>(
+            request,
+            query -> {
+                try {
+                    return selectUnits(request.getFinalSelect(), transactionId);
+                } catch (CollectInternalException e) {
+                    throw new IllegalStateException(e);
+                }
+            },
+            VitamConfiguration.getElasticSearchScrollTimeoutInMilliseconds(),
+            VitamConfiguration.getElasticSearchScrollLimit()
+        );
     }
 
     public JsonNode selectUnitById(String unitId) throws CollectInternalException {
         try (MetaDataClient client = metaDataCollectClientFactory.getClient()) {
             final SelectMultiQuery select = new SelectMultiQuery();
             JsonNode jsonNode = client.selectUnitbyId(select.getFinalSelect(), unitId);
-            RequestResponseOK<JsonNode> response =
-                JsonHandler.getFromJsonNode(jsonNode, RequestResponseOK.class, JsonNode.class);
+            RequestResponseOK<JsonNode> response = JsonHandler.getFromJsonNode(
+                jsonNode,
+                RequestResponseOK.class,
+                JsonNode.class
+            );
             if (response.getResults().isEmpty()) {
                 throw new CollectInternalException("Cannot find unit with id = " + unitId);
             }
@@ -137,8 +148,13 @@ public class MetadataRepository {
             parser.parse(queryDsl);
             applyTransactionToQuery(transactionId, parser.getRequest());
             return metaDataClient.selectObjectGroups(parser.getRequest().getFinalSelect());
-        } catch (MetaDataExecutionException | MetaDataClientServerException | InvalidParseOperationException |
-                 MetaDataDocumentSizeException | InvalidCreateOperationException e) {
+        } catch (
+            MetaDataExecutionException
+            | MetaDataClientServerException
+            | InvalidParseOperationException
+            | MetaDataDocumentSizeException
+            | InvalidCreateOperationException e
+        ) {
             LOGGER.error("Error when getting units in metadata: {}", e);
             throw new CollectInternalException("Error when getting units in metadata: " + e);
         }
@@ -162,8 +178,13 @@ public class MetadataRepository {
         throws CollectInternalException {
         try (MetaDataClient metaDataClient = metaDataCollectClientFactory.getClient()) {
             return metaDataClient.atomicUpdateBulk(updateMultiQueries);
-        } catch (MetaDataExecutionException | MetaDataNotFoundException | MetaDataClientServerException |
-                 InvalidParseOperationException | MetaDataDocumentSizeException e) {
+        } catch (
+            MetaDataExecutionException
+            | MetaDataNotFoundException
+            | MetaDataClientServerException
+            | InvalidParseOperationException
+            | MetaDataDocumentSizeException e
+        ) {
             throw new CollectInternalException(e);
         }
     }
@@ -180,8 +201,10 @@ public class MetadataRepository {
 
     public JsonNode saveArchiveUnits(List<ObjectNode> units) throws CollectInternalException {
         try (MetaDataClient client = metaDataCollectClientFactory.getClient()) {
-            List<BulkUnitInsertEntry> list =
-                units.stream().map(MetadataRepository::createInsertEntry).collect(Collectors.toList());
+            List<BulkUnitInsertEntry> list = units
+                .stream()
+                .map(MetadataRepository::createInsertEntry)
+                .collect(Collectors.toList());
             return client.insertUnitBulk(new BulkUnitInsertRequest(list));
         } catch (final MetaDataException | InvalidParseOperationException e) {
             LOGGER.error("Error while saving unit in metadata: {}", e);
@@ -212,7 +235,6 @@ public class MetadataRepository {
         }
     }
 
-
     public JsonNode saveObjectGroup(ObjectNode og) throws CollectInternalException {
         try (MetaDataClient client = metaDataCollectClientFactory.getClient()) {
             final InsertMultiQuery insert = new InsertMultiQuery();
@@ -228,12 +250,15 @@ public class MetadataRepository {
 
     public JsonNode saveObjectGroups(List<ObjectNode> objectGroups) throws CollectInternalException {
         try (MetaDataClient client = metaDataCollectClientFactory.getClient()) {
-            List<JsonNode> collect = objectGroups.stream().map(e -> {
-                final InsertMultiQuery insert = new InsertMultiQuery();
-                insert.resetFilter();
-                insert.addData(e);
-                return insert.getFinalInsert();
-            }).collect(Collectors.toList());
+            List<JsonNode> collect = objectGroups
+                .stream()
+                .map(e -> {
+                    final InsertMultiQuery insert = new InsertMultiQuery();
+                    insert.resetFilter();
+                    insert.addData(e);
+                    return insert.getFinalInsert();
+                })
+                .collect(Collectors.toList());
             return client.insertObjectGroups(collect);
         } catch (final MetaDataException | InvalidParseOperationException e) {
             LOGGER.error("Error while saving objectGroup in metadata: {}", e);
@@ -284,10 +309,8 @@ public class MetadataRepository {
         }
     }
 
-
     public JsonNode selectUnitsWithInheritedRules(JsonNode jsonQuery, @Nonnull String transactionId)
         throws InvalidParseOperationException {
-
         ParametersChecker.checkParameter(DATA_CATEGORY, jsonQuery);
 
         // Check correctness of request
@@ -300,8 +323,13 @@ public class MetadataRepository {
         try (MetaDataClient metaDataClient = metaDataCollectClientFactory.getClient()) {
             applyTransactionToQuery(transactionId, parser.getRequest());
             return metaDataClient.selectUnitsWithInheritedRules(jsonQuery);
-        } catch (MetaDataDocumentSizeException | ProcessingException | MetaDataClientServerException |
-                 MetaDataExecutionException | InvalidCreateOperationException e) {
+        } catch (
+            MetaDataDocumentSizeException
+            | ProcessingException
+            | MetaDataClientServerException
+            | MetaDataExecutionException
+            | InvalidCreateOperationException e
+        ) {
             LOGGER.error("Error on selecting units with Inherited Rules", e);
             throw new InvalidParseOperationException(e);
         }

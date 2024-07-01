@@ -43,11 +43,10 @@ import java.io.InputStream;
  * Collect Client implementation for production environment
  */
 public class CollectInternalClientRestMock extends AbstractMockClient implements CollectInternalClient {
+
     public static String TRANSACTION_ID = "transaction-id";
 
-    public CollectInternalClientRestMock() {
-    }
-
+    public CollectInternalClientRestMock() {}
 
     @Override
     public RequestResponse<JsonNode> initProject(ProjectDto projectDto) throws VitamClientException {
@@ -114,21 +113,28 @@ public class CollectInternalClientRestMock extends AbstractMockClient implements
     public RequestResponseOK<JsonNode> uploadArchiveUnit(JsonNode unitJsonNode, String transactionId)
         throws VitamClientException {
         if (TRANSACTION_ID.equals(transactionId)) {
-
             return null;
         }
         throw new VitamClientException("Mock exception in client");
     }
 
     @Override
-    public RequestResponseOK<JsonNode> addObjectGroup(String unitId, Integer version, JsonNode objectJsonNode,
-        String usage) {
+    public RequestResponseOK<JsonNode> addObjectGroup(
+        String unitId,
+        Integer version,
+        JsonNode objectJsonNode,
+        String usage
+    ) {
         return null;
     }
 
     @Override
-    public RequestResponse<JsonNode> addBinary(String unitId, Integer version, InputStream inputStreamUploaded,
-        String usage) {
+    public RequestResponse<JsonNode> addBinary(
+        String unitId,
+        Integer version,
+        InputStream inputStreamUploaded,
+        String usage
+    ) {
         return null;
     }
 
@@ -153,9 +159,7 @@ public class CollectInternalClientRestMock extends AbstractMockClient implements
     }
 
     @Override
-    public void uploadZipToTransaction(String transactionId, InputStream inputStreamUploaded) {
-
-    }
+    public void uploadZipToTransaction(String transactionId, InputStream inputStreamUploaded) {}
 
     @Override
     public RequestResponseOK<JsonNode> getUnitsByProjectId(String projectId, JsonNode dslQuery) {

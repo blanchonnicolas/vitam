@@ -41,17 +41,13 @@ public class MetadataSnapshot extends VitamDocument<MetadataSnapshot> {
      */
     public static final String VALUE = "Value";
 
-
     /**
      * Parameters
      */
     public enum PARAMETERS {
         Scroll,
-        LastScrollRequestDate
+        LastScrollRequestDate,
     }
-
-
-    ;
 
     @Override
     public MetadataSnapshot newInstance(JsonNode content) {
@@ -122,5 +118,4 @@ public class MetadataSnapshot extends VitamDocument<MetadataSnapshot> {
         append(VALUE, value);
         return this;
     }
-
 }

@@ -43,8 +43,9 @@ import javax.ws.rs.core.Response;
 import static io.restassured.RestAssured.given;
 
 public class TransactionExternalResourceTest {
+
     private static CollectExternalMain application;
-    private final static JunitHelper junitHelper = JunitHelper.getInstance();
+    private static final JunitHelper junitHelper = JunitHelper.getInstance();
     private static int portAvailable;
 
     @BeforeClass
@@ -52,17 +53,14 @@ public class TransactionExternalResourceTest {
         portAvailable = junitHelper.findAvailablePort();
         RestAssured.port = portAvailable;
         RestAssured.basePath = "collect-external/v1";
-        application = new CollectExternalMain("collect-external-test.conf",
-            BusinessApplicationTest.class, null);
+        application = new CollectExternalMain("collect-external-test.conf", BusinessApplicationTest.class, null);
         application.start();
     }
 
     @AfterClass
     public static void tearDown() throws Exception {
         try {
-            if (application != null && application.getVitamServer() != null &&
-                application.getVitamServer() != null) {
-
+            if (application != null && application.getVitamServer() != null && application.getVitamServer() != null) {
                 application.stop();
             }
         } catch (Exception e) {
@@ -80,13 +78,19 @@ public class TransactionExternalResourceTest {
             .accept(ContentType.JSON)
             .contentType(ContentType.JSON)
             .header(GlobalDataRest.X_TENANT_ID, "0")
-            .body("{\n" +
+            .body(
+                "{\n" +
                 "  \"DescriptionLevel\": \"RecordGrp\",\n" +
                 "  \"Title\": \"Bulletins de salaire : mars 2020\"\n" +
-                "}")
-            .when().log().all()
+                "}"
+            )
+            .when()
+            .log()
+            .all()
             .post("/transactions/" + CollectInternalClientRestMock.TRANSACTION_ID + "/units")
-            .then().log().all()
+            .then()
+            .log()
+            .all()
             .statusCode(Response.Status.OK.getStatusCode());
     }
 
@@ -96,16 +100,21 @@ public class TransactionExternalResourceTest {
             .accept(ContentType.JSON)
             .contentType(ContentType.JSON)
             .header(GlobalDataRest.X_TENANT_ID, "0")
-            .body("{\n" +
+            .body(
+                "{\n" +
                 "  \"DescriptionLevel\": \"RecordGrp\",\n" +
                 "  \"Title\": \"Bulletins de salaire : mars 2020\"\n" +
-                "}")
-            .when().log().all()
+                "}"
+            )
+            .when()
+            .log()
+            .all()
             .post("/transactions/BAD_TRANSACTION_ID/units")
-            .then().log().all()
+            .then()
+            .log()
+            .all()
             .statusCode(Response.Status.BAD_REQUEST.getStatusCode());
     }
-
 
     @Test
     public void bad_endpoint_match_pattern() {
@@ -113,13 +122,19 @@ public class TransactionExternalResourceTest {
             .accept(ContentType.JSON)
             .contentType(ContentType.JSON)
             .header(GlobalDataRest.X_TENANT_ID, "0")
-            .body("{\n" +
+            .body(
+                "{\n" +
                 "  \"DescriptionLevel\": \"RecordGrp\",\n" +
                 "  \"Title\": \"Bulletins de salaire : mars 2020\"\n" +
-                "}")
-            .when().log().all()
+                "}"
+            )
+            .when()
+            .log()
+            .all()
             .post("/transactions/units")
-            .then().log().all()
+            .then()
+            .log()
+            .all()
             .statusCode(Response.Status.METHOD_NOT_ALLOWED.getStatusCode());
     }
 
@@ -129,13 +144,19 @@ public class TransactionExternalResourceTest {
             .accept(ContentType.JSON)
             .contentType(ContentType.JSON)
             .header(GlobalDataRest.X_TENANT_ID, "0")
-            .body("{\n" +
+            .body(
+                "{\n" +
                 "  \"DescriptionLevel\": \"RecordGrp\",\n" +
                 "  \"Title\": \"Bulletins de salaire : mars 2020\"\n" +
-                "}")
-            .when().log().all()
+                "}"
+            )
+            .when()
+            .log()
+            .all()
             .post("/transactions//units")
-            .then().log().all()
+            .then()
+            .log()
+            .all()
             .statusCode(Response.Status.NOT_FOUND.getStatusCode());
     }
 }

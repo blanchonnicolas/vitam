@@ -68,11 +68,14 @@ public class MetadataHelper {
     public static final String STATIC_ATTACHMENT = "STATIC_ATTACHEMENT";
     public static final String DYNAMIC_ATTACHEMENT = "DYNAMIC_ATTACHEMENT";
 
-    private MetadataHelper() {
-    }
+    private MetadataHelper() {}
 
-    public static ArchiveUnitModel createUnit(String transactionId, LevelType descriptionLevel, String title,
-        String unitParent) {
+    public static ArchiveUnitModel createUnit(
+        String transactionId,
+        LevelType descriptionLevel,
+        String title,
+        String unitParent
+    ) {
         String id = GUIDFactory.newUnitGUID(VitamThreadUtils.getVitamSession().getTenantId()).getId();
         ArchiveUnitModel unitInternalModel = new ArchiveUnitModel();
 
@@ -90,16 +93,20 @@ public class MetadataHelper {
         return unitInternalModel;
     }
 
-    public static ObjectGroupResponse createObjectGroup(String transactionId, String fileName, String objectId,
-        String newFilename, FormatIdentifierResponse format, String digest, Long size) {
-
-
+    public static ObjectGroupResponse createObjectGroup(
+        String transactionId,
+        String fileName,
+        String objectId,
+        String newFilename,
+        FormatIdentifierResponse format,
+        String digest,
+        Long size
+    ) {
         FileInfoModel fileInfoModel = new FileInfoModel();
         fileInfoModel.setFilename(fileName);
         fileInfoModel.setLastModified(LocalDateUtil.getFormattedDateForMongo(LocalDateTime.now()));
 
         QualifiersModel qualifiersModel = new QualifiersModel();
-
 
         VersionsModel versionsModel = new VersionsModel();
         versionsModel.setId(objectId);
@@ -110,7 +117,6 @@ public class MetadataHelper {
         versionsModel.setSize(size);
         versionsModel.setUri(CONTENT_FOLDER + File.separator + newFilename);
         versionsModel.setOpi(transactionId);
-
 
         FormatIdentificationModel formatIdentificationModel = new FormatIdentificationModel();
         formatIdentificationModel.setFormatId(format.getPuid());
@@ -133,8 +139,11 @@ public class MetadataHelper {
         return dbObjectGroupModel;
     }
 
-    public static Map.Entry<String, String> findUnitParent(ObjectNode unit, @Nonnull List<MetadataUnitUp> unitUps,
-        Map<String, String> unitIds) {
+    public static Map.Entry<String, String> findUnitParent(
+        ObjectNode unit,
+        @Nonnull List<MetadataUnitUp> unitUps,
+        Map<String, String> unitIds
+    ) {
         for (MetadataUnitUp metadataUnitUp : unitUps) {
             if (metadataMatches(unit, metadataUnitUp.getMetadataKey(), metadataUnitUp.getMetadataValue())) {
                 final String unitTitle = String.format("%s_%s", DYNAMIC_ATTACHEMENT, metadataUnitUp.getUnitUp());
@@ -142,8 +151,10 @@ public class MetadataHelper {
                 return new AbstractMap.SimpleEntry<>(unit.get(VitamFieldsHelper.id()).asText(), unitUpId);
             }
         }
-        return new AbstractMap.SimpleEntry<>(unit.get(VitamFieldsHelper.id()).asText(),
-            (unit.get(VitamFieldsHelper.unitups()) != null) ? unit.get(VitamFieldsHelper.unitups()).asText() : null);
+        return new AbstractMap.SimpleEntry<>(
+            unit.get(VitamFieldsHelper.id()).asText(),
+            (unit.get(VitamFieldsHelper.unitups()) != null) ? unit.get(VitamFieldsHelper.unitups()).asText() : null
+        );
     }
 
     private static boolean metadataMatches(JsonNode objectNode, String path, String value) {
@@ -171,5 +182,4 @@ public class MetadataHelper {
         }
         return false;
     }
-
 }

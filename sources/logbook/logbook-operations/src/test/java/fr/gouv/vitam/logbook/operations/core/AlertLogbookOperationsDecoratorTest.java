@@ -66,9 +66,12 @@ import static org.mockito.Mockito.when;
 public class AlertLogbookOperationsDecoratorTest {
 
     private WorkspaceClientFactory workspaceClientFactory;
+
     @Rule
-    public RunWithCustomExecutorRule runInThread =
-        new RunWithCustomExecutorRule(VitamThreadPoolExecutor.getDefaultExecutor());
+    public RunWithCustomExecutorRule runInThread = new RunWithCustomExecutorRule(
+        VitamThreadPoolExecutor.getDefaultExecutor()
+    );
+
     private AlertLogbookOperationsDecorator alertLogbookOperationsDecorator;
     LogbookEvent logbookEvent = new LogbookEvent();
     List<LogbookEvent> alertEvents = new ArrayList<>();
@@ -93,20 +96,29 @@ public class AlertLogbookOperationsDecoratorTest {
         when(storageClientFactory.getClient()).thenReturn(mock(StorageClient.class));
         IndexationHelper indexationHelper = mock(IndexationHelper.class);
         indexManager = mock(ElasticsearchLogbookIndexManager.class);
-        logbookOperationsImpl =
-            new LogbookOperationsImpl(mongoDbAccess, workspaceClientFactory, storageClientFactory, indexationHelper,
-                indexManager);
+        logbookOperationsImpl = new LogbookOperationsImpl(
+            mongoDbAccess,
+            workspaceClientFactory,
+            storageClientFactory,
+            indexationHelper,
+            indexManager
+        );
         eventType = "STP_IMPORT_ACCESS_CONTRACT";
         logbookParameters = LogbookParameterHelper.newLogbookOperationParameters();
         logbookParameters.putParameterValue(LogbookParameterName.eventType, eventType);
         logbookParameters.putParameterValue(LogbookParameterName.outcome, outcome);
-        logbookParameters.putParameterValue(LogbookParameterName.eventIdentifierProcess, GUIDFactory
-            .newOperationLogbookGUID(0).getId());
+        logbookParameters.putParameterValue(
+            LogbookParameterName.eventIdentifierProcess,
+            GUIDFactory.newOperationLogbookGUID(0).getId()
+        );
         logbookEvent.setEvType(eventType);
         logbookEvent.setOutcome(outcome);
         alertEvents.add(logbookEvent);
-        alertLogbookOperationsDecorator =
-            new AlertLogbookOperationsDecorator(logbookOperationsImpl, alertEvents, alertService);
+        alertLogbookOperationsDecorator = new AlertLogbookOperationsDecorator(
+            logbookOperationsImpl,
+            alertEvents,
+            alertService
+        );
 
         workspaceClient = mock(WorkspaceClient.class);
         when(workspaceClientFactory.getClient()).thenReturn(workspaceClient);
@@ -136,7 +148,7 @@ public class AlertLogbookOperationsDecoratorTest {
     @Test
     public void testCreateBulkLogbookOperation() throws Exception {
         VitamThreadUtils.getVitamSession().setTenantId(0);
-        LogbookOperationParameters[] operationArray = {logbookParameters};
+        LogbookOperationParameters[] operationArray = { logbookParameters };
         alertLogbookOperationsDecorator.createBulkLogbookOperation(operationArray);
         verify(alertService).createAlert(Mockito.eq(VitamLogLevel.INFO), Mockito.anyString());
     }
@@ -145,11 +157,10 @@ public class AlertLogbookOperationsDecoratorTest {
     @Test
     public void testUpdateBulkLogbookOperation() throws Exception {
         VitamThreadUtils.getVitamSession().setTenantId(0);
-        LogbookOperationParameters[] operationArray = {logbookParameters};
+        LogbookOperationParameters[] operationArray = { logbookParameters };
         alertLogbookOperationsDecorator.updateBulkLogbookOperation(operationArray);
         verify(alertService).createAlert(Mockito.eq(VitamLogLevel.INFO), Mockito.anyString());
     }
-
 
     @Test
     public void testIsAlertEvent() throws Exception {

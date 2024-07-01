@@ -77,15 +77,16 @@ public class DescriptiveMetadataMapper {
      * @return DescriptiveMetadataModel
      */
     public DescriptiveMetadataModel map(DescriptiveMetadataContentType metadataContentType) {
-
         DescriptiveMetadataModel descriptiveMetadataModel = new DescriptiveMetadataModel();
         descriptiveMetadataModel.setAcquiredDate(
-            LocalDateUtil.transformIsoOffsetDateToIsoOffsetDateTime(metadataContentType.getAcquiredDate()));
+            LocalDateUtil.transformIsoOffsetDateToIsoOffsetDateTime(metadataContentType.getAcquiredDate())
+        );
         descriptiveMetadataModel.setAddressee(metadataContentType.getAddressee());
 
         descriptiveMetadataModel.setAny(ElementMapper.toMap(metadataContentType.getAny()));
-        descriptiveMetadataModel
-            .setArchivalAgencyArchiveUnitIdentifier(metadataContentType.getArchivalAgencyArchiveUnitIdentifier());
+        descriptiveMetadataModel.setArchivalAgencyArchiveUnitIdentifier(
+            metadataContentType.getArchivalAgencyArchiveUnitIdentifier()
+        );
 
         descriptiveMetadataModel.setAuthorizedAgent(metadataContentType.getAuthorizedAgent());
 
@@ -97,10 +98,12 @@ public class DescriptiveMetadataMapper {
 
         descriptiveMetadataModel.setCoverage(metadataContentType.getCoverage());
         descriptiveMetadataModel.setCreatedDate(
-            LocalDateUtil.transformIsoOffsetDateToIsoOffsetDateTime(metadataContentType.getCreatedDate()));
+            LocalDateUtil.transformIsoOffsetDateToIsoOffsetDateTime(metadataContentType.getCreatedDate())
+        );
 
-        CustodialHistoryModel custodialHistoryModel =
-            custodialHistoryMapper.map(metadataContentType.getCustodialHistory());
+        CustodialHistoryModel custodialHistoryModel = custodialHistoryMapper.map(
+            metadataContentType.getCustodialHistory()
+        );
         descriptiveMetadataModel.setCustodialHistory(custodialHistoryModel);
 
         descriptiveMetadataModel.setDescription(findDefaultTextType(metadataContentType.getDescription()));
@@ -120,24 +123,29 @@ public class DescriptiveMetadataMapper {
         descriptiveMetadataModel.setKeyword(metadataContentType.getKeyword());
         descriptiveMetadataModel.setLanguage(metadataContentType.getLanguage());
         descriptiveMetadataModel.setOriginatingAgency(metadataContentType.getOriginatingAgency());
-        descriptiveMetadataModel
-            .setOriginatingAgencyArchiveUnitIdentifier(metadataContentType.getOriginatingAgencyArchiveUnitIdentifier());
+        descriptiveMetadataModel.setOriginatingAgencyArchiveUnitIdentifier(
+            metadataContentType.getOriginatingAgencyArchiveUnitIdentifier()
+        );
         descriptiveMetadataModel.setOriginatingSystemId(metadataContentType.getOriginatingSystemId());
         descriptiveMetadataModel.setRecipient(metadataContentType.getRecipient());
 
         descriptiveMetadataModel.setRegisteredDate(
-            LocalDateUtil.transformIsoOffsetDateToIsoOffsetDateTime(metadataContentType.getRegisteredDate()));
+            LocalDateUtil.transformIsoOffsetDateToIsoOffsetDateTime(metadataContentType.getRegisteredDate())
+        );
         descriptiveMetadataModel.setRelatedObjectReference(metadataContentType.getRelatedObjectReference());
         descriptiveMetadataModel.setReceivedDate(
-            LocalDateUtil.transformIsoOffsetDateToIsoOffsetDateTime(metadataContentType.getReceivedDate()));
-        descriptiveMetadataModel
-            .setSentDate(LocalDateUtil.transformIsoOffsetDateToIsoOffsetDateTime(metadataContentType.getSentDate()));
+            LocalDateUtil.transformIsoOffsetDateToIsoOffsetDateTime(metadataContentType.getReceivedDate())
+        );
+        descriptiveMetadataModel.setSentDate(
+            LocalDateUtil.transformIsoOffsetDateToIsoOffsetDateTime(metadataContentType.getSentDate())
+        );
 
         descriptiveMetadataModel.setSignature(mapSignatures(metadataContentType.getSignature()));
 
         descriptiveMetadataModel.setSource(metadataContentType.getSource());
-        descriptiveMetadataModel
-            .setStartDate(LocalDateUtil.transformIsoOffsetDateToIsoOffsetDateTime(metadataContentType.getStartDate()));
+        descriptiveMetadataModel.setStartDate(
+            LocalDateUtil.transformIsoOffsetDateToIsoOffsetDateTime(metadataContentType.getStartDate())
+        );
         descriptiveMetadataModel.setStatus(metadataContentType.getStatus());
         descriptiveMetadataModel.setSubmissionAgency(metadataContentType.getSubmissionAgency());
         descriptiveMetadataModel.setSystemId(metadataContentType.getSystemId());
@@ -150,9 +158,11 @@ public class DescriptiveMetadataMapper {
         }
 
         descriptiveMetadataModel.setTransactedDate(
-            LocalDateUtil.transformIsoOffsetDateToIsoOffsetDateTime(metadataContentType.getTransactedDate()));
+            LocalDateUtil.transformIsoOffsetDateToIsoOffsetDateTime(metadataContentType.getTransactedDate())
+        );
         descriptiveMetadataModel.setTransferringAgencyArchiveUnitIdentifier(
-            metadataContentType.getTransferringAgencyArchiveUnitIdentifier());
+            metadataContentType.getTransferringAgencyArchiveUnitIdentifier()
+        );
         descriptiveMetadataModel.setType(metadataContentType.getType());
         descriptiveMetadataModel.setVersion(metadataContentType.getVersion());
         descriptiveMetadataModel.setWriter(metadataContentType.getWriter());
@@ -179,9 +189,7 @@ public class DescriptiveMetadataMapper {
         if (signatures == null) {
             return null;
         }
-        return signatures.stream()
-            .map(this::mapSignature)
-            .collect(Collectors.toList());
+        return signatures.stream().map(this::mapSignature).collect(Collectors.toList());
     }
 
     private SignatureTypeModel mapSignature(SignatureType signatureType) {
@@ -212,9 +220,7 @@ public class DescriptiveMetadataMapper {
     }
 
     private List<EventTypeModel> mapEvents(List<EventType> eventTypes) {
-        return eventTypes.stream()
-            .map(this::mapEvent)
-            .collect(Collectors.toList());
+        return eventTypes.stream().map(this::mapEvent).collect(Collectors.toList());
     }
 
     private EventTypeModel mapEvent(EventType event) {
@@ -228,30 +234,33 @@ public class DescriptiveMetadataMapper {
             .setOutcome(event.getOutcome())
             .setOutcomeDetail(event.getOutcomeDetail())
             .setOutcomeDetailMessage(event.getOutcomeDetailMessage())
-            .setLinkingAgentIdentifier(event.getLinkingAgentIdentifier().stream().map(this::mapLinkingAgentIdentifier)
-                .collect(Collectors.toList()));
-
+            .setLinkingAgentIdentifier(
+                event
+                    .getLinkingAgentIdentifier()
+                    .stream()
+                    .map(this::mapLinkingAgentIdentifier)
+                    .collect(Collectors.toList())
+            );
     }
 
     private LinkingAgentIdentifierTypeModel mapLinkingAgentIdentifier(
-        LinkingAgentIdentifierType linkingAgentIdentifierType) {
+        LinkingAgentIdentifierType linkingAgentIdentifierType
+    ) {
         if (linkingAgentIdentifierType == null) {
             return null;
         }
         var linkingAgentIdentifierTypeModel = new LinkingAgentIdentifierTypeModel();
-        linkingAgentIdentifierTypeModel
-            .setLinkingAgentIdentifierType(linkingAgentIdentifierType.getLinkingAgentIdentifierType());
-        linkingAgentIdentifierTypeModel
-            .setLinkingAgentIdentifierValue(linkingAgentIdentifierType.getLinkingAgentIdentifierValue());
+        linkingAgentIdentifierTypeModel.setLinkingAgentIdentifierType(
+            linkingAgentIdentifierType.getLinkingAgentIdentifierType()
+        );
+        linkingAgentIdentifierTypeModel.setLinkingAgentIdentifierValue(
+            linkingAgentIdentifierType.getLinkingAgentIdentifierValue()
+        );
         linkingAgentIdentifierTypeModel.setLinkingAgentRole(linkingAgentIdentifierType.getLinkingAgentRole());
         return linkingAgentIdentifierTypeModel;
     }
 
     public String findDefaultTextType(List<TextType> textTypes) {
-        return textTypes.stream()
-            .filter(t -> t.getLang() == null)
-            .findFirst()
-            .map(TextType::getValue).orElse(null);
+        return textTypes.stream().filter(t -> t.getLang() == null).findFirst().map(TextType::getValue).orElse(null);
     }
-
 }

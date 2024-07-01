@@ -43,7 +43,6 @@ public class BufferedConsumer<T> implements AutoCloseable {
     }
 
     public void appendEntry(T entry) {
-
         entryBuffer.add(entry);
 
         if (entryBuffer.size() >= bufferSize) {
@@ -53,7 +52,6 @@ public class BufferedConsumer<T> implements AutoCloseable {
 
     public void flush() {
         if (!this.entryBuffer.isEmpty()) {
-
             this.bufferConsumer.accept(entryBuffer);
             this.entryBuffer.clear();
         }

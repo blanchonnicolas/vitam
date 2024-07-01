@@ -79,39 +79,40 @@ import static org.assertj.core.api.Assertions.assertThat;
  * IngestContract
  */
 public class IngestContractIT extends VitamRuleRunner {
+
     private static final VitamLogger LOGGER = VitamLoggerFactory.getInstance(IngestContractIT.class);
     private static final Integer TENANT_ID = 0;
     private static final String FILE_INGEST_CONTRACT_OK =
         "/functional-admin/ingest-contract/referential_contracts_ok.json";
 
-
     @ClassRule
-    public static VitamServerRunner runner =
-        new VitamServerRunner(IngestContractIT.class, mongoRule.getMongoDatabase().getName(),
-            ElasticsearchRule.getClusterName(),
-            Sets.newHashSet(
-                WorkspaceMain.class,
-                StorageMain.class,
-                LogbookMain.class,
-                MetadataMain.class,
-                AccessInternalMain.class,
-                AdminManagementMain.class,
-                IngestInternalMain.class,
-                ProcessManagementMain.class,
-                WorkerMain.class
-
-            ));
+    public static VitamServerRunner runner = new VitamServerRunner(
+        IngestContractIT.class,
+        mongoRule.getMongoDatabase().getName(),
+        ElasticsearchRule.getClusterName(),
+        Sets.newHashSet(
+            WorkspaceMain.class,
+            StorageMain.class,
+            LogbookMain.class,
+            MetadataMain.class,
+            AccessInternalMain.class,
+            AdminManagementMain.class,
+            IngestInternalMain.class,
+            ProcessManagementMain.class,
+            WorkerMain.class
+        )
+    );
 
     private static LogbookElasticsearchAccess esClient;
-
 
     @BeforeClass
     public static void setUpBeforeClass() throws Exception {
         handleBeforeClass(Arrays.asList(0, 1), Collections.emptyMap());
 
         // ES client
-        List<ElasticsearchNode> esNodes =
-            Lists.newArrayList(new ElasticsearchNode(ElasticsearchRule.getHost(), ElasticsearchRule.getPort()));
+        List<ElasticsearchNode> esNodes = Lists.newArrayList(
+            new ElasticsearchNode(ElasticsearchRule.getHost(), ElasticsearchRule.getPort())
+        );
         esClient = new LogbookElasticsearchAccess(ElasticsearchRule.getClusterName(), esNodes, logbookIndexManager);
 
         StorageClientFactory storageClientFactory = StorageClientFactory.getInstance();
@@ -127,7 +128,6 @@ public class IngestContractIT extends VitamRuleRunner {
         VitamClientFactory.resetConnections();
     }
 
-
     @Before
     public void setUpBefore() throws Exception {
         VitamThreadUtils.getVitamSession().setRequestId(newOperationLogbookGUID(0));
@@ -142,13 +142,16 @@ public class IngestContractIT extends VitamRuleRunner {
         AdminManagementClientFactory.getInstance().changeServerPort(runner.PORT_SERVICE_FUNCTIONAL_ADMIN);
         LogbookOperationsClientFactory.getInstance().changeServerPort(runner.PORT_SERVICE_LOGBOOK);
         // When
-        try (AdminManagementClient client = AdminManagementClientFactory.getInstance().getClient();
-            LogbookOperationsClient logbookOperationsClient = LogbookOperationsClientFactory.getInstance()
-                .getClient()) {
+        try (
+            AdminManagementClient client = AdminManagementClientFactory.getInstance().getClient();
+            LogbookOperationsClient logbookOperationsClient = LogbookOperationsClientFactory.getInstance().getClient()
+        ) {
             Response.Status status = client.importIngestContracts(
-                getFromStringAsTypeReference(JsonHandler.getFromInputStream(contract).toString(),
-                    new TypeReference<List<IngestContractModel>>() {
-                    }));
+                getFromStringAsTypeReference(
+                    JsonHandler.getFromInputStream(contract).toString(),
+                    new TypeReference<List<IngestContractModel>>() {}
+                )
+            );
             Select select = new Select();
             select.setQuery(QueryHelper.eq("evType", "STP_IMPORT_INGEST_CONTRACT"));
             final JsonNode result = logbookOperationsClient.selectOperation(select.getFinalSelect());

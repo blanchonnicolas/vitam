@@ -44,6 +44,7 @@ import java.util.Map;
  * @deprecated : Use the new api /unitsWithInheritedRules instead. To be removed in future releases.
  */
 public class UnitSimplified {
+
     private String id;
     private ObjectNode management;
     private List<String> directParent;

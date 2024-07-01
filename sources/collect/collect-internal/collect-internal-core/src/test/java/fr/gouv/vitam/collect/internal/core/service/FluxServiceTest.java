@@ -96,20 +96,31 @@ public class FluxServiceTest {
 
     private static final String TRANSACTION2_ZIP_PATH = "streamZip/transaction2.zip";
 
-    @Rule public MockitoRule mockitoRule = MockitoJUnit.rule();
+    @Rule
+    public MockitoRule mockitoRule = MockitoJUnit.rule();
 
-    @Rule public TempFolderRule tempFolder = new TempFolderRule();
+    @Rule
+    public TempFolderRule tempFolder = new TempFolderRule();
 
-    @Rule public RunWithCustomExecutorRule runInThread =
-        new RunWithCustomExecutorRule(VitamThreadPoolExecutor.getDefaultExecutor());
+    @Rule
+    public RunWithCustomExecutorRule runInThread = new RunWithCustomExecutorRule(
+        VitamThreadPoolExecutor.getDefaultExecutor()
+    );
 
-    @Mock private CollectService collectService;
-    @Mock private MetadataService metadataService;
+    @Mock
+    private CollectService collectService;
 
-    @Mock private ProjectRepository projectRepository;
-    @Mock private MetadataRepository metadataRepository;
+    @Mock
+    private MetadataService metadataService;
 
-    @InjectMocks private FluxService fluxService;
+    @Mock
+    private ProjectRepository projectRepository;
+
+    @Mock
+    private MetadataRepository metadataRepository;
+
+    @InjectMocks
+    private FluxService fluxService;
 
     private TransactionModel transactionModel;
     private ProjectModel projectModel;
@@ -141,7 +152,8 @@ public class FluxServiceTest {
                 units.put(unit.get(VitamFieldsHelper.id()).asText(), unit);
             }
             return JsonHandler.toJsonNode(
-                new RequestResponseOK<>(JsonHandler.createObjectNode(), unitsToSave, unitsToSave.size()));
+                new RequestResponseOK<>(JsonHandler.createObjectNode(), unitsToSave, unitsToSave.size())
+            );
         });
 
         when(metadataRepository.saveObjectGroups(anyList())).thenAnswer(e -> {
@@ -150,32 +162,52 @@ public class FluxServiceTest {
                 objectGroups.put(og.get(VitamFieldsHelper.id()).asText(), og);
             }
             return JsonHandler.toJsonNode(
-                new RequestResponseOK<>(JsonHandler.createObjectNode(), ogToSave, ogToSave.size()));
+                new RequestResponseOK<>(JsonHandler.createObjectNode(), ogToSave, ogToSave.size())
+            );
         });
 
         when(metadataService.prepareAttachmentUnits(any(), anyString())).thenReturn(new HashMap<>());
-
 
         try (final InputStream resourceAsStream = PropertiesUtils.getResourceAsStream(TRANSACTION_ZIP_PATH)) {
             fluxService.processStream(resourceAsStream, transactionModel);
         }
 
-
         final JsonNode expectedUnits = JsonHandler.getFromFile(PropertiesUtils.getResourceFile(UNITS_PATH));
 
-        JsonAssert.assertJsonEquals(units.values(), expectedUnits, JsonAssert.when(Option.IGNORING_ARRAY_ORDER)
-            .whenIgnoringPaths(List.of("[*]." + VitamFieldsHelper.id(), "[*]." + VitamFieldsHelper.unitups(),
-                "[*]." + VitamFieldsHelper.object())));
+        JsonAssert.assertJsonEquals(
+            units.values(),
+            expectedUnits,
+            JsonAssert.when(Option.IGNORING_ARRAY_ORDER).whenIgnoringPaths(
+                List.of(
+                    "[*]." + VitamFieldsHelper.id(),
+                    "[*]." + VitamFieldsHelper.unitups(),
+                    "[*]." + VitamFieldsHelper.object()
+                )
+            )
+        );
 
         final JsonNode expectedGots = JsonHandler.getFromFile(PropertiesUtils.getResourceFile(OBJECTGROUPS_PATH));
 
-        JsonAssert.assertJsonEquals(JsonHandler.toJsonNode(objectGroups.values()), expectedGots,
-            JsonAssert.when(Option.IGNORING_ARRAY_ORDER).whenIgnoringPaths(List.of("[*]." + VitamFieldsHelper.id(),
-                "[*]." + VitamFieldsHelper.qualifiers() + "[*]." + TAG_VERSIONS + "[*]." + VitamFieldsHelper.id(),
-                "[*]." + TAG_FILE_INFO + "." + FileInfoModel.LAST_MODIFIED,
-                "[*]." + VitamFieldsHelper.qualifiers() + "[*]." + TAG_VERSIONS + "[*]." + TAG_FILE_INFO + "." +
+        JsonAssert.assertJsonEquals(
+            JsonHandler.toJsonNode(objectGroups.values()),
+            expectedGots,
+            JsonAssert.when(Option.IGNORING_ARRAY_ORDER).whenIgnoringPaths(
+                List.of(
+                    "[*]." + VitamFieldsHelper.id(),
+                    "[*]." + VitamFieldsHelper.qualifiers() + "[*]." + TAG_VERSIONS + "[*]." + VitamFieldsHelper.id(),
+                    "[*]." + TAG_FILE_INFO + "." + FileInfoModel.LAST_MODIFIED,
+                    "[*]." +
+                    VitamFieldsHelper.qualifiers() +
+                    "[*]." +
+                    TAG_VERSIONS +
+                    "[*]." +
+                    TAG_FILE_INFO +
+                    "." +
                     FileInfoModel.LAST_MODIFIED,
-                "[*]." + VitamFieldsHelper.qualifiers() + "[*]." + TAG_VERSIONS + "[*]." + TAG_URI)));
+                    "[*]." + VitamFieldsHelper.qualifiers() + "[*]." + TAG_VERSIONS + "[*]." + TAG_URI
+                )
+            )
+        );
     }
 
     @Test
@@ -185,16 +217,18 @@ public class FluxServiceTest {
 
         final AtomicReference<File> fileReference = new AtomicReference<>();
         when(collectService.pushStreamToWorkspace(any(), any(InputStream.class), eq(METADATA_CSV_FILE))).thenAnswer(
-            (e) -> {
+            e -> {
                 final InputStream is = e.getArgument(1);
                 final File file = tempFolder.newFile(METADATA_CSV_FILE);
                 Files.copy(is, file.toPath(), StandardCopyOption.REPLACE_EXISTING);
                 fileReference.set(file);
                 return "";
-            });
+            }
+        );
 
         when(collectService.getInputStreamFromWorkspace(any(), eq(METADATA_CSV_FILE))).thenAnswer(
-            (e) -> new FileInputStream(fileReference.get()));
+            e -> new FileInputStream(fileReference.get())
+        );
 
         when(metadataService.prepareAttachmentUnits(any(), anyString())).thenReturn(new HashMap<>());
 
@@ -204,7 +238,9 @@ public class FluxServiceTest {
 
         verify(metadataService).updateUnitsWithMetadataFile(eq("TRANSACTION_ID"), any());
     }
-    private static final String TRANSACTION_WITHOUT_FILE_COLUMN_ZIP_PATH = "streamZip/transaction_without_file_column.zip";
+
+    private static final String TRANSACTION_WITHOUT_FILE_COLUMN_ZIP_PATH =
+        "streamZip/transaction_without_file_column.zip";
 
     @Test
     @RunWithCustomExecutor
@@ -213,19 +249,33 @@ public class FluxServiceTest {
         when(projectRepository.findProjectById(anyString())).thenReturn(Optional.of(projectModel));
         final AtomicReference<File> fileReference = new AtomicReference<>();
         when(metadataService.prepareAttachmentUnits(any(), anyString())).thenReturn(new HashMap<>());
-        when(collectService.pushStreamToWorkspace(any(), any(InputStream.class), eq(METADATA_CSV_FILE))).thenAnswer((e) -> {
-            final InputStream is = e.getArgument(1);
-            final File file = tempFolder.newFile(METADATA_CSV_FILE);
-            Files.copy(is, file.toPath(), StandardCopyOption.REPLACE_EXISTING);
-            fileReference.set(file);
-            return "";
-        });
-        when(collectService.getInputStreamFromWorkspace(any(), eq(METADATA_CSV_FILE))).thenAnswer((e) -> new FileInputStream(fileReference.get()));
+        when(collectService.pushStreamToWorkspace(any(), any(InputStream.class), eq(METADATA_CSV_FILE))).thenAnswer(
+            e -> {
+                final InputStream is = e.getArgument(1);
+                final File file = tempFolder.newFile(METADATA_CSV_FILE);
+                Files.copy(is, file.toPath(), StandardCopyOption.REPLACE_EXISTING);
+                fileReference.set(file);
+                return "";
+            }
+        );
+        when(collectService.getInputStreamFromWorkspace(any(), eq(METADATA_CSV_FILE))).thenAnswer(
+            e -> new FileInputStream(fileReference.get())
+        );
 
         // When
-        try (final InputStream resourceAsStream = PropertiesUtils.getResourceAsStream(TRANSACTION_WITHOUT_FILE_COLUMN_ZIP_PATH)) {
-            CollectInternalException exception = Assert.assertThrows(CollectInternalException.class, () -> fluxService.processStream(resourceAsStream, transactionModel));
-            Assert.assertEquals("Mapping for File not found, expected one of [Content.DescriptionLevel, Content.Title]", exception.getMessage());
+        try (
+            final InputStream resourceAsStream = PropertiesUtils.getResourceAsStream(
+                TRANSACTION_WITHOUT_FILE_COLUMN_ZIP_PATH
+            )
+        ) {
+            CollectInternalException exception = Assert.assertThrows(
+                CollectInternalException.class,
+                () -> fluxService.processStream(resourceAsStream, transactionModel)
+            );
+            Assert.assertEquals(
+                "Mapping for File not found, expected one of [Content.DescriptionLevel, Content.Title]",
+                exception.getMessage()
+            );
         }
 
         // Then

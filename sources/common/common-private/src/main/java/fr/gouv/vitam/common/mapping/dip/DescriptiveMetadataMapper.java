@@ -64,7 +64,6 @@ public class DescriptiveMetadataMapper {
     private final CustodialHistoryMapper custodialHistoryMapper = new CustodialHistoryMapper();
     private final ManagementMapper managementMapper = new ManagementMapper(new RuleMapper());
 
-
     /**
      * Map local DescriptiveMetadataModel to jaxb DescriptiveMetadataContentType
      *
@@ -73,18 +72,17 @@ public class DescriptiveMetadataMapper {
      * @return a descriptive Metadata Content Type
      * @throws DatatypeConfigurationException
      */
-    public DescriptiveMetadataContentType map(DescriptiveMetadataModel metadataModel,
-        List<ArchiveUnitHistoryModel> historyListModel)
-        throws DatatypeConfigurationException {
-
+    public DescriptiveMetadataContentType map(
+        DescriptiveMetadataModel metadataModel,
+        List<ArchiveUnitHistoryModel> historyListModel
+    ) throws DatatypeConfigurationException {
         DescriptiveMetadataContentType dmc = new DescriptiveMetadataContentType();
         dmc.setAcquiredDate(metadataModel.getAcquiredDate());
 
-        if(metadataModel.getAddressee() != null) {
+        if (metadataModel.getAddressee() != null) {
             dmc.getAddressee().addAll(metadataModel.getAddressee());
         }
-        dmc.getAny().addAll(
-            TransformJsonTreeToListOfXmlElement.mapJsonToElement(metadataModel.getAny()));
+        dmc.getAny().addAll(TransformJsonTreeToListOfXmlElement.mapJsonToElement(metadataModel.getAny()));
 
         dmc.setCoverage(metadataModel.getCoverage());
         dmc.setCreatedDate(metadataModel.getCreatedDate());
@@ -96,7 +94,7 @@ public class DescriptiveMetadataMapper {
             dmc.getDescription().addAll(metadataModel.getDescription_().getTextTypes());
         }
 
-        if(metadataModel.getDescription() != null){
+        if (metadataModel.getDescription() != null) {
             TextType description = new TextType();
             description.setValue(metadataModel.getDescription());
             dmc.getDescription().add(description);
@@ -106,12 +104,11 @@ public class DescriptiveMetadataMapper {
         dmc.setDescriptionLevel(metadataModel.getDescriptionLevel());
         dmc.setDocumentType(metadataModel.getDocumentType());
         dmc.setEndDate(metadataModel.getEndDate());
-        if(metadataModel.getEvent() != null) {
+        if (metadataModel.getEvent() != null) {
             dmc.getEvent().addAll(mapEvents(metadataModel.getEvent()));
         }
         dmc.setGps(metadataModel.getGps());
         dmc.setOriginatingAgency(metadataModel.getOriginatingAgency());
-
 
         if (metadataModel.getFilePlanPosition() != null && !metadataModel.getFilePlanPosition().isEmpty()) {
             dmc.getFilePlanPosition().addAll(metadataModel.getFilePlanPosition());
@@ -125,21 +122,29 @@ public class DescriptiveMetadataMapper {
             dmc.getOriginatingSystemId().addAll(metadataModel.getOriginatingSystemId());
         }
 
-        if (metadataModel.getArchivalAgencyArchiveUnitIdentifier() != null &&
-            !metadataModel.getArchivalAgencyArchiveUnitIdentifier().isEmpty()) {
+        if (
+            metadataModel.getArchivalAgencyArchiveUnitIdentifier() != null &&
+            !metadataModel.getArchivalAgencyArchiveUnitIdentifier().isEmpty()
+        ) {
             dmc.getArchivalAgencyArchiveUnitIdentifier().addAll(metadataModel.getArchivalAgencyArchiveUnitIdentifier());
         }
 
-        if (metadataModel.getOriginatingAgencyArchiveUnitIdentifier() != null &&
-            !metadataModel.getOriginatingAgencyArchiveUnitIdentifier().isEmpty()) {
-            dmc.getOriginatingAgencyArchiveUnitIdentifier()
+        if (
+            metadataModel.getOriginatingAgencyArchiveUnitIdentifier() != null &&
+            !metadataModel.getOriginatingAgencyArchiveUnitIdentifier().isEmpty()
+        ) {
+            dmc
+                .getOriginatingAgencyArchiveUnitIdentifier()
                 .addAll(metadataModel.getOriginatingAgencyArchiveUnitIdentifier());
         }
 
-        if (metadataModel.getTransferringAgencyArchiveUnitIdentifier() != null &&
-            !metadataModel.getTransferringAgencyArchiveUnitIdentifier().isEmpty()) {
-            dmc.getTransferringAgencyArchiveUnitIdentifier().addAll(
-                metadataModel.getTransferringAgencyArchiveUnitIdentifier());
+        if (
+            metadataModel.getTransferringAgencyArchiveUnitIdentifier() != null &&
+            !metadataModel.getTransferringAgencyArchiveUnitIdentifier().isEmpty()
+        ) {
+            dmc
+                .getTransferringAgencyArchiveUnitIdentifier()
+                .addAll(metadataModel.getTransferringAgencyArchiveUnitIdentifier());
         }
 
         if (metadataModel.getLanguage() != null && !metadataModel.getLanguage().isEmpty()) {
@@ -162,11 +167,9 @@ public class DescriptiveMetadataMapper {
         dmc.setOriginatingSystemIdReplyTo(metadataModel.getOriginatingSystemIdReplyTo());
         dmc.setDateLitteral(metadataModel.getDateLitteral());
 
-
         if (metadataModel.getSignature() != null && !metadataModel.getSignature().isEmpty()) {
             dmc.getSignature().addAll(mapSignatures(metadataModel.getSignature()));
         }
-
 
         if (metadataModel.getRecipient() != null && !metadataModel.getRecipient().isEmpty()) {
             dmc.getRecipient().addAll(metadataModel.getRecipient());
@@ -186,7 +189,7 @@ public class DescriptiveMetadataMapper {
         dmc.setStatus(metadataModel.getStatus());
         dmc.setSubmissionAgency(metadataModel.getSubmissionAgency());
 
-        if(metadataModel.getTag() != null) {
+        if (metadataModel.getTag() != null) {
             dmc.getTag().addAll(metadataModel.getTag());
         }
 
@@ -201,13 +204,13 @@ public class DescriptiveMetadataMapper {
         dmc.setTransactedDate(metadataModel.getTransactedDate());
         dmc.setType(metadataModel.getType());
         dmc.setVersion(metadataModel.getVersion());
-        if(metadataModel.getWriter() != null) {
+        if (metadataModel.getWriter() != null) {
             dmc.getWriter().addAll(metadataModel.getWriter());
         }
-        if(metadataModel.getTransmitter() != null) {
+        if (metadataModel.getTransmitter() != null) {
             dmc.getTransmitter().addAll(metadataModel.getTransmitter());
         }
-        if(metadataModel.getSender() != null) {
+        if (metadataModel.getSender() != null) {
             dmc.getSender().addAll(metadataModel.getSender());
         }
 
@@ -220,9 +223,7 @@ public class DescriptiveMetadataMapper {
         if (signatures == null) {
             return null;
         }
-        return signatures.stream()
-            .map(this::mapSignature)
-            .collect(Collectors.toList());
+        return signatures.stream().map(this::mapSignature).collect(Collectors.toList());
     }
 
     private SignatureType mapSignature(SignatureTypeModel signatureType) {
@@ -258,9 +259,7 @@ public class DescriptiveMetadataMapper {
     }
 
     private List<EventType> mapEvents(List<EventTypeModel> eventTypes) {
-        return eventTypes.stream()
-            .map(this::mapEvent)
-            .collect(Collectors.toList());
+        return eventTypes.stream().map(this::mapEvent).collect(Collectors.toList());
     }
 
     private EventType mapEvent(EventTypeModel event) {
@@ -275,33 +274,41 @@ public class DescriptiveMetadataMapper {
         eventType.setOutcomeDetail(event.getOutcomeDetail());
         eventType.setOutcomeDetailMessage(event.getOutcomeDetailMessage());
         if (Objects.nonNull(event.getLinkingAgentIdentifier())) {
-            eventType.getLinkingAgentIdentifier().addAll(
-                event.getLinkingAgentIdentifier().stream().map(this::mapLinkingAgentIdentifier)
-                    .collect(Collectors.toList()));
+            eventType
+                .getLinkingAgentIdentifier()
+                .addAll(
+                    event
+                        .getLinkingAgentIdentifier()
+                        .stream()
+                        .map(this::mapLinkingAgentIdentifier)
+                        .collect(Collectors.toList())
+                );
         }
         return eventType;
     }
 
     private LinkingAgentIdentifierType mapLinkingAgentIdentifier(
-        LinkingAgentIdentifierTypeModel linkingAgentIdentifierTypeModel) {
+        LinkingAgentIdentifierTypeModel linkingAgentIdentifierTypeModel
+    ) {
         if (linkingAgentIdentifierTypeModel == null) {
             return null;
         }
         LinkingAgentIdentifierType linkingAgentIdentifierType = new LinkingAgentIdentifierType();
         linkingAgentIdentifierType.setLinkingAgentIdentifierType(
-            linkingAgentIdentifierTypeModel.getLinkingAgentIdentifierType());
+            linkingAgentIdentifierTypeModel.getLinkingAgentIdentifierType()
+        );
         linkingAgentIdentifierType.setLinkingAgentIdentifierValue(
-            linkingAgentIdentifierTypeModel.getLinkingAgentIdentifierValue());
+            linkingAgentIdentifierTypeModel.getLinkingAgentIdentifierValue()
+        );
         linkingAgentIdentifierType.setLinkingAgentRole(linkingAgentIdentifierTypeModel.getLinkingAgentRole());
         return linkingAgentIdentifierType;
     }
 
-    private void fillHistory(List<ArchiveUnitHistoryModel> archiveUnitHistoryModel,
-        List<ManagementHistoryType> managementHistoryType)
-        throws DatatypeConfigurationException {
-
+    private void fillHistory(
+        List<ArchiveUnitHistoryModel> archiveUnitHistoryModel,
+        List<ManagementHistoryType> managementHistoryType
+    ) throws DatatypeConfigurationException {
         for (ArchiveUnitHistoryModel historyModel : archiveUnitHistoryModel) {
-
             ManagementHistoryType historyType = new ManagementHistoryType();
             historyType.setData(new ManagementHistoryDataType());
             historyType.getData().setVersion(historyModel.getData().getVersion());
@@ -323,5 +330,4 @@ public class DescriptiveMetadataMapper {
             return Optional.empty();
         }
     }
-
 }

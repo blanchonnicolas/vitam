@@ -54,21 +54,20 @@ public class UnitRuleComputeTest {
     private static final String AU3_ID = "AU3";
     private static final String AU4_ID = "AU4";
 
-    private final static String MGT1 = "UnitRuleCompute/MGT1.json";
-    private final static String MGT10 = "UnitRuleCompute/MGT10.json";
-    private final static String MGT3 = "UnitRuleCompute/MGT3.json";
-    private final static String MGT4 = "UnitRuleCompute/MGT4.json";
+    private static final String MGT1 = "UnitRuleCompute/MGT1.json";
+    private static final String MGT10 = "UnitRuleCompute/MGT10.json";
+    private static final String MGT3 = "UnitRuleCompute/MGT3.json";
+    private static final String MGT4 = "UnitRuleCompute/MGT4.json";
 
+    private static final String AU1_MGT = "UnitRuleCompute/AU1_MGT.json";
+    private static final String AU5_MGT = "UnitRuleCompute/AU5_MGT.json";
+    private static final String AU3_MGT = "UnitRuleCompute/AU3_MGT.json";
+    private static final String AU2_MGT = "UnitRuleCompute/AU2_MGT.json";
 
-    private final static String AU1_MGT = "UnitRuleCompute/AU1_MGT.json";
-    private final static String AU5_MGT = "UnitRuleCompute/AU5_MGT.json";
-    private final static String AU3_MGT = "UnitRuleCompute/AU3_MGT.json";
-    private final static String AU2_MGT = "UnitRuleCompute/AU2_MGT.json";
-
-    private final static String AU5_MGT_NONREF = "UnitRuleCompute/AU5_MGT_NONREF.json";
-    private final static String AU3_MGT_NONREF = "UnitRuleCompute/AU3_MGT_NONREF.json";
-    private final static String AU2_MGT_NONREF = "UnitRuleCompute/AU2_MGT_NONREF.json";
-    private final static String AU4_MGT_NONREF = "UnitRuleCompute/AU4_MGT_NONREF.json";
+    private static final String AU5_MGT_NONREF = "UnitRuleCompute/AU5_MGT_NONREF.json";
+    private static final String AU3_MGT_NONREF = "UnitRuleCompute/AU3_MGT_NONREF.json";
+    private static final String AU2_MGT_NONREF = "UnitRuleCompute/AU2_MGT_NONREF.json";
+    private static final String AU4_MGT_NONREF = "UnitRuleCompute/AU4_MGT_NONREF.json";
 
     private ObjectNode node = JsonHandler.createObjectNode();
     private List<String> emptyParent = new ArrayList<String>();
@@ -94,15 +93,26 @@ public class UnitRuleComputeTest {
 
     @Test
     public void testTree() throws InvalidParseOperationException, FileNotFoundException {
-
-        UnitSimplified AU1 = new UnitSimplified(AU1_ID,
-            (ObjectNode) JsonHandler.getFromFile(PropertiesUtils.getResourceFile(AU1_MGT)), emptyParent);
-        UnitSimplified AU5 = new UnitSimplified(AU5_ID,
-            (ObjectNode) JsonHandler.getFromFile(PropertiesUtils.getResourceFile(AU5_MGT)), emptyParent);
-        UnitSimplified AU2 = new UnitSimplified(AU2_ID,
-            (ObjectNode) JsonHandler.getFromFile(PropertiesUtils.getResourceFile(AU2_MGT)), upAU2);
-        UnitSimplified AU3 = new UnitSimplified(AU3_ID,
-            (ObjectNode) JsonHandler.getFromFile(PropertiesUtils.getResourceFile(AU3_MGT)), upAU3);
+        UnitSimplified AU1 = new UnitSimplified(
+            AU1_ID,
+            (ObjectNode) JsonHandler.getFromFile(PropertiesUtils.getResourceFile(AU1_MGT)),
+            emptyParent
+        );
+        UnitSimplified AU5 = new UnitSimplified(
+            AU5_ID,
+            (ObjectNode) JsonHandler.getFromFile(PropertiesUtils.getResourceFile(AU5_MGT)),
+            emptyParent
+        );
+        UnitSimplified AU2 = new UnitSimplified(
+            AU2_ID,
+            (ObjectNode) JsonHandler.getFromFile(PropertiesUtils.getResourceFile(AU2_MGT)),
+            upAU2
+        );
+        UnitSimplified AU3 = new UnitSimplified(
+            AU3_ID,
+            (ObjectNode) JsonHandler.getFromFile(PropertiesUtils.getResourceFile(AU3_MGT)),
+            upAU3
+        );
         UnitSimplified AU4 = new UnitSimplified(AU4_ID, node, upAU4);
         Map<String, UnitSimplified> parentMap = new HashedMap<>();
         parentMap.put(AU1_ID, AU1);
@@ -114,7 +124,6 @@ public class UnitRuleComputeTest {
         UnitRuleCompute treeAU4 = new UnitRuleCompute(AU4);
         Set<String> rootList = new HashSet<>();
         treeAU4.buildAncestors(parentMap, allUnitNode, rootList);
-
 
         assertEquals(rootList.size(), 2);
         assertEquals(allUnitNode.size(), 5);
@@ -128,18 +137,31 @@ public class UnitRuleComputeTest {
 
     @Test
     public void testExclusionOfInheritance() throws InvalidParseOperationException, FileNotFoundException {
-
-        UnitSimplified AU1 = new UnitSimplified(AU1_ID,
-            (ObjectNode) JsonHandler.getFromFile(PropertiesUtils.getResourceFile(AU1_MGT)), emptyParent);
-        UnitSimplified AU5 =
-            new UnitSimplified(AU5_ID,
-                (ObjectNode) JsonHandler.getFromFile(PropertiesUtils.getResourceFile(AU5_MGT_NONREF)), emptyParent);
-        UnitSimplified AU2 = new UnitSimplified(AU2_ID,
-            (ObjectNode) JsonHandler.getFromFile(PropertiesUtils.getResourceFile(AU2_MGT_NONREF)), upAU2);
-        UnitSimplified AU3 = new UnitSimplified(AU3_ID,
-            (ObjectNode) JsonHandler.getFromFile(PropertiesUtils.getResourceFile(AU3_MGT_NONREF)), upAU3);
-        UnitSimplified AU4 = new UnitSimplified(AU4_ID,
-            (ObjectNode) JsonHandler.getFromFile(PropertiesUtils.getResourceFile(AU4_MGT_NONREF)), upAU4);
+        UnitSimplified AU1 = new UnitSimplified(
+            AU1_ID,
+            (ObjectNode) JsonHandler.getFromFile(PropertiesUtils.getResourceFile(AU1_MGT)),
+            emptyParent
+        );
+        UnitSimplified AU5 = new UnitSimplified(
+            AU5_ID,
+            (ObjectNode) JsonHandler.getFromFile(PropertiesUtils.getResourceFile(AU5_MGT_NONREF)),
+            emptyParent
+        );
+        UnitSimplified AU2 = new UnitSimplified(
+            AU2_ID,
+            (ObjectNode) JsonHandler.getFromFile(PropertiesUtils.getResourceFile(AU2_MGT_NONREF)),
+            upAU2
+        );
+        UnitSimplified AU3 = new UnitSimplified(
+            AU3_ID,
+            (ObjectNode) JsonHandler.getFromFile(PropertiesUtils.getResourceFile(AU3_MGT_NONREF)),
+            upAU3
+        );
+        UnitSimplified AU4 = new UnitSimplified(
+            AU4_ID,
+            (ObjectNode) JsonHandler.getFromFile(PropertiesUtils.getResourceFile(AU4_MGT_NONREF)),
+            upAU4
+        );
         Map<String, UnitSimplified> parentMap = new HashedMap<>();
         parentMap.put(AU1_ID, AU1);
         parentMap.put(AU5_ID, AU5);
@@ -150,7 +172,6 @@ public class UnitRuleComputeTest {
         UnitRuleCompute treeAU4 = new UnitRuleCompute(AU4);
         Set<String> rootList = new HashSet<>();
         treeAU4.buildAncestors(parentMap, allUnitNode, rootList);
-
 
         assertEquals(rootList.size(), 2);
         assertEquals(allUnitNode.size(), 5);
@@ -182,15 +203,27 @@ public class UnitRuleComputeTest {
         up3.add(ID2);
         up4.add(ID3);
 
-        UnitSimplified AU1 = new UnitSimplified(ID1,
-            (ObjectNode) JsonHandler.getFromFile(PropertiesUtils.getResourceFile(MGT1)), emptyParent);
-        UnitSimplified AU10 = new UnitSimplified(ID10,
-            (ObjectNode) JsonHandler.getFromFile(PropertiesUtils.getResourceFile(MGT10)), emptyParent);
+        UnitSimplified AU1 = new UnitSimplified(
+            ID1,
+            (ObjectNode) JsonHandler.getFromFile(PropertiesUtils.getResourceFile(MGT1)),
+            emptyParent
+        );
+        UnitSimplified AU10 = new UnitSimplified(
+            ID10,
+            (ObjectNode) JsonHandler.getFromFile(PropertiesUtils.getResourceFile(MGT10)),
+            emptyParent
+        );
         UnitSimplified AU2 = new UnitSimplified(ID2, node, up2);
-        UnitSimplified AU3 =
-            new UnitSimplified(ID3, (ObjectNode) JsonHandler.getFromFile(PropertiesUtils.getResourceFile(MGT3)), up3);
-        UnitSimplified AU4 =
-            new UnitSimplified(ID4, (ObjectNode) JsonHandler.getFromFile(PropertiesUtils.getResourceFile(MGT4)), up4);
+        UnitSimplified AU3 = new UnitSimplified(
+            ID3,
+            (ObjectNode) JsonHandler.getFromFile(PropertiesUtils.getResourceFile(MGT3)),
+            up3
+        );
+        UnitSimplified AU4 = new UnitSimplified(
+            ID4,
+            (ObjectNode) JsonHandler.getFromFile(PropertiesUtils.getResourceFile(MGT4)),
+            up4
+        );
 
         Map<String, UnitSimplified> parentMap = new HashedMap<>();
         parentMap.put(ID1, AU1);
@@ -203,7 +236,6 @@ public class UnitRuleComputeTest {
         Set<String> rootList = new HashSet<>();
         treeAU4.buildAncestors(parentMap, allUnitNode, rootList);
 
-
         assertEquals(rootList.size(), 2);
         assertEquals(allUnitNode.size(), 5);
 
@@ -213,5 +245,4 @@ public class UnitRuleComputeTest {
         String ruleAU4 = JsonHandler.prettyPrint(unitRule.getHeritedRules());
         System.out.print(ruleAU4);
     }
-
 }

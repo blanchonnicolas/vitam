@@ -57,18 +57,21 @@ import java.util.stream.Collectors;
 
 @Path("/scheduler/v1")
 public class SchedulerResource extends ApplicationStatusResource {
+
     private static final VitamLogger LOGGER = VitamLoggerFactory.getInstance(SchedulerResource.class);
 
     @GET
     @Path("/current-jobs")
     @Produces(MediaType.APPLICATION_JSON)
     public Response getCurrentJobs() throws SchedulerException {
-        final List<JobExecutionContext> jobs =
-            SchedulerListener.getInstance().getScheduler().getCurrentlyExecutingJobs();
+        final List<JobExecutionContext> jobs = SchedulerListener.getInstance()
+            .getScheduler()
+            .getCurrentlyExecutingJobs();
 
-        final List<VitamJobDetail> vitamJobs = jobs.stream().map(
-            job -> new VitamJobDetail(job.getJobDetail())
-        ).collect(Collectors.toList());
+        final List<VitamJobDetail> vitamJobs = jobs
+            .stream()
+            .map(job -> new VitamJobDetail(job.getJobDetail()))
+            .collect(Collectors.toList());
         try {
             final List<JsonNode> jsonNodes = JsonHandler.toArrayList((ArrayNode) JsonHandler.toJsonNode(vitamJobs));
             return Response.ok(new RequestResponseOK<JsonNode>().addAllResults(jsonNodes)).build();

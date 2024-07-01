@@ -49,7 +49,10 @@ public class UnitDipServiceImplTest {
     public void should_map_json_unit_to_xml() throws InvalidParseOperationException {
         // Given
         ArchiveUnitMapper archiveUnitMapper = new ArchiveUnitMapper();
-        UnitDipServiceImpl unitDipService = new UnitDipServiceImpl(archiveUnitMapper, VitamObjectMapper.buildDeserializationObjectMapper());
+        UnitDipServiceImpl unitDipService = new UnitDipServiceImpl(
+            archiveUnitMapper,
+            VitamObjectMapper.buildDeserializationObjectMapper()
+        );
 
         InputStream inputStream = getClass().getResourceAsStream("/unit_with_rules.json");
         JsonNode jsonNode = JsonHandler.getFromInputStream(inputStream);
@@ -62,28 +65,47 @@ public class UnitDipServiceImplTest {
 
         // Then
         String entity = (String) response.getEntity();
-        assertThat(fromString(entity), hasXPath("//vitam:Management/vitam:AccessRule/vitam:Rule",
-            equalTo("ACC-00002"))
-            .withNamespaceContext(prefix2Uri));
-        assertThat(fromString(entity), hasXPath("//vitam:Management/vitam:DisseminationRule/vitam:Rule",
-            equalTo("DIS-00001"))
-            .withNamespaceContext(prefix2Uri));
-        assertThat(fromString(entity), hasXPath("//vitam:Management/vitam:HoldRule/vitam:Rule",
-            equalTo("HOL-00002"))
-            .withNamespaceContext(prefix2Uri));
-        assertThat(fromString(entity), hasXPath("//vitam:Management/vitam:HoldRule/vitam:HoldReason",
-            equalTo("Reason"))
-            .withNamespaceContext(prefix2Uri));
-        assertThat(fromString(entity), hasXPath("//vitam:Management/vitam:HoldRule/vitam:HoldEndDate",
-            equalTo("2025-01-01"))
-            .withNamespaceContext(prefix2Uri));
+        assertThat(
+            fromString(entity),
+            hasXPath("//vitam:Management/vitam:AccessRule/vitam:Rule", equalTo("ACC-00002")).withNamespaceContext(
+                prefix2Uri
+            )
+        );
+        assertThat(
+            fromString(entity),
+            hasXPath(
+                "//vitam:Management/vitam:DisseminationRule/vitam:Rule",
+                equalTo("DIS-00001")
+            ).withNamespaceContext(prefix2Uri)
+        );
+        assertThat(
+            fromString(entity),
+            hasXPath("//vitam:Management/vitam:HoldRule/vitam:Rule", equalTo("HOL-00002")).withNamespaceContext(
+                prefix2Uri
+            )
+        );
+        assertThat(
+            fromString(entity),
+            hasXPath("//vitam:Management/vitam:HoldRule/vitam:HoldReason", equalTo("Reason")).withNamespaceContext(
+                prefix2Uri
+            )
+        );
+        assertThat(
+            fromString(entity),
+            hasXPath("//vitam:Management/vitam:HoldRule/vitam:HoldEndDate", equalTo("2025-01-01")).withNamespaceContext(
+                prefix2Uri
+            )
+        );
     }
 
     @Test
     public void should_map_json_unit_to_xml_with_keyword() throws InvalidParseOperationException {
         // Given
         ArchiveUnitMapper archiveUnitMapper = new ArchiveUnitMapper();
-        UnitDipServiceImpl unitDipService = new UnitDipServiceImpl(archiveUnitMapper, VitamObjectMapper.buildDeserializationObjectMapper());
+        UnitDipServiceImpl unitDipService = new UnitDipServiceImpl(
+            archiveUnitMapper,
+            VitamObjectMapper.buildDeserializationObjectMapper()
+        );
 
         InputStream inputStream = getClass().getResourceAsStream("/unit_with_keyword.json");
         JsonNode jsonNode = JsonHandler.getFromInputStream(inputStream);
@@ -96,20 +118,24 @@ public class UnitDipServiceImplTest {
 
         // Then
         String entity = (String) response.getEntity();
-        assertThat(fromString(entity), hasXPath("//vitam:Keyword/vitam:KeywordType",
-            equalTo("subject"))
-            .withNamespaceContext(prefix2Uri));
-        assertThat(fromString(entity), hasXPath("//vitam:Keyword/vitam:KeywordContent",
-            equalTo("blabla"))
-            .withNamespaceContext(prefix2Uri));
-
+        assertThat(
+            fromString(entity),
+            hasXPath("//vitam:Keyword/vitam:KeywordType", equalTo("subject")).withNamespaceContext(prefix2Uri)
+        );
+        assertThat(
+            fromString(entity),
+            hasXPath("//vitam:Keyword/vitam:KeywordContent", equalTo("blabla")).withNamespaceContext(prefix2Uri)
+        );
     }
 
     @Test
     public void should_map_json_unit_to_xml_with_agent_type() throws InvalidParseOperationException {
         // Given
         ArchiveUnitMapper archiveUnitMapper = new ArchiveUnitMapper();
-        UnitDipServiceImpl unitDipService = new UnitDipServiceImpl(archiveUnitMapper, VitamObjectMapper.buildDeserializationObjectMapper());
+        UnitDipServiceImpl unitDipService = new UnitDipServiceImpl(
+            archiveUnitMapper,
+            VitamObjectMapper.buildDeserializationObjectMapper()
+        );
 
         InputStream inputStream = getClass().getResourceAsStream("/unit_with_agent_type.json");
         JsonNode jsonNode = JsonHandler.getFromInputStream(inputStream);
@@ -122,12 +148,14 @@ public class UnitDipServiceImplTest {
 
         // Then
         String entity = (String) response.getEntity();
-        assertThat(fromString(entity), hasXPath("//vitam:Addressee/vitam:FirstName",
-            equalTo("FirstName2"))
-            .withNamespaceContext(prefix2Uri));
-        assertThat(fromString(entity), hasXPath("//vitam:Addressee/vitam:BirthName",
-            equalTo("BirthName2"))
-            .withNamespaceContext(prefix2Uri));
+        assertThat(
+            fromString(entity),
+            hasXPath("//vitam:Addressee/vitam:FirstName", equalTo("FirstName2")).withNamespaceContext(prefix2Uri)
+        );
+        assertThat(
+            fromString(entity),
+            hasXPath("//vitam:Addressee/vitam:BirthName", equalTo("BirthName2")).withNamespaceContext(prefix2Uri)
+        );
     }
 
     @Test
@@ -135,10 +163,13 @@ public class UnitDipServiceImplTest {
         throws InvalidParseOperationException {
         // Given
         ArchiveUnitMapper archiveUnitMapper = new ArchiveUnitMapper();
-        UnitDipServiceImpl unitDipService = new UnitDipServiceImpl(archiveUnitMapper, VitamObjectMapper.buildDeserializationObjectMapper());
+        UnitDipServiceImpl unitDipService = new UnitDipServiceImpl(
+            archiveUnitMapper,
+            VitamObjectMapper.buildDeserializationObjectMapper()
+        );
 
-        InputStream inputStream = getClass().getResourceAsStream(
-            "/unit_originating_agency_with_organization_descriptive_metadata.json");
+        InputStream inputStream = getClass()
+            .getResourceAsStream("/unit_originating_agency_with_organization_descriptive_metadata.json");
         JsonNode jsonNode = JsonHandler.getFromInputStream(inputStream);
 
         Map<String, String> prefix2Uri = new HashMap<>();
@@ -149,16 +180,24 @@ public class UnitDipServiceImplTest {
 
         // Then
         String entity = (String) response.getEntity();
-        assertThat(fromString(entity),
-            hasXPath("//vitam:OriginatingAgency/vitam:Identifier",
-                equalTo("RATP")).withNamespaceContext(prefix2Uri));
-        assertThat(fromString(entity),
-            hasXPath("//vitam:OriginatingAgency/vitam:OrganizationDescriptiveMetadata/vitam:XXXX/vitam:YYYY",
-                equalTo("description libre YYYY")).withNamespaceContext(prefix2Uri));
-        assertThat(fromString(entity),
-            hasXPath("//vitam:OriginatingAgency/vitam:OrganizationDescriptiveMetadata/vitam:DescriptionOA",
-                equalTo("La RATP est un etablissement public")).withNamespaceContext(prefix2Uri));
-
+        assertThat(
+            fromString(entity),
+            hasXPath("//vitam:OriginatingAgency/vitam:Identifier", equalTo("RATP")).withNamespaceContext(prefix2Uri)
+        );
+        assertThat(
+            fromString(entity),
+            hasXPath(
+                "//vitam:OriginatingAgency/vitam:OrganizationDescriptiveMetadata/vitam:XXXX/vitam:YYYY",
+                equalTo("description libre YYYY")
+            ).withNamespaceContext(prefix2Uri)
+        );
+        assertThat(
+            fromString(entity),
+            hasXPath(
+                "//vitam:OriginatingAgency/vitam:OrganizationDescriptiveMetadata/vitam:DescriptionOA",
+                equalTo("La RATP est un etablissement public")
+            ).withNamespaceContext(prefix2Uri)
+        );
     }
 
     @Test
@@ -166,10 +205,13 @@ public class UnitDipServiceImplTest {
         throws InvalidParseOperationException {
         // Given
         ArchiveUnitMapper archiveUnitMapper = new ArchiveUnitMapper();
-        UnitDipServiceImpl unitDipService = new UnitDipServiceImpl(archiveUnitMapper, VitamObjectMapper.buildDeserializationObjectMapper());
+        UnitDipServiceImpl unitDipService = new UnitDipServiceImpl(
+            archiveUnitMapper,
+            VitamObjectMapper.buildDeserializationObjectMapper()
+        );
 
-        InputStream inputStream = getClass().getResourceAsStream(
-            "/unit_submission_agency_with_organization_descriptive_metadata.json");
+        InputStream inputStream = getClass()
+            .getResourceAsStream("/unit_submission_agency_with_organization_descriptive_metadata.json");
         JsonNode jsonNode = JsonHandler.getFromInputStream(inputStream);
 
         Map<String, String> prefix2Uri = new HashMap<>();
@@ -180,16 +222,24 @@ public class UnitDipServiceImplTest {
 
         // Then
         String entity = (String) response.getEntity();
-        assertThat(fromString(entity),
-            hasXPath("//vitam:SubmissionAgency/vitam:Identifier",
-                equalTo("RATP")).withNamespaceContext(prefix2Uri));
-        assertThat(fromString(entity),
-            hasXPath("//vitam:SubmissionAgency/vitam:OrganizationDescriptiveMetadata/vitam:XXXX/vitam:YYYY",
-                equalTo("description libre YYYY")).withNamespaceContext(prefix2Uri));
-        assertThat(fromString(entity),
-            hasXPath("//vitam:SubmissionAgency/vitam:OrganizationDescriptiveMetadata/vitam:DescriptionOA",
-                equalTo("La RATP est un etablissement public")).withNamespaceContext(prefix2Uri));
-
+        assertThat(
+            fromString(entity),
+            hasXPath("//vitam:SubmissionAgency/vitam:Identifier", equalTo("RATP")).withNamespaceContext(prefix2Uri)
+        );
+        assertThat(
+            fromString(entity),
+            hasXPath(
+                "//vitam:SubmissionAgency/vitam:OrganizationDescriptiveMetadata/vitam:XXXX/vitam:YYYY",
+                equalTo("description libre YYYY")
+            ).withNamespaceContext(prefix2Uri)
+        );
+        assertThat(
+            fromString(entity),
+            hasXPath(
+                "//vitam:SubmissionAgency/vitam:OrganizationDescriptiveMetadata/vitam:DescriptionOA",
+                equalTo("La RATP est un etablissement public")
+            ).withNamespaceContext(prefix2Uri)
+        );
     }
 
     @Test
@@ -197,10 +247,12 @@ public class UnitDipServiceImplTest {
         throws InvalidParseOperationException {
         // Given
         ArchiveUnitMapper archiveUnitMapper = new ArchiveUnitMapper();
-        UnitDipServiceImpl unitDipService = new UnitDipServiceImpl(archiveUnitMapper, VitamObjectMapper.buildDeserializationObjectMapper());
+        UnitDipServiceImpl unitDipService = new UnitDipServiceImpl(
+            archiveUnitMapper,
+            VitamObjectMapper.buildDeserializationObjectMapper()
+        );
 
-        InputStream inputStream = getClass().getResourceAsStream(
-            "/unit_with_related_object_reference_metadata.json");
+        InputStream inputStream = getClass().getResourceAsStream("/unit_with_related_object_reference_metadata.json");
         JsonNode jsonNode = JsonHandler.getFromInputStream(inputStream);
 
         Map<String, String> prefix2Uri = new HashMap<>();
@@ -211,9 +263,12 @@ public class UnitDipServiceImplTest {
 
         // Then
         String entity = (String) response.getEntity();
-        assertThat(fromString(entity),
-            hasXPath("//vitam:RelatedObjectReference/vitam:Requires/vitam:RepositoryArchiveUnitPID",
-                equalTo("aeaqaaaaaab2szrxabosoaloqmivdliaaaaq")).withNamespaceContext(prefix2Uri));
-
+        assertThat(
+            fromString(entity),
+            hasXPath(
+                "//vitam:RelatedObjectReference/vitam:Requires/vitam:RepositoryArchiveUnitPID",
+                equalTo("aeaqaaaaaab2szrxabosoaloqmivdliaaaaq")
+            ).withNamespaceContext(prefix2Uri)
+        );
     }
 }

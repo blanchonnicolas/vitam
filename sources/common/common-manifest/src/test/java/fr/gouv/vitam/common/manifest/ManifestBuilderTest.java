@@ -78,11 +78,9 @@ public class ManifestBuilderTest {
         Assert.assertFalse("La chaîne XML contient des balises vides.", containsSomeEmptyTags(xmlContent));
     }
 
-
     @Test
     public void should_write_got_without_empty_tags()
-        throws JAXBException, XMLStreamException,
-        FileNotFoundException, InvalidParseOperationException, InternalServerException, JsonProcessingException {
+        throws JAXBException, XMLStreamException, FileNotFoundException, InvalidParseOperationException, InternalServerException, JsonProcessingException {
         objectGroup = PropertiesUtils.getResourceAsStream(OBJECT_GROUP);
         og = JsonHandler.getFromInputStream(objectGroup);
         Stream<LogbookLifeCycleObjectGroup> logbookLifeCycleObjectGroupStream = Stream.empty();
@@ -97,11 +95,12 @@ public class ManifestBuilderTest {
     }
 
     private boolean containsSomeEmptyTags(String xmlContent) {
-        Pattern pattern = Pattern.compile("<((\\w+\\:)*(LogBook|Management|Description))>\\s*<\\/((\\w+\\:)*(LogBook|Management|Description))>");
+        Pattern pattern = Pattern.compile(
+            "<((\\w+\\:)*(LogBook|Management|Description))>\\s*<\\/((\\w+\\:)*(LogBook|Management|Description))>"
+        );
         Matcher matcher = pattern.matcher(xmlContent);
         return matcher.find();
     }
-
 
     private ArchiveUnitModel createArchiveUnitModel() {
         ArchiveUnitModel archiveUnitModel = new ArchiveUnitModel();
@@ -162,7 +161,6 @@ public class ManifestBuilderTest {
         Assert.assertFalse("La chaîne XML contient des balises vides.", containsSomeEmptyTags(xmlContent));
     }
 
-
     private RuleCategoryModel generateRule(String type) {
         RuleCategoryModel ruleCategoryModel = new RuleCategoryModel();
         ruleCategoryModel.addToPreventRulesId("R1");
@@ -183,7 +181,6 @@ public class ManifestBuilderTest {
                 break;
             case SedaConstants.TAG_RULE_ACCESS:
                 rule.setStartDate(null);
-
             case SedaConstants.TAG_RULE_DISSEMINATION:
             case SedaConstants.TAG_RULE_REUSE:
             case SedaConstants.TAG_RULE_CLASSIFICATION:
@@ -218,18 +215,26 @@ public class ManifestBuilderTest {
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
         ManifestBuilder manifestBuilder = new ManifestBuilder(outputStream);
         manifestBuilder.writeArchiveUnit(archiveUnitModel, multimap, null);
-        Assert.assertFalse(outputStream.toString().contains("DataObjectGroupReferenceId>" + dataObjectGroupReferenceId + "</"));
+        Assert.assertFalse(
+            outputStream.toString().contains("DataObjectGroupReferenceId>" + dataObjectGroupReferenceId + "</")
+        );
 
         outputStream = new ByteArrayOutputStream();
         manifestBuilder = new ManifestBuilder(outputStream);
         manifestBuilder.writeArchiveUnit(archiveUnitModel, multimap, Map.of());
-        Assert.assertFalse(outputStream.toString().contains("DataObjectGroupReferenceId>" + dataObjectGroupReferenceId + "</"));
+        Assert.assertFalse(
+            outputStream.toString().contains("DataObjectGroupReferenceId>" + dataObjectGroupReferenceId + "</")
+        );
 
         outputStream = new ByteArrayOutputStream();
         manifestBuilder = new ManifestBuilder(outputStream);
-        manifestBuilder.writeArchiveUnit(archiveUnitModel, multimap, Map.of(
-            archiveUnitModelId, dataObjectGroupReferenceId
-        ));
-        Assert.assertTrue(outputStream.toString().contains("DataObjectGroupReferenceId>" + dataObjectGroupReferenceId + "</"));
+        manifestBuilder.writeArchiveUnit(
+            archiveUnitModel,
+            multimap,
+            Map.of(archiveUnitModelId, dataObjectGroupReferenceId)
+        );
+        Assert.assertTrue(
+            outputStream.toString().contains("DataObjectGroupReferenceId>" + dataObjectGroupReferenceId + "</")
+        );
     }
 }

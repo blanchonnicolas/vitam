@@ -113,6 +113,7 @@ import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.equalTo;
 
 public class MetadataResourceTest {
+
     private static final String DATA =
         "{ \"_id\": \"aeaqaaaaaaaaaaabaawkwak2ha24fdaaaaaq\", " + "\"data\": \"data1\" }";
     private static final String DATA2 =
@@ -127,18 +128,21 @@ public class MetadataResourceTest {
     public static final String PREFIX = GUIDFactory.newGUID().getId();
 
     @Rule
-    public RunWithCustomExecutorRule runInThread =
-        new RunWithCustomExecutorRule(VitamThreadPoolExecutor.getDefaultExecutor());
+    public RunWithCustomExecutorRule runInThread = new RunWithCustomExecutorRule(
+        VitamThreadPoolExecutor.getDefaultExecutor()
+    );
 
     @ClassRule
     public static TemporaryFolder tempFolder = new TemporaryFolder();
 
     @ClassRule
     public static MongoRule mongoRule = new MongoRule(
-        MongoDbAccess.getMongoClientSettingsBuilder(Unit.class, ObjectGroup.class));
+        MongoDbAccess.getMongoClientSettingsBuilder(Unit.class, ObjectGroup.class)
+    );
 
     @ClassRule
     public static ElasticsearchRule elasticsearchRule = new ElasticsearchRule();
+
     private static JunitHelper junitHelper;
     private static int serverPort;
 
@@ -146,8 +150,12 @@ public class MetadataResourceTest {
     private static final int tenantId = 0;
     private static final List<Integer> tenantList = Lists.newArrayList(tenantId);
     private static final Integer TENANT_ID = 0;
-    private static final ElasticsearchMetadataIndexManager metadataIndexManager = MetadataCollectionsTestUtils
-        .createTestIndexManager(tenantList, emptyMap(), MappingLoaderTestUtils.getTestMappingLoader());
+    private static final ElasticsearchMetadataIndexManager metadataIndexManager =
+        MetadataCollectionsTestUtils.createTestIndexManager(
+            tenantList,
+            emptyMap(),
+            MappingLoaderTestUtils.getTestMappingLoader()
+        );
     private static final ElasticsearchFunctionalAdminIndexManager functionalAdminIndexManager =
         FunctionalAdminCollectionsTestUtils.createTestIndexManager();
 
@@ -157,32 +165,53 @@ public class MetadataResourceTest {
     @BeforeClass
     public static void setUpBeforeClass() throws Exception {
         junitHelper = JunitHelper.getInstance();
-        List<ElasticsearchNode> esNodes =
-            Lists.newArrayList(new ElasticsearchNode(ElasticsearchRule.getHost(), ElasticsearchRule.getPort()));
+        List<ElasticsearchNode> esNodes = Lists.newArrayList(
+            new ElasticsearchNode(ElasticsearchRule.getHost(), ElasticsearchRule.getPort())
+        );
 
         MappingLoader mappingLoader = MappingLoaderTestUtils.getTestMappingLoader();
 
         final List<MongoDbNode> mongo_nodes = new ArrayList<>();
         mongo_nodes.add(new MongoDbNode("localhost", MongoRule.getDataBasePort()));
-        final MetaDataConfiguration configuration =
-            new MetaDataConfiguration(mongo_nodes, mongoRule.getMongoDatabase().getName(),
-                ElasticsearchRule.getClusterName(), esNodes, mappingLoader);
+        final MetaDataConfiguration configuration = new MetaDataConfiguration(
+            mongo_nodes,
+            mongoRule.getMongoDatabase().getName(),
+            ElasticsearchRule.getClusterName(),
+            esNodes,
+            mappingLoader
+        );
 
-        elasticsearchAccessMetadata = new ElasticsearchAccessMetadata(ElasticsearchRule.VITAM_CLUSTER, esNodes,
-            metadataIndexManager);
+        elasticsearchAccessMetadata = new ElasticsearchAccessMetadata(
+            ElasticsearchRule.VITAM_CLUSTER,
+            esNodes,
+            metadataIndexManager
+        );
         MetadataCollectionsTestUtils.beforeTestClass(mongoRule.getMongoDatabase(), PREFIX, elasticsearchAccessMetadata);
-        accessFunctionalAdmin = new ElasticsearchAccessFunctionalAdmin(ElasticsearchRule.VITAM_CLUSTER, esNodes,
-            functionalAdminIndexManager);
-        FunctionalAdminCollectionsTestUtils.beforeTestClass(mongoRule.getMongoDatabase(), PREFIX, accessFunctionalAdmin,
-            Lists.newArrayList(FunctionalAdminCollections.ACCESSION_REGISTER_DETAIL,
-                FunctionalAdminCollections.ACCESSION_REGISTER_SUMMARY));
+        accessFunctionalAdmin = new ElasticsearchAccessFunctionalAdmin(
+            ElasticsearchRule.VITAM_CLUSTER,
+            esNodes,
+            functionalAdminIndexManager
+        );
+        FunctionalAdminCollectionsTestUtils.beforeTestClass(
+            mongoRule.getMongoDatabase(),
+            PREFIX,
+            accessFunctionalAdmin,
+            Lists.newArrayList(
+                FunctionalAdminCollections.ACCESSION_REGISTER_DETAIL,
+                FunctionalAdminCollections.ACCESSION_REGISTER_SUMMARY
+            )
+        );
         configuration.setJettyConfig(JETTY_CONFIG);
         configuration.setUrlProcessing("http://processing.service.consul:8203/");
         configuration.setContextPath("/metadata");
-        configuration.setIndexationConfiguration(new MetadataIndexationConfiguration()
-            .setDefaultCollectionConfiguration(new DefaultCollectionConfiguration()
-                .setUnit(new CollectionConfiguration(1, 0))
-                .setObjectgroup(new CollectionConfiguration(1, 0))));
+        configuration.setIndexationConfiguration(
+            new MetadataIndexationConfiguration()
+                .setDefaultCollectionConfiguration(
+                    new DefaultCollectionConfiguration()
+                        .setUnit(new CollectionConfiguration(1, 0))
+                        .setObjectgroup(new CollectionConfiguration(1, 0))
+                )
+        );
 
         VitamConfiguration.setTenants(tenantList);
         serverPort = junitHelper.findAvailablePort();
@@ -202,9 +231,13 @@ public class MetadataResourceTest {
     @AfterClass
     public static void tearDownAfterClass() {
         MetadataCollectionsTestUtils.afterTestClass(metadataIndexManager, true);
-        FunctionalAdminCollectionsTestUtils
-            .afterTestClass(Lists.newArrayList(FunctionalAdminCollections.ACCESSION_REGISTER_DETAIL,
-                FunctionalAdminCollections.ACCESSION_REGISTER_SUMMARY), true);
+        FunctionalAdminCollectionsTestUtils.afterTestClass(
+            Lists.newArrayList(
+                FunctionalAdminCollections.ACCESSION_REGISTER_DETAIL,
+                FunctionalAdminCollections.ACCESSION_REGISTER_SUMMARY
+            ),
+            true
+        );
         try {
             metadataMain.stop();
         } catch (final Exception e) {
@@ -214,25 +247,35 @@ public class MetadataResourceTest {
         VitamClientFactory.resetConnections();
     }
 
-
     @After
     public void tearDown() {
         MetadataCollectionsTestUtils.afterTest(metadataIndexManager);
-        FunctionalAdminCollectionsTestUtils
-            .afterTest(Lists.newArrayList(FunctionalAdminCollections.ACCESSION_REGISTER_DETAIL,
-                FunctionalAdminCollections.ACCESSION_REGISTER_SUMMARY));
+        FunctionalAdminCollectionsTestUtils.afterTest(
+            Lists.newArrayList(
+                FunctionalAdminCollections.ACCESSION_REGISTER_DETAIL,
+                FunctionalAdminCollections.ACCESSION_REGISTER_SUMMARY
+            )
+        );
     }
 
     private static final JsonNode buildDSLWithOptions(String data) throws Exception {
-        return JsonHandler.toJsonNode(new BulkUnitInsertRequest(Collections.singletonList(
-            new BulkUnitInsertEntry(Collections.emptySet(), JsonHandler.getFromString(data))
-        )));
+        return JsonHandler.toJsonNode(
+            new BulkUnitInsertRequest(
+                Collections.singletonList(
+                    new BulkUnitInsertEntry(Collections.emptySet(), JsonHandler.getFromString(data))
+                )
+            )
+        );
     }
 
     private static final JsonNode buildInsertUnitRequest(String data, String... roots) throws Exception {
-        return JsonHandler.toJsonNode(new BulkUnitInsertRequest(Collections.singletonList(
-            new BulkUnitInsertEntry(new HashSet<>(Arrays.asList(roots)), JsonHandler.getFromString(data))
-        )));
+        return JsonHandler.toJsonNode(
+            new BulkUnitInsertRequest(
+                Collections.singletonList(
+                    new BulkUnitInsertEntry(new HashSet<>(Arrays.asList(roots)), JsonHandler.getFromString(data))
+                )
+            )
+        );
     }
 
     private static final JsonNode buildInsertObjectGroupRequest(String data, String... roots) throws Exception {
@@ -254,11 +297,16 @@ public class MetadataResourceTest {
 
     private static String generateResponseErrorFromStatus(Status status, String message)
         throws JsonProcessingException {
-        return new ObjectMapper().writeValueAsString(new VitamError(status.name()).setHttpCode(status.getStatusCode())
-            .setContext("ingest").setState("code_vitam")
-            .setMessage(status.getReasonPhrase()).setDescription(message));
+        return new ObjectMapper()
+            .writeValueAsString(
+                new VitamError(status.name())
+                    .setHttpCode(status.getStatusCode())
+                    .setContext("ingest")
+                    .setState("code_vitam")
+                    .setMessage(status.getReasonPhrase())
+                    .setDescription(message)
+            );
     }
-
 
     /**
      * Test status endpoint
@@ -276,8 +324,10 @@ public class MetadataResourceTest {
         given()
             .contentType(ContentType.JSON)
             .header(GlobalDataRest.X_TENANT_ID, TENANT_ID)
-            .body(INVALID_DATA).when()
-            .post("units/bulk").then()
+            .body(INVALID_DATA)
+            .when()
+            .post("units/bulk")
+            .then()
             .statusCode(Status.BAD_REQUEST.getStatusCode());
     }
 
@@ -286,15 +336,19 @@ public class MetadataResourceTest {
         with()
             .contentType(ContentType.JSON)
             .header(GlobalDataRest.X_TENANT_ID, TENANT_ID)
-            .body(buildDSLWithOptions(DATA)).when()
-            .post("units/bulk").then()
+            .body(buildDSLWithOptions(DATA))
+            .when()
+            .post("units/bulk")
+            .then()
             .statusCode(Status.CREATED.getStatusCode());
 
         given()
             .contentType(ContentType.JSON)
             .header(GlobalDataRest.X_TENANT_ID, TENANT_ID)
-            .body(buildDSLWithOptions(DATA)).when()
-            .post("units/bulk").then()
+            .body(buildDSLWithOptions(DATA))
+            .when()
+            .post("units/bulk")
+            .then()
             .statusCode(Status.CREATED.getStatusCode());
     }
 
@@ -303,21 +357,24 @@ public class MetadataResourceTest {
         with()
             .contentType(ContentType.JSON)
             .header(GlobalDataRest.X_TENANT_ID, TENANT_ID)
-            .body(buildDSLWithOptions(DATA)).when()
-            .post("units/bulk").then()
+            .body(buildDSLWithOptions(DATA))
+            .when()
+            .post("units/bulk")
+            .then()
             .statusCode(Status.CREATED.getStatusCode());
 
         given()
             .contentType(ContentType.JSON)
             .header(GlobalDataRest.X_TENANT_ID, TENANT_ID)
-            .body(buildInsertUnitRequest(DATA2, "aeaqaaaaaaaaaaabaawkwak2ha24fdaaaaaq")).when()
-            .post("units/bulk").then()
+            .body(buildInsertUnitRequest(DATA2, "aeaqaaaaaaaaaaabaawkwak2ha24fdaaaaaq"))
+            .when()
+            .post("units/bulk")
+            .then()
             .statusCode(Status.CREATED.getStatusCode());
     }
 
     @Test
     public void givenInsertComplexUnitGraphThenCheckGraph() throws Exception {
-
         /*
          * Test case :
          * 1(sp1)  2(sp2)  3(sp3)
@@ -366,14 +423,15 @@ public class MetadataResourceTest {
     }
 
     private void createUnit(String id, String sp, String... directParents) throws Exception {
-
         String unitData = "{" + "\"_id\": \"" + id + "\"," + "\"_sp\": \"" + sp + "\"" + "}";
 
         with()
             .contentType(ContentType.JSON)
             .header(GlobalDataRest.X_TENANT_ID, TENANT_ID)
-            .body(buildInsertUnitRequest(unitData, directParents)).when()
-            .post("units/bulk").then()
+            .body(buildInsertUnitRequest(unitData, directParents))
+            .when()
+            .post("units/bulk")
+            .then()
             .statusCode(Status.CREATED.getStatusCode());
     }
 
@@ -382,36 +440,47 @@ public class MetadataResourceTest {
         String responseJson = given()
             .contentType(ContentType.JSON)
             .header(GlobalDataRest.X_TENANT_ID, TENANT_ID)
-            .get("/raw/units/" + id).then()
+            .get("/raw/units/" + id)
+            .then()
             .statusCode(Status.OK.getStatusCode())
-            .extract().body().asString();
+            .extract()
+            .body()
+            .asString();
 
         ObjectNode actualUnitJson = (ObjectNode) JsonHandler.getFromString(responseJson).get("$results").get(0);
         ObjectNode expectedUnitJson = (ObjectNode) JsonHandler.getFromFile(
-            PropertiesUtils.getResourceFile(expectedContentFileName));
+            PropertiesUtils.getResourceFile(expectedContentFileName)
+        );
 
         actualUnitJson.remove(MetadataDocument.APPROXIMATE_CREATION_DATE);
         actualUnitJson.remove(MetadataDocument.APPROXIMATE_UPDATE_DATE);
         // Check last persisted date
         LocalDateTime graphLastPersistedDate = LocalDateUtil.parseMongoFormattedDate(
-            actualUnitJson.get(MetadataDocument.GRAPH_LAST_PERSISTED_DATE).asText());
+            actualUnitJson.get(MetadataDocument.GRAPH_LAST_PERSISTED_DATE).asText()
+        );
         assertThat(graphLastPersistedDate)
-            .isAfter(LocalDateUtil.now().minusMinutes(1)).isBefore(LocalDateUtil.now().plusSeconds(1));
+            .isAfter(LocalDateUtil.now().minusMinutes(1))
+            .isBefore(LocalDateUtil.now().plusSeconds(1));
 
         // Compare jsons (excluding graph last persisted date)
         actualUnitJson.remove(MetadataDocument.GRAPH_LAST_PERSISTED_DATE);
         expectedUnitJson.remove(MetadataDocument.GRAPH_LAST_PERSISTED_DATE);
 
-        JsonAssert.assertJsonEquals(expectedUnitJson.toString(), actualUnitJson.toString(),
-            JsonAssert.when(Option.IGNORING_ARRAY_ORDER));
+        JsonAssert.assertJsonEquals(
+            expectedUnitJson.toString(),
+            actualUnitJson.toString(),
+            JsonAssert.when(Option.IGNORING_ARRAY_ORDER)
+        );
     }
 
     @Test(expected = MarshalException.class)
     public void shouldReturnErrorIfContentTypeIsNotJson() throws Exception {
         given()
             .contentType("metadataMain/xml")
-            .body(buildDSLWithOptions(DATA)).when()
-            .post("units/bulk").then()
+            .body(buildDSLWithOptions(DATA))
+            .when()
+            .post("units/bulk")
+            .then()
             .statusCode(Status.UNSUPPORTED_MEDIA_TYPE.getStatusCode());
     }
 
@@ -420,11 +489,18 @@ public class MetadataResourceTest {
         given()
             .contentType(ContentType.JSON)
             .header(GlobalDataRest.X_TENANT_ID, TENANT_ID)
-            .body(buildInsertUnitRequest(DATA, "aeaqaaaaaeaaaaakaarp4akuuf2ldmyaaaab")).when()
+            .body(buildInsertUnitRequest(DATA, "aeaqaaaaaeaaaaakaarp4akuuf2ldmyaaaab"))
+            .when()
             .post("/units/bulk")
             .then()
-            .body(equalTo(generateResponseErrorFromStatus(Status.NOT_FOUND,
-                "Cannot find parents: [aeaqaaaaaeaaaaakaarp4akuuf2ldmyaaaab]")))
+            .body(
+                equalTo(
+                    generateResponseErrorFromStatus(
+                        Status.NOT_FOUND,
+                        "Cannot find parents: [aeaqaaaaaeaaaaakaarp4akuuf2ldmyaaaab]"
+                    )
+                )
+            )
             .statusCode(Status.NOT_FOUND.getStatusCode());
     }
 
@@ -433,8 +509,10 @@ public class MetadataResourceTest {
         given()
             .contentType(ContentType.JSON)
             .header(GlobalDataRest.X_TENANT_ID, TENANT_ID)
-            .body(buildDSLWithOptions(DATA)).when()
-            .post("units/bulk").then()
+            .body(buildDSLWithOptions(DATA))
+            .when()
+            .post("units/bulk")
+            .then()
             .statusCode(Status.CREATED.getStatusCode());
     }
 
@@ -444,8 +522,10 @@ public class MetadataResourceTest {
         given()
             .contentType(ContentType.JSON)
             .header(GlobalDataRest.X_TENANT_ID, TENANT_ID)
-            .body(INVALID_DATA).when()
-            .post("/objectgroups").then()
+            .body(INVALID_DATA)
+            .when()
+            .post("/objectgroups")
+            .then()
             .body(equalTo(generateResponseErrorFromStatus(Status.BAD_REQUEST, "Parse in error for Insert: empty data")))
             .statusCode(Status.BAD_REQUEST.getStatusCode());
     }
@@ -455,21 +535,27 @@ public class MetadataResourceTest {
         with()
             .contentType(ContentType.JSON)
             .header(GlobalDataRest.X_TENANT_ID, TENANT_ID)
-            .body(buildDSLWithOptions(DATA)).when()
-            .post("units/bulk").then()
+            .body(buildDSLWithOptions(DATA))
+            .when()
+            .post("units/bulk")
+            .then()
             .statusCode(Status.CREATED.getStatusCode());
         with()
             .contentType(ContentType.JSON)
             .header(GlobalDataRest.X_TENANT_ID, TENANT_ID)
-            .body(buildInsertObjectGroupRequest(OG_DATA, "aeaqaaaaaaaaaaabaawkwak2ha24fdaaaaaq")).when()
-            .post("/objectgroups").then()
+            .body(buildInsertObjectGroupRequest(OG_DATA, "aeaqaaaaaaaaaaabaawkwak2ha24fdaaaaaq"))
+            .when()
+            .post("/objectgroups")
+            .then()
             .statusCode(Status.CREATED.getStatusCode());
 
         given()
             .contentType(ContentType.JSON)
             .header(GlobalDataRest.X_TENANT_ID, TENANT_ID)
-            .body(buildInsertObjectGroupRequest(OG_DATA, "aeaqaaaaaaaaaaabaawkwak2ha24fdaaaaaq")).when()
-            .post("/objectgroups").then()
+            .body(buildInsertObjectGroupRequest(OG_DATA, "aeaqaaaaaaaaaaabaawkwak2ha24fdaaaaaq"))
+            .when()
+            .post("/objectgroups")
+            .then()
             .statusCode(Status.CREATED.getStatusCode());
     }
 
@@ -480,8 +566,10 @@ public class MetadataResourceTest {
         try {
             given()
                 .contentType(ContentType.JSON)
-                .body(buildDSLWithOptions(createJsonStringWithDepth(60))).when()
-                .post("/objectgroups").then()
+                .body(buildDSLWithOptions(createJsonStringWithDepth(60)))
+                .when()
+                .post("/objectgroups")
+                .then()
                 .body(equalTo(generateResponseErrorFromStatus(Status.BAD_REQUEST, "String exceeds sanity check of 99")))
                 .statusCode(Status.BAD_REQUEST.getStatusCode());
         } finally {
@@ -496,8 +584,7 @@ public class MetadataResourceTest {
         String operationId = "1234";
 
         VitamRepositoryFactory factory = VitamRepositoryFactory.get();
-        VitamMongoRepository mongo =
-            factory.getVitamMongoRepository(UNIT.getVitamCollection());
+        VitamMongoRepository mongo = factory.getVitamMongoRepository(UNIT.getVitamCollection());
         Document doc = new Document("_id", "1")
             .append("_ops", singletonList(operationId))
             .append("_tenant", 0)
@@ -507,17 +594,19 @@ public class MetadataResourceTest {
             .append("_sps", Arrays.asList("sp1", "sp2"));
         mongo.save(doc);
 
-        VitamElasticsearchRepository es = factory.getVitamESRepository(UNIT.getVitamCollection(),
-            metadataIndexManager.getElasticsearchIndexAliasResolver(UNIT));
+        VitamElasticsearchRepository es = factory.getVitamESRepository(
+            UNIT.getVitamCollection(),
+            metadataIndexManager.getElasticsearchIndexAliasResolver(UNIT)
+        );
         es.save(doc);
 
         given()
             .header(GlobalDataRest.X_TENANT_ID, TENANT_ID)
             .when()
-            .get("/accession-registers/units/" + operationId).then()
+            .get("/accession-registers/units/" + operationId)
+            .then()
             .body("$results.size()", equalTo(1))
             .statusCode(Status.OK.getStatusCode());
-
     }
 
     @Test
@@ -525,29 +614,35 @@ public class MetadataResourceTest {
     public void should_find_accession_register_on_object_group() throws Exception {
         VitamThreadUtils.getVitamSession().setTenantId(TENANT_ID);
         Document doc = new ObjectGroup(
-            JsonHandler.getFromInputStream(getClass().getResourceAsStream("/object_sp1_1.json")));
+            JsonHandler.getFromInputStream(getClass().getResourceAsStream("/object_sp1_1.json"))
+        );
         VitamRepositoryFactory factory = VitamRepositoryFactory.get();
-        VitamMongoRepository mongo =
-            factory.getVitamMongoRepository(OBJECTGROUP.getVitamCollection());
+        VitamMongoRepository mongo = factory.getVitamMongoRepository(OBJECTGROUP.getVitamCollection());
         mongo.save(doc);
-        VitamElasticsearchRepository es =
-            factory.getVitamESRepository(OBJECTGROUP.getVitamCollection(),
-                metadataIndexManager.getElasticsearchIndexAliasResolver(OBJECTGROUP));
+        VitamElasticsearchRepository es = factory.getVitamESRepository(
+            OBJECTGROUP.getVitamCollection(),
+            metadataIndexManager.getElasticsearchIndexAliasResolver(OBJECTGROUP)
+        );
         es.save(doc);
         String operationId = "aedqaaaaacgbcaacaar3kak4tr2o3wqaaaaq";
 
         given()
             .header(GlobalDataRest.X_TENANT_ID, TENANT_ID)
             .when()
-            .get("/accession-registers/objects/" + operationId).then()
+            .get("/accession-registers/objects/" + operationId)
+            .then()
             .body("$results.size()", equalTo(1))
             .statusCode(Status.OK.getStatusCode());
     }
 
     @Test
     public void indexCollectionNoBodyPreconditionFailed() {
-        given().contentType(MediaType.APPLICATION_JSON)
-            .when().post("/reindex").then().statusCode(Status.PRECONDITION_FAILED.getStatusCode());
+        given()
+            .contentType(MediaType.APPLICATION_JSON)
+            .when()
+            .post("/reindex")
+            .then()
+            .statusCode(Status.PRECONDITION_FAILED.getStatusCode());
     }
 
     @Test
@@ -557,8 +652,13 @@ public class MetadataResourceTest {
         indexParameters.setTenants(tenants);
         indexParameters.setCollectionName("fake");
 
-        given().contentType(MediaType.APPLICATION_JSON).body(indexParameters)
-            .when().post("/reindex").then().statusCode(Status.INTERNAL_SERVER_ERROR.getStatusCode())
+        given()
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(indexParameters)
+            .when()
+            .post("/reindex")
+            .then()
+            .statusCode(Status.INTERNAL_SERVER_ERROR.getStatusCode())
             .body("collectionName", equalTo("fake"))
             .body("KO.size()", equalTo(1))
             .body("KO.get(0).tenants.size()", equalTo(1))
@@ -569,8 +669,12 @@ public class MetadataResourceTest {
 
     @Test
     public void aliasCollectionNoBodyPreconditionFailed() {
-        given().contentType(MediaType.APPLICATION_JSON)
-            .when().post("/alias").then().statusCode(Status.PRECONDITION_FAILED.getStatusCode());
+        given()
+            .contentType(MediaType.APPLICATION_JSON)
+            .when()
+            .post("/alias")
+            .then()
+            .statusCode(Status.PRECONDITION_FAILED.getStatusCode());
     }
 
     @Test
@@ -578,7 +682,12 @@ public class MetadataResourceTest {
         SwitchIndexParameters parameters = new SwitchIndexParameters();
         parameters.setAlias("alias");
         parameters.setIndexName("indexName");
-        given().contentType(MediaType.APPLICATION_JSON).body(parameters)
-            .when().post("/alias").then().statusCode(Status.INTERNAL_SERVER_ERROR.getStatusCode());
+        given()
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(parameters)
+            .when()
+            .post("/alias")
+            .then()
+            .statusCode(Status.INTERNAL_SERVER_ERROR.getStatusCode());
     }
 }

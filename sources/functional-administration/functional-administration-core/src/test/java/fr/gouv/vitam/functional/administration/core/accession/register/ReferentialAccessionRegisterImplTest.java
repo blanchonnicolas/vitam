@@ -93,6 +93,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
 public class ReferentialAccessionRegisterImplTest {
+
     public static final String PREFIX = GUIDFactory.newGUID().getId();
     private static final int ACCESSION_REGISTER_SYMBOLIC_THREAD_POOL_SIZE = 4;
     private static final String ACCESSION_REGISTER_DETAIL = "accession-register_detail.json";
@@ -104,21 +105,28 @@ public class ReferentialAccessionRegisterImplTest {
     private static final Integer TENANT_ID = 0;
     private static final ElasticsearchFunctionalAdminIndexManager indexManager =
         FunctionalAdminCollectionsTestUtils.createTestIndexManager();
+
     @ClassRule
     public static TemporaryFolder tempFolder = new TemporaryFolder();
+
     @ClassRule
     public static MongoRule mongoRule = new MongoRule(
-        MongoDbAccess.getMongoClientSettingsBuilder(AccessionRegisterDetail.class, AccessionRegisterSummary.class));
+        MongoDbAccess.getMongoClientSettingsBuilder(AccessionRegisterDetail.class, AccessionRegisterSummary.class)
+    );
 
     @ClassRule
     public static ElasticsearchRule elasticsearchRule = new ElasticsearchRule();
+
     static ReferentialAccessionRegisterImpl accessionRegisterImpl;
     static AccessionRegisterDetailModel register;
     private static ElasticsearchAccessFunctionalAdmin esClient;
     private static MongoDbAccessAdminImpl mongoDbAccessAdmin;
+
     @Rule
-    public RunWithCustomExecutorRule runInThread =
-        new RunWithCustomExecutorRule(VitamThreadPoolExecutor.getDefaultExecutor());
+    public RunWithCustomExecutorRule runInThread = new RunWithCustomExecutorRule(
+        VitamThreadPoolExecutor.getDefaultExecutor()
+    );
+
     @Rule
     public MockitoRule mockitoRule = MockitoJUnit.rule();
 
@@ -134,22 +142,27 @@ public class ReferentialAccessionRegisterImplTest {
     @BeforeClass
     @RunWithCustomExecutor
     public static void setUpBeforeClass() throws Exception {
-
         final List<ElasticsearchNode> esNodes = new ArrayList<>();
         esNodes.add(new ElasticsearchNode(ElasticsearchRule.getHost(), ElasticsearchRule.getPort()));
         esClient = new ElasticsearchAccessFunctionalAdmin(ElasticsearchRule.VITAM_CLUSTER, esNodes, indexManager);
 
         final List<MongoDbNode> nodes = new ArrayList<>();
         nodes.add(new MongoDbNode("localhost", MongoRule.getDataBasePort()));
-        mongoDbAccessAdmin =
-            MongoDbAccessAdminFactory
-                .create(new DbConfigurationImpl(nodes, mongoRule.getMongoDatabase().getName()), Collections::emptyList,
-                    indexManager);
+        mongoDbAccessAdmin = MongoDbAccessAdminFactory.create(
+            new DbConfigurationImpl(nodes, mongoRule.getMongoDatabase().getName()),
+            Collections::emptyList,
+            indexManager
+        );
 
-        FunctionalAdminCollectionsTestUtils.beforeTestClass(mongoRule.getMongoDatabase(), PREFIX,
+        FunctionalAdminCollectionsTestUtils.beforeTestClass(
+            mongoRule.getMongoDatabase(),
+            PREFIX,
             esClient,
-            Arrays.asList(FunctionalAdminCollections.ACCESSION_REGISTER_DETAIL,
-                FunctionalAdminCollections.ACCESSION_REGISTER_SUMMARY));
+            Arrays.asList(
+                FunctionalAdminCollections.ACCESSION_REGISTER_DETAIL,
+                FunctionalAdminCollections.ACCESSION_REGISTER_SUMMARY
+            )
+        );
     }
 
     @AfterClass
@@ -159,12 +172,14 @@ public class ReferentialAccessionRegisterImplTest {
 
     @Before
     public void setup() {
-
         doReturn(metaDataClient).when(metaDataClientFactory).getClient();
 
-        accessionRegisterImpl = new ReferentialAccessionRegisterImpl(mongoDbAccessAdmin,
-            functionalBackupService, metaDataClientFactory,
-            ACCESSION_REGISTER_SYMBOLIC_THREAD_POOL_SIZE);
+        accessionRegisterImpl = new ReferentialAccessionRegisterImpl(
+            mongoDbAccessAdmin,
+            functionalBackupService,
+            metaDataClientFactory,
+            ACCESSION_REGISTER_SYMBOLIC_THREAD_POOL_SIZE
+        );
     }
 
     @After
@@ -172,17 +187,16 @@ public class ReferentialAccessionRegisterImplTest {
         FunctionalAdminCollectionsTestUtils.afterTest();
     }
 
-
     @Test
     @RunWithCustomExecutor
     public void testCreateAndUpdateAccessionRegister() throws Exception {
-
         VitamThreadUtils.getVitamSession().setTenantId(TENANT_ID);
         ElasticsearchAccessFunctionalAdmin.ensureIndex();
 
-        AccessionRegisterDetailModel ardm =
-            JsonHandler.getFromInputStream(PropertiesUtils.getResourceAsStream(ACCESSION_REGISTER_DETAIL),
-                AccessionRegisterDetailModel.class);
+        AccessionRegisterDetailModel ardm = JsonHandler.getFromInputStream(
+            PropertiesUtils.getResourceAsStream(ACCESSION_REGISTER_DETAIL),
+            AccessionRegisterDetailModel.class
+        );
 
         accessionRegisterImpl.createOrUpdateAccessionRegister(ardm);
 
@@ -192,8 +206,9 @@ public class ReferentialAccessionRegisterImplTest {
 
         Select select = new Select();
         select.setQuery(QueryHelper.eq("OriginatingAgency", "OG_1"));
-        RequestResponseOK<AccessionRegisterSummary> response =
-            accessionRegisterImpl.findDocuments(select.getFinalSelect());
+        RequestResponseOK<AccessionRegisterSummary> response = accessionRegisterImpl.findDocuments(
+            select.getFinalSelect()
+        );
         assertThat(response.isOk()).isTrue();
         assertThat(response.getResults()).hasSize(1);
         AccessionRegisterSummary summary = response.getResults().iterator().next();
@@ -215,10 +230,12 @@ public class ReferentialAccessionRegisterImplTest {
 
         select = new Select();
         select.setQuery(
-            QueryHelper.and().add(QueryHelper.eq("Opi", "Opi_1"), QueryHelper.eq("OriginatingAgency", "OG_1")));
+            QueryHelper.and().add(QueryHelper.eq("Opi", "Opi_1"), QueryHelper.eq("OriginatingAgency", "OG_1"))
+        );
 
-        RequestResponseOK<AccessionRegisterDetail> detailResponse =
-            accessionRegisterImpl.findDetail(select.getFinalSelect());
+        RequestResponseOK<AccessionRegisterDetail> detailResponse = accessionRegisterImpl.findDetail(
+            select.getFinalSelect()
+        );
 
         assertThat(detailResponse.isOk()).isTrue();
         assertThat(detailResponse.getResults()).hasSize(1);
@@ -242,9 +259,10 @@ public class ReferentialAccessionRegisterImplTest {
         assertThat(detail.get(AccessionRegisterDetail.EVENTS, List.class)).hasSize(1);
 
         // Add elimination event 1
-        ardm =
-            JsonHandler.getFromInputStream(PropertiesUtils.getResourceAsStream(ACCESSION_REGISTER_DETAIL_ELIMINATION),
-                AccessionRegisterDetailModel.class);
+        ardm = JsonHandler.getFromInputStream(
+            PropertiesUtils.getResourceAsStream(ACCESSION_REGISTER_DETAIL_ELIMINATION),
+            AccessionRegisterDetailModel.class
+        );
 
         accessionRegisterImpl.createOrUpdateAccessionRegister(ardm);
 
@@ -264,8 +282,7 @@ public class ReferentialAccessionRegisterImplTest {
 
         select = new Select();
         select.setQuery(QueryHelper.eq("OriginatingAgency", "OG_1"));
-        response =
-            accessionRegisterImpl.findDocuments(select.getFinalSelect());
+        response = accessionRegisterImpl.findDocuments(select.getFinalSelect());
         assertThat(response.isOk()).isTrue();
         assertThat(response.getResults()).hasSize(1);
         summary = response.getResults().iterator().next();
@@ -287,10 +304,10 @@ public class ReferentialAccessionRegisterImplTest {
 
         select = new Select();
         select.setQuery(
-            QueryHelper.and().add(QueryHelper.eq("Opi", "Opi_1"), QueryHelper.eq("OriginatingAgency", "OG_1")));
+            QueryHelper.and().add(QueryHelper.eq("Opi", "Opi_1"), QueryHelper.eq("OriginatingAgency", "OG_1"))
+        );
 
-        detailResponse =
-            accessionRegisterImpl.findDetail(select.getFinalSelect());
+        detailResponse = accessionRegisterImpl.findDetail(select.getFinalSelect());
 
         assertThat(detailResponse.isOk()).isTrue();
         assertThat(detailResponse.getResults()).hasSize(1);
@@ -314,11 +331,11 @@ public class ReferentialAccessionRegisterImplTest {
 
         assertThat(detail.get(AccessionRegisterDetail.EVENTS, List.class)).hasSize(2);
 
-
         // Add elimination event 1
-        ardm =
-            JsonHandler.getFromInputStream(PropertiesUtils.getResourceAsStream(ACCESSION_REGISTER_DETAIL_ELIMINATION_2),
-                AccessionRegisterDetailModel.class);
+        ardm = JsonHandler.getFromInputStream(
+            PropertiesUtils.getResourceAsStream(ACCESSION_REGISTER_DETAIL_ELIMINATION_2),
+            AccessionRegisterDetailModel.class
+        );
 
         accessionRegisterImpl.createOrUpdateAccessionRegister(ardm);
 
@@ -328,8 +345,7 @@ public class ReferentialAccessionRegisterImplTest {
 
         select = new Select();
         select.setQuery(QueryHelper.eq("OriginatingAgency", "OG_1"));
-        response =
-            accessionRegisterImpl.findDocuments(select.getFinalSelect());
+        response = accessionRegisterImpl.findDocuments(select.getFinalSelect());
         assertThat(response.isOk()).isTrue();
         assertThat(response.getResults()).hasSize(1);
         summary = response.getResults().iterator().next();
@@ -351,10 +367,10 @@ public class ReferentialAccessionRegisterImplTest {
 
         select = new Select();
         select.setQuery(
-            QueryHelper.and().add(QueryHelper.eq("Opi", "Opi_1"), QueryHelper.eq("OriginatingAgency", "OG_1")));
+            QueryHelper.and().add(QueryHelper.eq("Opi", "Opi_1"), QueryHelper.eq("OriginatingAgency", "OG_1"))
+        );
 
-        detailResponse =
-            accessionRegisterImpl.findDetail(select.getFinalSelect());
+        detailResponse = accessionRegisterImpl.findDetail(select.getFinalSelect());
 
         assertThat(detailResponse.isOk()).isTrue();
         assertThat(detailResponse.getResults()).hasSize(1);
@@ -380,25 +396,27 @@ public class ReferentialAccessionRegisterImplTest {
 
     @Test
     @RunWithCustomExecutor
-    public void testFindAccessionRegisterDetail()
-        throws Exception {
-
+    public void testFindAccessionRegisterDetail() throws Exception {
         VitamThreadUtils.getVitamSession().setTenantId(TENANT_ID);
-        register = JsonHandler.getFromInputStream(PropertiesUtils.getResourceAsStream(FILE_TO_TEST_OK),
-            AccessionRegisterDetailModel.class);
+        register = JsonHandler.getFromInputStream(
+            PropertiesUtils.getResourceAsStream(FILE_TO_TEST_OK),
+            AccessionRegisterDetailModel.class
+        );
         ElasticsearchAccessFunctionalAdmin.ensureIndex();
 
         register.setOriginatingAgency("testFindAccessionRegisterDetailAgency");
 
         accessionRegisterImpl.createOrUpdateAccessionRegister(register);
-        final MongoCollection<Document> collection =
-            mongoRule.getMongoCollection(FunctionalAdminCollections.ACCESSION_REGISTER_SUMMARY.getName());
+        final MongoCollection<Document> collection = mongoRule.getMongoCollection(
+            FunctionalAdminCollections.ACCESSION_REGISTER_SUMMARY.getName()
+        );
         assertEquals(1, collection.countDocuments());
 
         final Select select = new Select();
         select.setQuery(eq("OriginatingAgency", "testFindAccessionRegisterDetailAgency"));
-        final RequestResponseOK<AccessionRegisterDetail> detail =
-            accessionRegisterImpl.findDetail(select.getFinalSelect());
+        final RequestResponseOK<AccessionRegisterDetail> detail = accessionRegisterImpl.findDetail(
+            select.getFinalSelect()
+        );
         assertEquals(1, detail.getResults().size());
         final AccessionRegisterDetail item = detail.getResults().get(0);
         assertEquals("testFindAccessionRegisterDetailAgency", item.getOriginatingAgency());
@@ -406,22 +424,24 @@ public class ReferentialAccessionRegisterImplTest {
 
     @Test
     @RunWithCustomExecutor
-    public void testFindAccessionRegisterSummary()
-        throws Exception {
-
+    public void testFindAccessionRegisterSummary() throws Exception {
         VitamThreadUtils.getVitamSession().setTenantId(TENANT_ID);
-        register = JsonHandler.getFromInputStream(PropertiesUtils.getResourceAsStream(FILE_TO_TEST_2_OK),
-            AccessionRegisterDetailModel.class);
+        register = JsonHandler.getFromInputStream(
+            PropertiesUtils.getResourceAsStream(FILE_TO_TEST_2_OK),
+            AccessionRegisterDetailModel.class
+        );
         ElasticsearchAccessFunctionalAdmin.ensureIndex();
 
         accessionRegisterImpl.createOrUpdateAccessionRegister(register);
-        final MongoCollection<Document> collection =
-            mongoRule.getMongoCollection(FunctionalAdminCollections.ACCESSION_REGISTER_SUMMARY.getName());
+        final MongoCollection<Document> collection = mongoRule.getMongoCollection(
+            FunctionalAdminCollections.ACCESSION_REGISTER_SUMMARY.getName()
+        );
         assertEquals(1, collection.countDocuments());
         final Select select = new Select();
         select.setQuery(eq("OriginatingAgency", "OG_1"));
-        final RequestResponseOK<AccessionRegisterSummary> summary =
-            accessionRegisterImpl.findDocuments(select.getFinalSelect());
+        final RequestResponseOK<AccessionRegisterSummary> summary = accessionRegisterImpl.findDocuments(
+            select.getFinalSelect()
+        );
         assertEquals(1, summary.getResults().size());
         final AccessionRegisterSummary item = summary.getResults().get(0);
         assertEquals("OG_1", item.getOriginatingAgency());
@@ -433,21 +453,23 @@ public class ReferentialAccessionRegisterImplTest {
     @Test
     @RunWithCustomExecutor
     public void testCreateAccessionRegisterSymbolicOK() throws Exception {
-
         // Given
         Set<Integer> tenants = ConcurrentHashMap.newKeySet();
-        doAnswer((args) -> {
-                Integer tenantId = VitamThreadUtils.getVitamSession().getTenantId();
-                tenants.add(tenantId);
-                return JsonHandler.toJsonNode(new RequestResponseOK<AccessionRegisterSymbolic>()
-                    .addResult(new AccessionRegisterSymbolic()
+        doAnswer(args -> {
+            Integer tenantId = VitamThreadUtils.getVitamSession().getTenantId();
+            tenants.add(tenantId);
+            return JsonHandler.toJsonNode(
+                new RequestResponseOK<AccessionRegisterSymbolic>().addResult(
+                    new AccessionRegisterSymbolic()
                         .setTenant(tenantId)
                         .setId(GUIDFactory.newGUID().getId())
                         .setOriginatingAgency("sp" + tenantId)
                         .setArchiveUnit(10)
-                    ));
-            }
-        ).when(metaDataClient).createAccessionRegisterSymbolic();
+                )
+            );
+        })
+            .when(metaDataClient)
+            .createAccessionRegisterSymbolic();
 
         // When
         List<Integer> tenantList = Arrays.asList(0, 1, 2, 3);
@@ -460,41 +482,47 @@ public class ReferentialAccessionRegisterImplTest {
         for (Integer tenant : tenantList) {
             VitamThreadUtils.getVitamSession().setTenantId(tenant);
             final ObjectNode selectAll = new Select().getFinalSelect();
-            DbRequestResult results =
-                mongoDbAccessAdmin.findDocuments(selectAll, FunctionalAdminCollections.ACCESSION_REGISTER_SYMBOLIC);
+            DbRequestResult results = mongoDbAccessAdmin.findDocuments(
+                selectAll,
+                FunctionalAdminCollections.ACCESSION_REGISTER_SYMBOLIC
+            );
             List<AccessionRegisterSymbolic> documents = results.getDocuments(AccessionRegisterSymbolic.class);
             assertThat(documents).hasSize(1);
             assertThat(documents.get(0).getOriginatingAgency()).isEqualTo("sp" + tenant);
         }
 
-        verify(functionalBackupService, times(tenantList.size()))
-            .saveDocument(Mockito.eq(FunctionalAdminCollections.ACCESSION_REGISTER_SYMBOLIC), any());
+        verify(functionalBackupService, times(tenantList.size())).saveDocument(
+            Mockito.eq(FunctionalAdminCollections.ACCESSION_REGISTER_SYMBOLIC),
+            any()
+        );
     }
 
     @Test
     @RunWithCustomExecutor
     public void testCreateAccessionRegisterSymbolicSkipEmptyTenants() throws Exception {
-
         // Given
         Set<Integer> tenants = ConcurrentHashMap.newKeySet();
-        doAnswer((args) -> {
-                Integer tenantId = VitamThreadUtils.getVitamSession().getTenantId();
-                tenants.add(tenantId);
+        doAnswer(args -> {
+            Integer tenantId = VitamThreadUtils.getVitamSession().getTenantId();
+            tenants.add(tenantId);
 
-                // Tenant 0 is empty
-                if (tenantId == 0) {
-                    return JsonHandler.toJsonNode(new RequestResponseOK<AccessionRegisterSymbolic>());
-                }
+            // Tenant 0 is empty
+            if (tenantId == 0) {
+                return JsonHandler.toJsonNode(new RequestResponseOK<AccessionRegisterSymbolic>());
+            }
 
-                return JsonHandler.toJsonNode(new RequestResponseOK<AccessionRegisterSymbolic>()
-                    .addResult(new AccessionRegisterSymbolic()
+            return JsonHandler.toJsonNode(
+                new RequestResponseOK<AccessionRegisterSymbolic>().addResult(
+                    new AccessionRegisterSymbolic()
                         .setTenant(tenantId)
                         .setId(GUIDFactory.newGUID().getId())
                         .setOriginatingAgency("sp" + tenantId)
                         .setArchiveUnit(10)
-                    ));
-            }
-        ).when(metaDataClient).createAccessionRegisterSymbolic();
+                )
+            );
+        })
+            .when(metaDataClient)
+            .createAccessionRegisterSymbolic();
 
         // When
         List<Integer> tenantList = Arrays.asList(0, 1, 2, 3);
@@ -507,8 +535,10 @@ public class ReferentialAccessionRegisterImplTest {
         for (Integer tenant : tenantList) {
             VitamThreadUtils.getVitamSession().setTenantId(tenant);
             final ObjectNode selectAll = new Select().getFinalSelect();
-            DbRequestResult results =
-                mongoDbAccessAdmin.findDocuments(selectAll, FunctionalAdminCollections.ACCESSION_REGISTER_SYMBOLIC);
+            DbRequestResult results = mongoDbAccessAdmin.findDocuments(
+                selectAll,
+                FunctionalAdminCollections.ACCESSION_REGISTER_SYMBOLIC
+            );
             List<AccessionRegisterSymbolic> documents = results.getDocuments(AccessionRegisterSymbolic.class);
             if (tenant == 0) {
                 assertThat(documents).isEmpty();
@@ -518,40 +548,45 @@ public class ReferentialAccessionRegisterImplTest {
             }
         }
 
-        verify(functionalBackupService, times(3))
-            .saveDocument(Mockito.eq(FunctionalAdminCollections.ACCESSION_REGISTER_SYMBOLIC), any());
+        verify(functionalBackupService, times(3)).saveDocument(
+            Mockito.eq(FunctionalAdminCollections.ACCESSION_REGISTER_SYMBOLIC),
+            any()
+        );
     }
 
     @Test
     @RunWithCustomExecutor
     public void testCreateAccessionRegisterSymbolicWithOneTenantKOThenOtherTenantsOKAndGlobalResponseKO()
         throws Exception {
-
         // Given
         Set<Integer> tenants = ConcurrentHashMap.newKeySet();
-        doAnswer((args) -> {
-                Integer tenantId = VitamThreadUtils.getVitamSession().getTenantId();
-                tenants.add(tenantId);
+        doAnswer(args -> {
+            Integer tenantId = VitamThreadUtils.getVitamSession().getTenantId();
+            tenants.add(tenantId);
 
-                // Tenant 1 is KO
-                if (tenantId == 1) {
-                    throw new MetaDataClientServerException("");
-                }
+            // Tenant 1 is KO
+            if (tenantId == 1) {
+                throw new MetaDataClientServerException("");
+            }
 
-                return JsonHandler.toJsonNode(new RequestResponseOK<AccessionRegisterSymbolic>()
-                    .addResult(new AccessionRegisterSymbolic()
+            return JsonHandler.toJsonNode(
+                new RequestResponseOK<AccessionRegisterSymbolic>().addResult(
+                    new AccessionRegisterSymbolic()
                         .setTenant(tenantId)
                         .setId(GUIDFactory.newGUID().getId())
                         .setOriginatingAgency("sp" + tenantId)
                         .setArchiveUnit(10)
-                    ));
-            }
-        ).when(metaDataClient).createAccessionRegisterSymbolic();
+                )
+            );
+        })
+            .when(metaDataClient)
+            .createAccessionRegisterSymbolic();
 
         // When / Then
         List<Integer> tenantList = Arrays.asList(0, 1, 2, 3);
-        assertThatThrownBy(() -> accessionRegisterImpl.createAccessionRegisterSymbolic(tenantList))
-            .isInstanceOf(ReferentialException.class);
+        assertThatThrownBy(() -> accessionRegisterImpl.createAccessionRegisterSymbolic(tenantList)).isInstanceOf(
+            ReferentialException.class
+        );
 
         verify(metaDataClient, times(tenantList.size())).createAccessionRegisterSymbolic();
         assertThat(tenants).containsAnyElementsOf(tenantList);
@@ -559,8 +594,10 @@ public class ReferentialAccessionRegisterImplTest {
         for (Integer tenant : tenantList) {
             VitamThreadUtils.getVitamSession().setTenantId(tenant);
             final ObjectNode selectAll = new Select().getFinalSelect();
-            DbRequestResult results =
-                mongoDbAccessAdmin.findDocuments(selectAll, FunctionalAdminCollections.ACCESSION_REGISTER_SYMBOLIC);
+            DbRequestResult results = mongoDbAccessAdmin.findDocuments(
+                selectAll,
+                FunctionalAdminCollections.ACCESSION_REGISTER_SYMBOLIC
+            );
             List<AccessionRegisterSymbolic> documents = results.getDocuments(AccessionRegisterSymbolic.class);
             if (tenant == 1) {
                 assertThat(documents).isEmpty();
@@ -570,7 +607,9 @@ public class ReferentialAccessionRegisterImplTest {
             }
         }
 
-        verify(functionalBackupService, times(3))
-            .saveDocument(Mockito.eq(FunctionalAdminCollections.ACCESSION_REGISTER_SYMBOLIC), any());
+        verify(functionalBackupService, times(3)).saveDocument(
+            Mockito.eq(FunctionalAdminCollections.ACCESSION_REGISTER_SYMBOLIC),
+            any()
+        );
     }
 }

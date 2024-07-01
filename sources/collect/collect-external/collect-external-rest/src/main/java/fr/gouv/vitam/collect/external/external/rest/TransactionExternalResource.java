@@ -86,10 +86,10 @@ import static javax.ws.rs.core.Response.Status.INTERNAL_SERVER_ERROR;
 import static javax.ws.rs.core.Response.Status.OK;
 import static javax.ws.rs.core.Response.Status.PRECONDITION_FAILED;
 
-
 @Path("/collect-external/v1/transactions")
 @Tag(name = "Collect-External")
 public class TransactionExternalResource extends ApplicationStatusResource {
+
     private static final VitamLogger LOGGER = VitamLoggerFactory.getInstance(TransactionExternalResource.class);
     private static final String PREDICATES_FAILED_EXCEPTION = "Predicates Failed Exception ";
     private static final String YOU_MUST_SUPPLY_TRANSACTION_DATA = "You must supply transaction data!";
@@ -105,8 +105,10 @@ public class TransactionExternalResource extends ApplicationStatusResource {
     }
 
     @VisibleForTesting
-    TransactionExternalResource(CollectInternalClientFactory collectInternalClientFactory,
-        IngestExternalClientFactory ingestExternalClientFactory) {
+    TransactionExternalResource(
+        CollectInternalClientFactory collectInternalClientFactory,
+        IngestExternalClientFactory ingestExternalClientFactory
+    ) {
         this.collectInternalClientFactory = collectInternalClientFactory;
         this.ingestExternalClientFactory = ingestExternalClientFactory;
     }
@@ -145,7 +147,6 @@ public class TransactionExternalResource extends ApplicationStatusResource {
         }
     }
 
-
     @Path("/{transactionId}")
     @DELETE
     @Produces(APPLICATION_JSON)
@@ -164,12 +165,14 @@ public class TransactionExternalResource extends ApplicationStatusResource {
         }
     }
 
-
     @Path("/{transactionId}/units")
     @POST
     @Consumes(APPLICATION_JSON)
     @Produces(APPLICATION_JSON)
-    @Secured(permission = TRANSACTION_UNIT_CREATE, description = "Crée une unité archivistique et la rattache à la transaction courante")
+    @Secured(
+        permission = TRANSACTION_UNIT_CREATE,
+        description = "Crée une unité archivistique et la rattache à la transaction courante"
+    )
     public Response uploadArchiveUnit(@PathParam("transactionId") String transactionId, JsonNode unitJsonNode) {
         try (CollectInternalClient client = collectInternalClientFactory.getClient()) {
             SanityChecker.checkParameter(transactionId);
@@ -195,8 +198,10 @@ public class TransactionExternalResource extends ApplicationStatusResource {
     @Consumes(APPLICATION_JSON)
     @Produces(APPLICATION_JSON)
     @Secured(permission = TRANSACTION_UNIT_READ, description = "Récupère toutes les unités archivistique")
-    public Response selectUnits(@PathParam("transactionId") String transactionId,
-        @Dsl(value = DslSchema.SELECT_MULTIPLE) JsonNode jsonQuery) {
+    public Response selectUnits(
+        @PathParam("transactionId") String transactionId,
+        @Dsl(value = DslSchema.SELECT_MULTIPLE) JsonNode jsonQuery
+    ) {
         try (CollectInternalClient client = collectInternalClientFactory.getClient()) {
             SanityChecker.checkParameter(transactionId);
             SanityChecker.checkJsonAll(jsonQuery);
@@ -273,13 +278,19 @@ public class TransactionExternalResource extends ApplicationStatusResource {
     @Consumes(APPLICATION_JSON)
     @Secured(permission = TRANSACTION_SEND, description = "Envoi vers VITAM la transaction")
     public Response generateAndSendSip(@PathParam("transactionId") String transactionId) {
-        try (CollectInternalClient collectClient = collectInternalClientFactory.getClient();
-            IngestExternalClient clientIngest = ingestExternalClientFactory.getClient()) {
+        try (
+            CollectInternalClient collectClient = collectInternalClientFactory.getClient();
+            IngestExternalClient clientIngest = ingestExternalClientFactory.getClient()
+        ) {
             SanityChecker.checkParameter(transactionId);
             LOGGER.info("Preparing SIP transaction to workspace");
             InputStream responseStream = collectClient.generateSip(transactionId);
-            RequestResponse<Void> response = clientIngest.ingest(new VitamContext(ParameterHelper.getTenantParameter()),
-                responseStream, DEFAULT_WORKFLOW.name(), RESUME.name());
+            RequestResponse<Void> response = clientIngest.ingest(
+                new VitamContext(ParameterHelper.getTenantParameter()),
+                responseStream,
+                DEFAULT_WORKFLOW.name(),
+                RESUME.name()
+            );
             collectClient.attachVitamOperationId(transactionId, response.getHeaderString(GlobalDataRest.X_REQUEST_ID));
             collectClient.changeTransactionStatus(transactionId, TransactionStatus.SENT);
             LOGGER.info("SIP sent with success ");
@@ -292,7 +303,6 @@ public class TransactionExternalResource extends ApplicationStatusResource {
             return Response.status(INTERNAL_SERVER_ERROR).build();
         }
     }
-
 
     @Path("/{transactionId}/units")
     @PUT
@@ -316,11 +326,13 @@ public class TransactionExternalResource extends ApplicationStatusResource {
 
     @Path("/{transactionId}/upload")
     @POST
-    @Consumes({CommonMediaType.ZIP})
+    @Consumes({ CommonMediaType.ZIP })
     @Produces(APPLICATION_JSON)
     @Secured(permission = TRANSACTION_ZIP_CREATE, description = "Charge les binaires d'une transaction")
-    public Response uploadTransactionZip(@PathParam("transactionId") String transactionId,
-        InputStream inputStreamObject) {
+    public Response uploadTransactionZip(
+        @PathParam("transactionId") String transactionId,
+        InputStream inputStreamObject
+    ) {
         try (CollectInternalClient client = collectInternalClientFactory.getClient()) {
             SanityChecker.checkParameter(transactionId);
             ParametersChecker.checkParameter("You must supply a file!", inputStreamObject);
@@ -341,10 +353,14 @@ public class TransactionExternalResource extends ApplicationStatusResource {
     @Path("/{transactionId}/unitsWithInheritedRules")
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    @Secured(permission = TRANSACTION_UNIT_WITH_INHERITED_RULES_READ, description = "Récupérer la liste des unités archivistiques avec leurs règles de gestion héritées")
-    public Response selectUnitsWithInheritedRules(@PathParam("transactionId") String transactionId,
-        @Dsl(value = DslSchema.SELECT_MULTIPLE) JsonNode queryJson) {
-
+    @Secured(
+        permission = TRANSACTION_UNIT_WITH_INHERITED_RULES_READ,
+        description = "Récupérer la liste des unités archivistiques avec leurs règles de gestion héritées"
+    )
+    public Response selectUnitsWithInheritedRules(
+        @PathParam("transactionId") String transactionId,
+        @Dsl(value = DslSchema.SELECT_MULTIPLE) JsonNode queryJson
+    ) {
         try (CollectInternalClient client = collectInternalClientFactory.getClient()) {
             SanityChecker.checkParameter(transactionId);
             RequestResponse<JsonNode> result = client.selectUnitsWithInheritedRules(transactionId, queryJson);

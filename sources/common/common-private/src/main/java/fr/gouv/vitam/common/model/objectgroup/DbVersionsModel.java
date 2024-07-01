@@ -107,8 +107,8 @@ public class DbVersionsModel {
         PhysicalDimensionsModel physicalDimensionsModel,
         String physicalId,
         OtherMetadata otherMetadata,
-        String opi) {
-
+        String opi
+    ) {
         this.id = id;
         this.dataObjectProfile = dataObjectProfile;
         this.dataObjectVersion = dataObjectVersion;
@@ -301,16 +301,16 @@ public class DbVersionsModel {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o)
-            return true;
-        if (o == null || getClass() != o.getClass())
-            return false;
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
         DbVersionsModel that = (DbVersionsModel) o;
-        return id.equals(that.id)
-            && dataObjectVersion.equals(that.dataObjectVersion)
-            && dataObjectGroupId.equals(that.dataObjectGroupId)
-            && otherMetadata.equals(that.otherMetadata)
-            && formatIdentificationModel.equals(that.formatIdentificationModel);
+        return (
+            id.equals(that.id) &&
+            dataObjectVersion.equals(that.dataObjectVersion) &&
+            dataObjectGroupId.equals(that.dataObjectGroupId) &&
+            otherMetadata.equals(that.otherMetadata) &&
+            formatIdentificationModel.equals(that.formatIdentificationModel)
+        );
     }
 
     @Override

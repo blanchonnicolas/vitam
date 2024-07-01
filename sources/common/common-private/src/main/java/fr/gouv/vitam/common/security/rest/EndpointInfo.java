@@ -103,13 +103,25 @@ public class EndpointInfo {
 
     @Override
     public String toString() {
-        return "EndpointInfo{" +
-            "permission='" + permission + '\'' +
-            ", verb='" + verb + '\'' +
-            ", endpoint='" + endpoint + '\'' +
-            ", consumedMediaTypes=" + Arrays.toString(consumedMediaTypes) +
-            ", producedMediaTypes=" + Arrays.toString(producedMediaTypes) +
-            ", description='" + description + '\'' +
-            '}';
+        return (
+            "EndpointInfo{" +
+            "permission='" +
+            permission +
+            '\'' +
+            ", verb='" +
+            verb +
+            '\'' +
+            ", endpoint='" +
+            endpoint +
+            '\'' +
+            ", consumedMediaTypes=" +
+            Arrays.toString(consumedMediaTypes) +
+            ", producedMediaTypes=" +
+            Arrays.toString(producedMediaTypes) +
+            ", description='" +
+            description +
+            '\'' +
+            '}'
+        );
     }
 }

@@ -143,12 +143,12 @@ public class VitamConfiguration {
     /**
      * Max shutdown timeout 2 minute
      */
-    private final static long MAX_SHUTDOWN_TIMEOUT = 2 * 60 * 1000;
+    private static final long MAX_SHUTDOWN_TIMEOUT = 2 * 60 * 1000;
 
     /**
      * Default strategy id
      */
-    private final static String DEFAULT_STRATEGY = "default";
+    private static final String DEFAULT_STRATEGY = "default";
 
     /**
      * OTHERS ATTRIBUTES
@@ -179,7 +179,6 @@ public class VitamConfiguration {
     private static String vitamGriffinInputFilesFolder = "/vitam/tmp/worker/griffins";
 
     private static String workspaceWorkflowsFolder = "workflows";
-
 
     private static Integer vitamCleanPeriod = 1;
 
@@ -394,8 +393,10 @@ public class VitamConfiguration {
     /**
      * max binary size for SIP and trasnfer
      */
-    private static BinarySizePlatformThreshold binarySizePlatformThreshold =
-        new BinarySizePlatformThreshold(1, BinarySizePlatformThreshold.SizeUnit.GIGABYTE); // 1 Go
+    private static BinarySizePlatformThreshold binarySizePlatformThreshold = new BinarySizePlatformThreshold(
+        1,
+        BinarySizePlatformThreshold.SizeUnit.GIGABYTE
+    ); // 1 Go
 
     /**
      * list of max binary size for SIP and trasnfer by tenant
@@ -512,7 +513,6 @@ public class VitamConfiguration {
      */
     private static Boolean forceChunkModeInputStream = false;
 
-
     /*
      * maxResultWindow
      */
@@ -558,7 +558,6 @@ public class VitamConfiguration {
      * Configuration Parameters for computeInheritedRule workflow
      */
     private static List<String> indexInheritedRulesWithAPIV2OutputByTenant = new ArrayList<>();
-
 
     /**
      * Max size of external json for operation
@@ -741,7 +740,8 @@ public class VitamConfiguration {
         setConfig(vitamConfiguration.getConfig())
             .setData(vitamConfiguration.getData())
             .setLog(vitamConfiguration.getLog())
-            .setTmp(vitamConfiguration.getTmp()).checkValues();
+            .setTmp(vitamConfiguration.getTmp())
+            .checkValues();
     }
 
     /**
@@ -754,7 +754,8 @@ public class VitamConfiguration {
         DEFAULT_CONFIGURATION.setConfig(vitamConfiguration.getConfig())
             .setData(vitamConfiguration.getData())
             .setLog(vitamConfiguration.getLog())
-            .setTmp(vitamConfiguration.getTmp()).checkValues();
+            .setTmp(vitamConfiguration.getTmp())
+            .checkValues();
     }
 
     /**
@@ -767,8 +768,7 @@ public class VitamConfiguration {
      * @throws IllegalArgumentException if one argument is null or empty
      */
     static void setConfiguration(String config, String log, String data, String tmp) {
-        DEFAULT_CONFIGURATION.setConfig(config)
-            .setData(data).setLog(log).setTmp(tmp).checkValues();
+        DEFAULT_CONFIGURATION.setConfig(config).setData(data).setLog(log).setTmp(tmp).checkValues();
     }
 
     /**
@@ -873,8 +873,6 @@ public class VitamConfiguration {
      * @param parameters
      */
     public static void importConfigurationParameters(VitamConfigurationParameters parameters) {
-
-
         if (null != parameters.getVitamConfigFolderDefault()) {
             setVitamConfigFolderDefault(parameters.getVitamConfigFolderDefault());
         }
@@ -938,17 +936,14 @@ public class VitamConfiguration {
         if (null != parameters.getSecurityDigestType()) {
             DigestType digestType = DigestType.valueOf(parameters.getSecurityDigestType());
             setSecurityDigestType(digestType);
-
         }
         if (null != parameters.getDefaultDigestType()) {
             DigestType digestType = DigestType.valueOf(parameters.getDefaultDigestType());
             setDefaultDigestType(digestType);
-
         }
         if (null != parameters.getDefaultTimestampDigestType()) {
             DigestType digestType = DigestType.valueOf(parameters.getDefaultTimestampDigestType());
             setDefaultTimestampDigestType(digestType);
-
         }
         if (null != parameters.getAcceptableRequestTime()) {
             setAcceptableRequestTime(parameters.getAcceptableRequestTime());
@@ -1108,7 +1103,8 @@ public class VitamConfiguration {
 
         if (null != parameters.getReclassificationMaxGuildListSizeInLogbookOperation()) {
             setReclassificationMaxGuildListSizeInLogbookOperation(
-                parameters.getReclassificationMaxGuildListSizeInLogbookOperation());
+                parameters.getReclassificationMaxGuildListSizeInLogbookOperation()
+            );
         }
 
         if (null != parameters.getKeywordMaxLength()) {
@@ -1172,7 +1168,8 @@ public class VitamConfiguration {
 
         if (null != parameters.getElasticSearchTimeoutWaitRequestInMilliseconds()) {
             setElasticSearchTimeoutWaitRequestInMilliseconds(
-                parameters.getElasticSearchTimeoutWaitRequestInMilliseconds());
+                parameters.getElasticSearchTimeoutWaitRequestInMilliseconds()
+            );
         }
         if (null != parameters.getElasticSearchScrollLimit()) {
             setElasticSearchScrollLimit(parameters.getElasticSearchScrollLimit());
@@ -1214,12 +1211,22 @@ public class VitamConfiguration {
      * status on STDERR.
      */
     static void checkVitamConfiguration() {
-        if (!(SystemPropertyUtil.contains(VITAM_TMP_PROPERTY) && SystemPropertyUtil.contains(VITAM_CONFIG_PROPERTY) &&
-            SystemPropertyUtil.contains(VITAM_DATA_PROPERTY) &&
-            SystemPropertyUtil.contains(VITAM_LOG_PROPERTY))) {
+        if (
+            !(SystemPropertyUtil.contains(VITAM_TMP_PROPERTY) &&
+                SystemPropertyUtil.contains(VITAM_CONFIG_PROPERTY) &&
+                SystemPropertyUtil.contains(VITAM_DATA_PROPERTY) &&
+                SystemPropertyUtil.contains(VITAM_LOG_PROPERTY))
+        ) {
             SysErrLogger.FAKE_LOGGER.syserr(
-                "One of the directives is not specified: -Dxxx=path where xxx is one of -D" + VITAM_TMP_PROPERTY +
-                    " -D" + VITAM_CONFIG_PROPERTY + " -D" + VITAM_DATA_PROPERTY + " -D" + VITAM_LOG_PROPERTY);
+                "One of the directives is not specified: -Dxxx=path where xxx is one of -D" +
+                VITAM_TMP_PROPERTY +
+                " -D" +
+                VITAM_CONFIG_PROPERTY +
+                " -D" +
+                VITAM_DATA_PROPERTY +
+                " -D" +
+                VITAM_LOG_PROPERTY
+            );
         }
         String data = vitamDataFolderDefault;
         if (SystemPropertyUtil.contains(VITAM_DATA_PROPERTY)) {
@@ -1449,14 +1456,12 @@ public class VitamConfiguration {
         return waitingDelay;
     }
 
-
     /**
      * @return the size of the queue of async workspace
      */
     public static Integer getAsyncWorkspaceQueueSize() {
         return asyncWorkspaceQueueSize;
     }
-
 
     /**
      * @return the receive Buffer Size
@@ -1471,7 +1476,6 @@ public class VitamConfiguration {
     public static Boolean isUseNewJaxrClient() {
         return useNewJaxrClient;
     }
-
 
     /**
      * @return true if is integration Test
@@ -1489,7 +1493,6 @@ public class VitamConfiguration {
         SystemPropertyUtil.set(VITAM_JUNIT_PROPERTY, value);
     }
 
-
     /**
      * getter for VITAM_CONFIG_PROPERTY
      *
@@ -1499,8 +1502,6 @@ public class VitamConfiguration {
         return VITAM_CONFIG_PROPERTY;
     }
 
-
-
     /**
      * getter for VITAM_DATA_PROPERTY
      *
@@ -1509,7 +1510,6 @@ public class VitamConfiguration {
     public static String getVitamDataProperty() {
         return VITAM_DATA_PROPERTY;
     }
-
 
     /**
      * getter for VITAM_LOG_PROPERTY
@@ -1528,7 +1528,6 @@ public class VitamConfiguration {
     public static String getVitamTmpProperty() {
         return VITAM_TMP_PROPERTY;
     }
-
 
     /**
      * getter for vitamConfigFolderDefault
@@ -1593,7 +1592,6 @@ public class VitamConfiguration {
         return vitamCleanPeriod;
     }
 
-
     /**
      * setter for vitamLogFolderDefault
      *
@@ -1638,7 +1636,6 @@ public class VitamConfiguration {
     public static void setAsyncWorkspaceQueueSize(int queueSize) {
         asyncWorkspaceQueueSize = queueSize;
     }
-
 
     /**
      * setter for recvBufferSize
@@ -1793,8 +1790,6 @@ public class VitamConfiguration {
         VitamConfiguration.useNewJaxrClient = useNewJaxrClient;
     }
 
-
-
     /**
      * setter for securityDigestType
      *
@@ -1883,7 +1878,6 @@ public class VitamConfiguration {
     private static void setAllowGzipEncoding(Boolean allowGzipEncoding) {
         VitamConfiguration.allowGzipEncoding = allowGzipEncoding;
     }
-
 
     /**
      * getter for forceChunkModeInputStream
@@ -2065,8 +2059,6 @@ public class VitamConfiguration {
         VitamConfiguration.maxCacheEntries = maxCacheEntries;
     }
 
-
-
     /**
      * Setter for expireCacheEntriesDelay
      *
@@ -2102,8 +2094,6 @@ public class VitamConfiguration {
     private static void setExportScore(boolean exportScore) {
         VitamConfiguration.exportScore = exportScore;
     }
-
-
 
     /**
      * Getter for maxElasticsearchBulk;
@@ -2260,7 +2250,6 @@ public class VitamConfiguration {
         VitamConfiguration.operationMaxSizeForExternal = operationMaxSizeForExternal;
     }
 
-
     /**
      * Getter for default OriginatingAgency for DIP export OriginatingAgency conflict
      *
@@ -2294,8 +2283,7 @@ public class VitamConfiguration {
         return vitamDefaultCodeListVersion;
     }
 
-    public static void setVitamDefaultCodeListVersion(
-        Map<String, String> vitamDefaultCodeListVersion) {
+    public static void setVitamDefaultCodeListVersion(Map<String, String> vitamDefaultCodeListVersion) {
         VitamConfiguration.vitamDefaultCodeListVersion = vitamDefaultCodeListVersion;
     }
 
@@ -2326,7 +2314,6 @@ public class VitamConfiguration {
         return batchSize;
     }
 
-
     /**
      * Get the store graph elements per file
      *
@@ -2336,7 +2323,6 @@ public class VitamConfiguration {
         return storeGraphElementsPerFile;
     }
 
-
     /**
      * Set store graph elements per file
      *
@@ -2345,7 +2331,6 @@ public class VitamConfiguration {
     public static void setStoreGraphElementsPerFile(Integer storeGraphElementsPerFile) {
         VitamConfiguration.storeGraphElementsPerFile = storeGraphElementsPerFile;
     }
-
 
     /**
      * Get store graph overlap delay
@@ -2418,7 +2403,6 @@ public class VitamConfiguration {
     public static void setOptimisticLockSleepTime(int optimisticLockSleepTime) {
         VitamConfiguration.optimisticLockSleepTime = optimisticLockSleepTime;
     }
-
 
     /**
      * Getter
@@ -2575,7 +2559,8 @@ public class VitamConfiguration {
      * Max guid to store in logbook operation in evDetData
      */
     public static void setReclassificationMaxGuildListSizeInLogbookOperation(
-        int reclassificationMaxGuildListSizeInLogbookOperation) {
+        int reclassificationMaxGuildListSizeInLogbookOperation
+    ) {
         VitamConfiguration.reclassificationMaxGuildListSizeInLogbookOperation =
             reclassificationMaxGuildListSizeInLogbookOperation;
     }
@@ -2617,7 +2602,8 @@ public class VitamConfiguration {
     }
 
     public static void setIndexInheritedRulesWithAPIV2OutputByTenant(
-        List<String> indexInheritedRulesWithAPIV2OutputByTenant) {
+        List<String> indexInheritedRulesWithAPIV2OutputByTenant
+    ) {
         VitamConfiguration.indexInheritedRulesWithAPIV2OutputByTenant = indexInheritedRulesWithAPIV2OutputByTenant;
     }
 
@@ -2634,7 +2620,8 @@ public class VitamConfiguration {
     }
 
     public static void setElasticSearchTimeoutWaitRequestInMilliseconds(
-        Integer elasticSearchTimeoutWaitRequestInMilliseconds) {
+        Integer elasticSearchTimeoutWaitRequestInMilliseconds
+    ) {
         VitamConfiguration.elasticSearchTimeoutWaitRequestInMilliseconds =
             elasticSearchTimeoutWaitRequestInMilliseconds;
     }

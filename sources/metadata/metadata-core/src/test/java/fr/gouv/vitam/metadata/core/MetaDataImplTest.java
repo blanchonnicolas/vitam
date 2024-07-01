@@ -53,7 +53,6 @@ import fr.gouv.vitam.common.thread.VitamThreadUtils;
 import fr.gouv.vitam.functional.administration.client.AdminManagementClient;
 import fr.gouv.vitam.functional.administration.client.AdminManagementClientFactory;
 import fr.gouv.vitam.metadata.api.exception.MetaDataExecutionException;
-import fr.gouv.vitam.metadata.api.model.BulkUnitInsertRequest;
 import fr.gouv.vitam.metadata.core.config.ElasticsearchMetadataIndexManager;
 import fr.gouv.vitam.metadata.core.database.collections.DbRequest;
 import fr.gouv.vitam.metadata.core.database.collections.MetadataCollections;
@@ -107,8 +106,9 @@ import static org.mockito.Mockito.when;
 public class MetaDataImplTest {
 
     @ClassRule
-    public static RunWithCustomExecutorRule runInThread =
-        new RunWithCustomExecutorRule(VitamThreadPoolExecutor.getDefaultExecutor());
+    public static RunWithCustomExecutorRule runInThread = new RunWithCustomExecutorRule(
+        VitamThreadPoolExecutor.getDefaultExecutor()
+    );
 
     private MetaDataImpl metaDataImpl;
     private DbRequest request;
@@ -126,12 +126,18 @@ public class MetaDataImplTest {
         "{ \"$queries\": [{ \"$path\": \"aaaaa\" }],\"$filter\": { },\"$projection\": {},\"$facets\": []}";
     private AdminManagementClient adminManagementClient;
 
-    private static JsonNode buildQueryJsonWithOptions(String query, String data)
-        throws InvalidParseOperationException {
-        return JsonHandler.getFromString(new StringBuilder()
-            .append("{ $roots : [ '' ], ").append("$query : [ ").append(query).append(" ], ").append("$data : ")
-            .append(data).append(" }")
-            .toString());
+    private static JsonNode buildQueryJsonWithOptions(String query, String data) throws InvalidParseOperationException {
+        return JsonHandler.getFromString(
+            new StringBuilder()
+                .append("{ $roots : [ '' ], ")
+                .append("$query : [ ")
+                .append(query)
+                .append(" ], ")
+                .append("$data : ")
+                .append(data)
+                .append(" }")
+                .toString()
+        );
     }
 
     private static String createLongString(int size) {
@@ -143,8 +149,9 @@ public class MetaDataImplTest {
     @BeforeClass
     public static void loadStaticResources() throws Exception {
         sampleObjectGroup = JsonHandler.getFromFile(PropertiesUtils.findFile(SAMPLE_OBJECTGROUP_FILENAME));
-        sampleObjectGroupFiltered =
-            JsonHandler.getFromFile(PropertiesUtils.findFile(SAMPLE_OBJECTGROUP_FILTERED_FILENAME));
+        sampleObjectGroupFiltered = JsonHandler.getFromFile(
+            PropertiesUtils.findFile(SAMPLE_OBJECTGROUP_FILTERED_FILENAME)
+        );
     }
 
     @Before
@@ -161,9 +168,19 @@ public class MetaDataImplTest {
         when(adminManagementClient.findOntologies(any())).thenReturn(responseOK);
 
         ElasticsearchMetadataIndexManager indexManager = mock(ElasticsearchMetadataIndexManager.class);
-        metaDataImpl =
-            new MetaDataImpl(mongoDbAccessFactory, adminManagementClientFactory, indexationHelper, request,
-                100, 300, 100, 300, 100, 300, indexManager);
+        metaDataImpl = new MetaDataImpl(
+            mongoDbAccessFactory,
+            adminManagementClientFactory,
+            indexationHelper,
+            request,
+            100,
+            300,
+            100,
+            300,
+            100,
+            300,
+            indexManager
+        );
 
         VitamThreadUtils.getVitamSession().setTenantId(0);
         VitamThreadUtils.getVitamSession().setRequestId(GUIDFactory.newRequestIdGUID(0));
@@ -177,7 +194,6 @@ public class MetaDataImplTest {
 
     @Test
     public void givenInsertUnitThenOK() throws Exception {
-
         // Given
         JsonNode bulkUnitInsertRequest = new InsertMultiQuery().getFinalInsert();
 
@@ -212,7 +228,6 @@ public class MetaDataImplTest {
 
     @Test(expected = InvalidParseOperationException.class)
     public void given_selectUnitquery_When_search_units_Then_Throw_InvalidParseOperationException() throws Exception {
-
         when(request.execRequest(any(), anyList())).thenThrow(new InvalidParseOperationException(""));
         metaDataImpl.selectUnitsByQuery(JsonHandler.getFromString(QUERY));
     }
@@ -228,14 +243,28 @@ public class MetaDataImplTest {
             new OntologyModel().setType(OntologyType.KEYWORD).setIdentifier("_id"),
             new OntologyModel().setType(OntologyType.TEXT).setIdentifier("title")
         );
-        when(adminManagementClient.findOntologies(any()))
-            .thenReturn(new RequestResponseOK<OntologyModel>().addAllResults(ontologyModels));
+        when(adminManagementClient.findOntologies(any())).thenReturn(
+            new RequestResponseOK<OntologyModel>().addAllResults(ontologyModels)
+        );
 
-        when(request.execUpdateRequest(any(), eq("unitId"), eq(MetadataCollections.UNIT), any(OntologyValidator.class),
-            any(UnitValidator.class), anyList(), anyBoolean()))
-            .thenReturn(new UpdatedDocument("unitId",
+        when(
+            request.execUpdateRequest(
+                any(),
+                eq("unitId"),
+                eq(MetadataCollections.UNIT),
+                any(OntologyValidator.class),
+                any(UnitValidator.class),
+                anyList(),
+                anyBoolean()
+            )
+        ).thenReturn(
+            new UpdatedDocument(
+                "unitId",
                 JsonHandler.createObjectNode().put("x", "v1"),
-                JsonHandler.createObjectNode().put("x", "v2"), true));
+                JsonHandler.createObjectNode().put("x", "v2"),
+                true
+            )
+        );
         UpdateUnit result = metaDataImpl.updateUnitById(JsonHandler.getFromString(QUERY), "unitId", true);
         assertThat(result.getUnitId()).isEqualTo("unitId");
         assertThat(result.getStatus()).isEqualTo(StatusCode.OK);
@@ -264,8 +293,9 @@ public class MetaDataImplTest {
     @Test(expected = InvalidParseOperationException.class)
     public void given_empty_query_When_selectUnitById_ThenThrow_MetaDataExecutionException() throws Exception {
         List<OntologyModel> ontologyModels = emptyList();
-        when(adminManagementClient.findOntologies(any()))
-            .thenReturn(new RequestResponseOK<OntologyModel>().addAllResults(ontologyModels));
+        when(adminManagementClient.findOntologies(any())).thenReturn(
+            new RequestResponseOK<OntologyModel>().addAllResults(ontologyModels)
+        );
 
         metaDataImpl.selectUnitsById(JsonHandler.getFromString(""), "unitId");
     }
@@ -273,16 +303,18 @@ public class MetaDataImplTest {
     @Test(expected = InvalidParseOperationException.class)
     public void given_empty_query_When_updateUnitById_ThenThrow_MetaDataExecutionException() throws Exception {
         List<OntologyModel> ontologyModels = emptyList();
-        when(adminManagementClient.findOntologies(any()))
-            .thenReturn(new RequestResponseOK<OntologyModel>().addAllResults(ontologyModels));
+        when(adminManagementClient.findOntologies(any())).thenReturn(
+            new RequestResponseOK<OntologyModel>().addAllResults(ontologyModels)
+        );
         metaDataImpl.updateUnitById(JsonHandler.getFromString(""), "unitId", true);
     }
 
     @Test(expected = MetaDataExecutionException.class)
     public void given_updateUnits_ThenThrow_MetaDataExecutionException() throws Exception {
         List<OntologyModel> ontologyModels = emptyList();
-        when(adminManagementClient.findOntologies(any()))
-            .thenReturn(new RequestResponseOK<OntologyModel>().addAllResults(ontologyModels));
+        when(adminManagementClient.findOntologies(any())).thenReturn(
+            new RequestResponseOK<OntologyModel>().addAllResults(ontologyModels)
+        );
 
         final Result<MetadataDocument<?>> selectResult = new ResultDefault<>(FILTERARGS.UNITS);
         selectResult.addId("unitId", (float) 1);
@@ -292,12 +324,19 @@ public class MetaDataImplTest {
         unit.put("description", "description");
         selectResult.addFinal(unit);
 
-        when(request.execRequest(isA(RequestParserMultiple.class), eq(ontologyModels)))
-            .thenReturn(selectResult);
+        when(request.execRequest(isA(RequestParserMultiple.class), eq(ontologyModels))).thenReturn(selectResult);
 
-        when(request.execUpdateRequest(any(), eq("unitId"), eq(MetadataCollections.UNIT), any(OntologyValidator.class),
-            any(UnitValidator.class), anyList(), anyBoolean()))
-            .thenThrow(new MetaDataExecutionException(""));
+        when(
+            request.execUpdateRequest(
+                any(),
+                eq("unitId"),
+                eq(MetadataCollections.UNIT),
+                any(OntologyValidator.class),
+                any(UnitValidator.class),
+                anyList(),
+                anyBoolean()
+            )
+        ).thenThrow(new MetaDataExecutionException(""));
         metaDataImpl.updateUnitById(JsonHandler.getFromString(QUERY), "unitId", true);
     }
 
@@ -315,8 +354,9 @@ public class MetaDataImplTest {
     @Test(expected = InvalidParseOperationException.class)
     public void given_updateUnitbyId_When_search_units_Then_Throw_InvalidParseOperationException() throws Exception {
         List<OntologyModel> ontologyModels = emptyList();
-        when(adminManagementClient.findOntologies(any()))
-            .thenReturn(new RequestResponseOK<OntologyModel>().addAllResults(ontologyModels));
+        when(adminManagementClient.findOntologies(any())).thenReturn(
+            new RequestResponseOK<OntologyModel>().addAllResults(ontologyModels)
+        );
 
         final Result<MetadataDocument<?>> selectResult = new ResultDefault<>(FILTERARGS.UNITS);
         selectResult.addId("unitId", (float) 1);
@@ -326,12 +366,19 @@ public class MetaDataImplTest {
         unit.put("description", "description");
         selectResult.addFinal(unit);
 
-        when(request.execRequest(isA(RequestParserMultiple.class), eq(ontologyModels)))
-            .thenReturn(selectResult);
+        when(request.execRequest(isA(RequestParserMultiple.class), eq(ontologyModels))).thenReturn(selectResult);
 
-        when(request.execUpdateRequest(any(), eq("unitId"), eq(MetadataCollections.UNIT), any(OntologyValidator.class),
-            any(UnitValidator.class), anyList(), anyBoolean()))
-            .thenThrow(new InvalidParseOperationException(""));
+        when(
+            request.execUpdateRequest(
+                any(),
+                eq("unitId"),
+                eq(MetadataCollections.UNIT),
+                any(OntologyValidator.class),
+                any(UnitValidator.class),
+                anyList(),
+                anyBoolean()
+            )
+        ).thenThrow(new InvalidParseOperationException(""));
         metaDataImpl.updateUnitById(JsonHandler.getFromString(QUERY), "unitId", true);
     }
 
@@ -341,27 +388,35 @@ public class MetaDataImplTest {
         result.addId("ogId", 1f);
         result.addFinal(new ObjectGroup(sampleObjectGroup));
         when(request.execRequest(any(), anyList())).thenReturn(result);
-        final MetadataResult metadataResult =
-            metaDataImpl.selectObjectGroupById(JsonHandler.getFromString(QUERY), "ogId");
+        final MetadataResult metadataResult = metaDataImpl.selectObjectGroupById(
+            JsonHandler.getFromString(QUERY),
+            "ogId"
+        );
         final JsonNode objectGroupDocument = metadataResult.getResults().iterator().next();
         boolean different = false;
         Iterator<Entry<String, JsonNode>> fields = objectGroupDocument.fields();
         while (fields.hasNext()) {
             Entry<String, JsonNode> entry = fields.next();
-            if (!sampleObjectGroupFiltered.has(entry.getKey()) ||
-                !sampleObjectGroupFiltered.get(entry.getKey()).asText().equals(entry.getValue().asText())) {
-                System.err
-                    .println("D: " + entry.getKey() + " : " + entry.getValue() + " " + entry.getValue().getNodeType());
+            if (
+                !sampleObjectGroupFiltered.has(entry.getKey()) ||
+                !sampleObjectGroupFiltered.get(entry.getKey()).asText().equals(entry.getValue().asText())
+            ) {
+                System.err.println(
+                    "D: " + entry.getKey() + " : " + entry.getValue() + " " + entry.getValue().getNodeType()
+                );
                 different = true;
             }
         }
         fields = sampleObjectGroupFiltered.fields();
         while (fields.hasNext()) {
             Entry<String, JsonNode> entry = fields.next();
-            if (!objectGroupDocument.has(entry.getKey()) ||
-                !objectGroupDocument.get(entry.getKey()).asText().equals(entry.getValue().asText())) {
-                System.err
-                    .println("S: " + entry.getKey() + " : " + entry.getValue() + " " + entry.getValue().getNodeType());
+            if (
+                !objectGroupDocument.has(entry.getKey()) ||
+                !objectGroupDocument.get(entry.getKey()).asText().equals(entry.getValue().asText())
+            ) {
+                System.err.println(
+                    "S: " + entry.getKey() + " : " + entry.getValue() + " " + entry.getValue().getNodeType()
+                );
                 different = true;
             }
         }
@@ -374,8 +429,9 @@ public class MetaDataImplTest {
             new OntologyModel().setType(OntologyType.KEYWORD).setIdentifier("_id"),
             new OntologyModel().setType(OntologyType.TEXT).setIdentifier("title")
         );
-        when(adminManagementClient.findOntologies(any()))
-            .thenReturn(new RequestResponseOK<OntologyModel>().addAllResults(ontologyModels));
+        when(adminManagementClient.findOntologies(any())).thenReturn(
+            new RequestResponseOK<OntologyModel>().addAllResults(ontologyModels)
+        );
 
         final JsonNode wantedDiff = JsonHandler.getFromFile(PropertiesUtils.findFile("wantedDiff.json"));
 
@@ -394,10 +450,19 @@ public class MetaDataImplTest {
 
         final JsonNode updateRequest = JsonHandler.getFromFile(PropertiesUtils.findFile("updateQuery.json"));
 
-        when(request.execUpdateRequest(any(), eq("unitId"), eq(MetadataCollections.UNIT), any(OntologyValidator.class),
-            any(UnitValidator.class), anyList(), anyBoolean()))
-            .thenReturn(
-                new UpdatedDocument("unitId", JsonHandler.toJsonNode(unit), JsonHandler.toJsonNode(secondUnit), true));
+        when(
+            request.execUpdateRequest(
+                any(),
+                eq("unitId"),
+                eq(MetadataCollections.UNIT),
+                any(OntologyValidator.class),
+                any(UnitValidator.class),
+                anyList(),
+                anyBoolean()
+            )
+        ).thenReturn(
+            new UpdatedDocument("unitId", JsonHandler.toJsonNode(unit), JsonHandler.toJsonNode(secondUnit), true)
+        );
 
         UpdateUnit result = metaDataImpl.updateUnitById(updateRequest, "unitId", true);
 
@@ -410,8 +475,9 @@ public class MetaDataImplTest {
             new OntologyModel().setType(OntologyType.KEYWORD).setIdentifier("_id"),
             new OntologyModel().setType(OntologyType.TEXT).setIdentifier("title")
         );
-        when(adminManagementClient.findOntologies(any()))
-            .thenReturn(new RequestResponseOK<OntologyModel>().addAllResults(ontologyModels));
+        when(adminManagementClient.findOntologies(any())).thenReturn(
+            new RequestResponseOK<OntologyModel>().addAllResults(ontologyModels)
+        );
 
         final Result<MetadataDocument<?>> updateResult = new ResultDefault<>(FILTERARGS.UNITS);
         updateResult.addId("unitId1", (float) 1);
@@ -425,30 +491,58 @@ public class MetaDataImplTest {
 
         when(request.execRequest(isA(SelectParserMultiple.class), eq(ontologyModels))).thenReturn(
             new ResultDefault<MetadataDocument<?>>(FILTERARGS.UNITS).addFinal(unit1Before),
-            new ResultDefault<MetadataDocument<?>>(FILTERARGS.UNITS).addFinal(unit2Before));
+            new ResultDefault<MetadataDocument<?>>(FILTERARGS.UNITS).addFinal(unit2Before)
+        );
 
-        when(request.execUpdateRequest(any(), any(), eq(MetadataCollections.UNIT), any(OntologyValidator.class),
-            any(UnitValidator.class), anyList(), anyBoolean()))
-            .thenReturn(
-                new UpdatedDocument("unit1", JsonHandler.toJsonNode(unit1Before), JsonHandler.toJsonNode(unit1After),
-                    true),
-                new UpdatedDocument("unit2", JsonHandler.toJsonNode(unit2Before), JsonHandler.toJsonNode(unit2After),
-                    true));
+        when(
+            request.execUpdateRequest(
+                any(),
+                any(),
+                eq(MetadataCollections.UNIT),
+                any(OntologyValidator.class),
+                any(UnitValidator.class),
+                anyList(),
+                anyBoolean()
+            )
+        ).thenReturn(
+            new UpdatedDocument("unit1", JsonHandler.toJsonNode(unit1Before), JsonHandler.toJsonNode(unit1After), true),
+            new UpdatedDocument("unit2", JsonHandler.toJsonNode(unit2Before), JsonHandler.toJsonNode(unit2After), true)
+        );
 
         // When
         final JsonNode updateRequest = JsonHandler.getFromFile(PropertiesUtils.findFile("updateUnits.json"));
-        RequestResponseOK<UpdateUnit> requestResponse =
-            (RequestResponseOK<UpdateUnit>) metaDataImpl.updateUnits(updateRequest, true);
+        RequestResponseOK<UpdateUnit> requestResponse = (RequestResponseOK<UpdateUnit>) metaDataImpl.updateUnits(
+            updateRequest,
+            true
+        );
 
         // Then
         assertThat(requestResponse.getResults().stream())
-            .extracting(UpdateUnit::getUnitId, UpdateUnit::getKey, UpdateUnit::getMessage, UpdateUnit::getStatus,
-                UpdateUnit::getKey, UpdateUnit::getDiff)
+            .extracting(
+                UpdateUnit::getUnitId,
+                UpdateUnit::getKey,
+                UpdateUnit::getMessage,
+                UpdateUnit::getStatus,
+                UpdateUnit::getKey,
+                UpdateUnit::getDiff
+            )
             .containsExactlyInAnyOrder(
-                tuple("unitId1", UNIT_METADATA_UPDATE, "Update unit OK.", OK, UNIT_METADATA_UPDATE,
-                    "-  \"field\" : \"value v1\"\n+  \"field\" : \"value v2\""),
-                tuple("unitId2", UNIT_METADATA_UPDATE, "Update unit OK.", OK, UNIT_METADATA_UPDATE,
-                    "-  \"field\" : \"value v1\"\n+  \"field\" : \"value v2\"")
+                tuple(
+                    "unitId1",
+                    UNIT_METADATA_UPDATE,
+                    "Update unit OK.",
+                    OK,
+                    UNIT_METADATA_UPDATE,
+                    "-  \"field\" : \"value v1\"\n+  \"field\" : \"value v2\""
+                ),
+                tuple(
+                    "unitId2",
+                    UNIT_METADATA_UPDATE,
+                    "Update unit OK.",
+                    OK,
+                    UNIT_METADATA_UPDATE,
+                    "-  \"field\" : \"value v1\"\n+  \"field\" : \"value v2\""
+                )
             );
     }
 
@@ -465,11 +559,24 @@ public class MetaDataImplTest {
         parameters.setCollectionName("fakeName");
         List<Integer> tenants = Collections.singletonList(0);
         parameters.setTenants(tenants);
-        ElasticsearchMetadataIndexManager indexManager = MetadataCollectionsTestUtils
-            .createTestIndexManager(tenants, emptyMap(), MappingLoaderTestUtils.getTestMappingLoader());
-        metaDataImpl =
-            new MetaDataImpl(mongoDbAccessFactory, adminManagementClientFactory, IndexationHelper.getInstance(),
-                request, 100, 300, 100, 300, 100, 300, indexManager);
+        ElasticsearchMetadataIndexManager indexManager = MetadataCollectionsTestUtils.createTestIndexManager(
+            tenants,
+            emptyMap(),
+            MappingLoaderTestUtils.getTestMappingLoader()
+        );
+        metaDataImpl = new MetaDataImpl(
+            mongoDbAccessFactory,
+            adminManagementClientFactory,
+            IndexationHelper.getInstance(),
+            request,
+            100,
+            300,
+            100,
+            300,
+            100,
+            300,
+            indexManager
+        );
         // When
         ReindexationResult result = metaDataImpl.reindex(parameters);
 
@@ -484,10 +591,10 @@ public class MetaDataImplTest {
 
     @Test
     public void reindexIOExceptionTest() throws Exception {
-        when(indexationHelper.reindex(any(), any(), any(), any(), any(), any(), any()))
-            .thenThrow(new DatabaseException("prb"));
-        when(indexationHelper.getFullKOResult(any(), any()))
-            .thenCallRealMethod();
+        when(indexationHelper.reindex(any(), any(), any(), any(), any(), any(), any())).thenThrow(
+            new DatabaseException("prb")
+        );
+        when(indexationHelper.getFullKOResult(any(), any())).thenCallRealMethod();
         MetadataCollections.UNIT.getVitamCollection().initialize(mock(MongoDatabase.class), false);
         IndexParameters parameters = new IndexParameters();
         parameters.setCollectionName("Unit");
@@ -500,8 +607,10 @@ public class MetaDataImplTest {
         assertEquals(1, result.getIndexKO().size());
         assertNull(result.getIndexKO().get(0).getTenantGroup());
         assertEquals(tenants, result.getIndexKO().get(0).getTenants());
-        assertEquals("Cannot reindex collection UNIT for tenant 0. Unexpected error",
-            result.getIndexKO().get(0).getMessage());
+        assertEquals(
+            "Cannot reindex collection UNIT for tenant 0. Unexpected error",
+            result.getIndexKO().get(0).getMessage()
+        );
     }
 
     @Test(expected = DatabaseException.class)

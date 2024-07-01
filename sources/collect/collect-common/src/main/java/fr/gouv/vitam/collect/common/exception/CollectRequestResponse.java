@@ -52,7 +52,8 @@ public class CollectRequestResponse {
     }
 
     public static Response toVitamError(Response.Status status, String message) {
-        VitamError<Object> vitamError = new VitamError<>(status.name()).setContext(COLLECT)
+        VitamError<Object> vitamError = new VitamError<>(status.name())
+            .setContext(COLLECT)
             .setMessage(message)
             .setHttpCode(status.getStatusCode());
         return Response.status(status).entity(vitamError).build();

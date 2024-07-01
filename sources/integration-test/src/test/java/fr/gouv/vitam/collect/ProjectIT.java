@@ -29,11 +29,11 @@ package fr.gouv.vitam.collect;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.google.common.collect.Sets;
 import fr.gouv.vitam.collect.common.dto.ProjectDto;
+import fr.gouv.vitam.collect.common.enums.TransactionStatus;
 import fr.gouv.vitam.collect.external.client.CollectExternalClient;
 import fr.gouv.vitam.collect.external.client.CollectExternalClientFactory;
 import fr.gouv.vitam.collect.external.external.rest.CollectExternalMain;
 import fr.gouv.vitam.collect.internal.CollectInternalMain;
-import fr.gouv.vitam.collect.common.enums.TransactionStatus;
 import fr.gouv.vitam.common.DataLoader;
 import fr.gouv.vitam.common.LocalDateUtil;
 import fr.gouv.vitam.common.VitamRuleRunner;
@@ -61,13 +61,19 @@ import static org.junit.Assert.assertTrue;
 
 public class ProjectIT extends VitamRuleRunner {
 
-
-    @ClassRule public static VitamServerRunner runner =
-        new VitamServerRunner(ProjectIT.class, mongoRule.getMongoDatabase().getName(),
-            ElasticsearchRule.getClusterName(),
-            Sets.newHashSet(AdminManagementMain.class, LogbookMain.class, WorkspaceMain.class,
-                CollectInternalMain.class, CollectExternalMain.class));
-
+    @ClassRule
+    public static VitamServerRunner runner = new VitamServerRunner(
+        ProjectIT.class,
+        mongoRule.getMongoDatabase().getName(),
+        ElasticsearchRule.getClusterName(),
+        Sets.newHashSet(
+            AdminManagementMain.class,
+            LogbookMain.class,
+            WorkspaceMain.class,
+            CollectInternalMain.class,
+            CollectExternalMain.class
+        )
+    );
 
     private static final Integer TENANT_ID = 0;
     private static final String SUBMISSION_AGENCY_IDENTIFIER = "Service_versant";
@@ -87,19 +93,22 @@ public class ProjectIT extends VitamRuleRunner {
 
     @Test
     public void shoud_update_project() throws VitamClientException, InvalidParseOperationException, ParseException {
-        try(CollectExternalClient client = CollectExternalClientFactory.getInstance().getClient()) {
+        try (CollectExternalClient client = CollectExternalClientFactory.getInstance().getClient()) {
             // GIVEN
             ProjectDto projectDto = initProjectData();
             RequestResponse<JsonNode> createdProject = client.initProject(vitamContext, projectDto);
-            projectDto = JsonHandler.getFromJsonNode(((RequestResponseOK<JsonNode>) createdProject).getFirstResult(),
-                ProjectDto.class);
+            projectDto = JsonHandler.getFromJsonNode(
+                ((RequestResponseOK<JsonNode>) createdProject).getFirstResult(),
+                ProjectDto.class
+            );
 
             ProjectDto projectDtoResult = getProjectDtoById(projectDto.getId());
             assertThat(projectDtoResult).isNotNull();
             assertThat(projectDtoResult.getCreationDate()).isNotNull();
             assertThat(projectDtoResult.getId()).isEqualTo(projectDto.getId());
             assertThat(LocalDateUtil.getDate(projectDtoResult.getCreationDate())).isEqualTo(
-                LocalDateUtil.getDate(projectDtoResult.getLastUpdate()));
+                LocalDateUtil.getDate(projectDtoResult.getLastUpdate())
+            );
 
             // WHEN
             projectDtoResult.setComment("COMMENT AFTER UPDATE");
@@ -110,8 +119,11 @@ public class ProjectIT extends VitamRuleRunner {
             assertThat(projectDtoResultAfterUpdate.getComment()).isNotEqualTo(projectDto.getComment());
             assertThat(projectDtoResultAfterUpdate.getComment()).isEqualTo("COMMENT AFTER UPDATE");
             assertThat(projectDtoResultAfterUpdate.getLastUpdate()).isNotNull();
-            assertTrue(LocalDateUtil.getDate(projectDtoResultAfterUpdate.getLastUpdate())
-                .after(LocalDateUtil.getDate(projectDtoResultAfterUpdate.getCreationDate())));
+            assertTrue(
+                LocalDateUtil.getDate(projectDtoResultAfterUpdate.getLastUpdate()).after(
+                    LocalDateUtil.getDate(projectDtoResultAfterUpdate.getCreationDate())
+                )
+            );
         }
     }
 
@@ -121,15 +133,18 @@ public class ProjectIT extends VitamRuleRunner {
             // GIVEN
             ProjectDto projectDto = initProjectData();
             RequestResponse<JsonNode> createdProject = client.initProject(vitamContext, projectDto);
-            projectDto = JsonHandler.getFromJsonNode(((RequestResponseOK<JsonNode>) createdProject).getFirstResult(),
-                ProjectDto.class);
+            projectDto = JsonHandler.getFromJsonNode(
+                ((RequestResponseOK<JsonNode>) createdProject).getFirstResult(),
+                ProjectDto.class
+            );
 
             ProjectDto projectDtoResult = getProjectDtoById(projectDto.getId());
             assertThat(projectDtoResult).isNotNull();
             assertThat(projectDtoResult.getCreationDate()).isNotNull();
             assertThat(projectDtoResult.getId()).isEqualTo(projectDto.getId());
             assertThat(LocalDateUtil.getDate(projectDtoResult.getCreationDate())).isEqualTo(
-                LocalDateUtil.getDate(projectDtoResult.getLastUpdate()));
+                LocalDateUtil.getDate(projectDtoResult.getLastUpdate())
+            );
 
             // WHEN
             client.deleteProjectById(vitamContext, projectDto.getId());
@@ -140,8 +155,10 @@ public class ProjectIT extends VitamRuleRunner {
 
     private ProjectDto getProjectDtoById(String projectId) throws VitamClientException, InvalidParseOperationException {
         try (CollectExternalClient client = CollectExternalClientFactory.getInstance().getClient()) {
-            RequestResponseOK<JsonNode> response =
-                (RequestResponseOK<JsonNode>) client.getProjectById(vitamContext, projectId);
+            RequestResponseOK<JsonNode> response = (RequestResponseOK<JsonNode>) client.getProjectById(
+                vitamContext,
+                projectId
+            );
             assertThat(response.isOk()).isTrue();
             return JsonHandler.getFromJsonNode(response.getFirstResult(), ProjectDto.class);
         }

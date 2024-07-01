@@ -115,8 +115,7 @@ public class LogbookLFCAdministrationTest {
     public static final ChronoUnit MAX_RENEWAL_DELAY_UNIT = ChronoUnit.MINUTES;
 
     @ClassRule
-    public static MongoRule mongoRule =
-        new MongoRule(MongoDbAccess.getMongoClientSettingsBuilder());
+    public static MongoRule mongoRule = new MongoRule(MongoDbAccess.getMongoClientSettingsBuilder());
 
     @ClassRule
     public static ElasticsearchRule elasticsearchRule = new ElasticsearchRule();
@@ -131,33 +130,39 @@ public class LogbookLFCAdministrationTest {
     private static StorageClientFactory storageClientFactory;
     private static StorageClient storageClient;
 
-
     private static ProcessingManagementClientFactory processingManagementClientFactory;
     private static ProcessingManagementClient processingManagementClient;
 
     @ClassRule
     public static TemporaryFolder esTempFolder = new TemporaryFolder();
+
     @ClassRule
     public static LogicalClockRule logicalClock = new LogicalClockRule();
 
     private static final Integer tenantId = 0;
     static final List<Integer> tenantList = Collections.singletonList(tenantId);
-    private final static ElasticsearchLogbookIndexManager indexManager =
+    private static final ElasticsearchLogbookIndexManager indexManager =
         LogbookCollectionsTestUtils.createTestIndexManager(tenantList, Collections.emptyMap());
 
     @Rule
-    public RunWithCustomExecutorRule runInThread =
-        new RunWithCustomExecutorRule(VitamThreadPoolExecutor.getDefaultExecutor());
+    public RunWithCustomExecutorRule runInThread = new RunWithCustomExecutorRule(
+        VitamThreadPoolExecutor.getDefaultExecutor()
+    );
+
     private LogbookOperationsImpl logbookOperations;
     private LogbookLifeCyclesImpl logbookLifeCycles;
 
     @BeforeClass
     public static void init() throws Exception {
-        List<ElasticsearchNode> esNodes =
-            Lists.newArrayList(new ElasticsearchNode(ElasticsearchRule.getHost(), ElasticsearchRule.getPort()));
+        List<ElasticsearchNode> esNodes = Lists.newArrayList(
+            new ElasticsearchNode(ElasticsearchRule.getHost(), ElasticsearchRule.getPort())
+        );
 
-        LogbookCollectionsTestUtils.beforeTestClass(mongoRule.getMongoDatabase(), PREFIX,
-            new LogbookElasticsearchAccess(ElasticsearchRule.VITAM_CLUSTER, esNodes, indexManager));
+        LogbookCollectionsTestUtils.beforeTestClass(
+            mongoRule.getMongoDatabase(),
+            PREFIX,
+            new LogbookElasticsearchAccess(ElasticsearchRule.VITAM_CLUSTER, esNodes, indexManager)
+        );
 
         workspaceClientFactory = mock(WorkspaceClientFactory.class);
         workspaceClient = mock(WorkspaceClient.class);
@@ -174,13 +179,16 @@ public class LogbookLFCAdministrationTest {
 
         List<MongoDbNode> nodes = new ArrayList<>();
         nodes.add(new MongoDbNode(DATABASE_HOST, MongoRule.getDataBasePort()));
-        LogbookConfiguration logbookConfiguration =
-            new LogbookConfiguration(nodes, MongoRule.VITAM_DB, ElasticsearchRule.VITAM_CLUSTER, esNodes);
+        LogbookConfiguration logbookConfiguration = new LogbookConfiguration(
+            nodes,
+            MongoRule.VITAM_DB,
+            ElasticsearchRule.VITAM_CLUSTER,
+            esNodes
+        );
         VitamConfiguration.setTenants(tenantList);
         VitamConfiguration.setAdminTenant(tenantId);
         mongoDbAccess = LogbookMongoDbAccessFactory.create(logbookConfiguration, Collections::emptyList, indexManager);
     }
-
 
     @AfterClass
     public static void tearDownAfterClass() {
@@ -195,8 +203,13 @@ public class LogbookLFCAdministrationTest {
         reset(storageClient);
         reset(workspaceClient);
         reset(processingManagementClient);
-        logbookOperations = new LogbookOperationsImpl(mongoDbAccess, workspaceClientFactory, storageClientFactory,
-            IndexationHelper.getInstance(), indexManager);
+        logbookOperations = new LogbookOperationsImpl(
+            mongoDbAccess,
+            workspaceClientFactory,
+            storageClientFactory,
+            IndexationHelper.getInstance(),
+            indexManager
+        );
         logbookLifeCycles = new LogbookLifeCyclesImpl(mongoDbAccess);
         RequestResponseOK<ProcessDetail> response = new RequestResponseOK<>(null, Collections.emptyList(), 0);
         when(processingManagementClient.listOperationsDetails(any())).thenReturn(response);
@@ -221,12 +234,18 @@ public class LogbookLFCAdministrationTest {
 
         LogbookOperations logbookOperations = mock(LogbookOperations.class);
         LogbookLifeCyclesImpl logbookLifeCycles = mock(LogbookLifeCyclesImpl.class);
-        doReturn(null).when(logbookOperations).findLastLifecycleTraceabilityOperation(
-            anyString(), eq(false));
+        doReturn(null).when(logbookOperations).findLastLifecycleTraceabilityOperation(anyString(), eq(false));
 
-        LogbookLFCAdministration logbookAdministration =
-            new LogbookLFCAdministration(logbookOperations, logbookLifeCycles, processingManagementClientFactory,
-                workspaceClientFactory, TEMPORIZATION_DELAY, MAX_RENEWAL_DELAY, MAX_RENEWAL_DELAY_UNIT, MAX_ENTRIES);
+        LogbookLFCAdministration logbookAdministration = new LogbookLFCAdministration(
+            logbookOperations,
+            logbookLifeCycles,
+            processingManagementClientFactory,
+            workspaceClientFactory,
+            TEMPORIZATION_DELAY,
+            MAX_RENEWAL_DELAY,
+            MAX_RENEWAL_DELAY_UNIT,
+            MAX_ENTRIES
+        );
 
         // When
         GUID operationGuid = GUIDFactory.newOperationLogbookGUID(tenantId);
@@ -235,8 +254,10 @@ public class LogbookLFCAdministrationTest {
         // Then
         assertThat(result).isTrue();
         verify(processingManagementClient).listOperationsDetails(any());
-        verify(logbookOperations).findLastLifecycleTraceabilityOperation(Contexts.UNIT_LFC_TRACEABILITY.getEventType(),
-            false);
+        verify(logbookOperations).findLastLifecycleTraceabilityOperation(
+            Contexts.UNIT_LFC_TRACEABILITY.getEventType(),
+            false
+        );
 
         verify(logbookOperations).create(any());
         verifyNoMoreInteractions(logbookOperations);
@@ -245,14 +266,19 @@ public class LogbookLFCAdministrationTest {
         ArgumentCaptor<ProcessingEntry> processingEntryArgumentCaptor = ArgumentCaptor.forClass(ProcessingEntry.class);
         verify(processingManagementClient).initVitamProcess(processingEntryArgumentCaptor.capture());
 
-        assertThat(processingEntryArgumentCaptor.getValue().getWorkflow())
-            .isEqualTo("UNIT_LFC_TRACEABILITY");
-        assertThat(processingEntryArgumentCaptor.getValue().getExtraParams().
-            get(WorkerParameterName.lifecycleTraceabilityTemporizationDelayInSeconds.name())).isEqualTo(
-            TEMPORIZATION_DELAY.toString());
-        assertThat(processingEntryArgumentCaptor.getValue().getExtraParams().
-            get(WorkerParameterName.lifecycleTraceabilityMaxEntries.name())).isEqualTo(
-            MAX_ENTRIES.toString());
+        assertThat(processingEntryArgumentCaptor.getValue().getWorkflow()).isEqualTo("UNIT_LFC_TRACEABILITY");
+        assertThat(
+            processingEntryArgumentCaptor
+                .getValue()
+                .getExtraParams()
+                .get(WorkerParameterName.lifecycleTraceabilityTemporizationDelayInSeconds.name())
+        ).isEqualTo(TEMPORIZATION_DELAY.toString());
+        assertThat(
+            processingEntryArgumentCaptor
+                .getValue()
+                .getExtraParams()
+                .get(WorkerParameterName.lifecycleTraceabilityMaxEntries.name())
+        ).isEqualTo(MAX_ENTRIES.toString());
     }
 
     @Test
@@ -269,12 +295,18 @@ public class LogbookLFCAdministrationTest {
 
         LogbookOperations logbookOperations = mock(LogbookOperations.class);
         LogbookLifeCyclesImpl logbookLifeCycles = mock(LogbookLifeCyclesImpl.class);
-        doReturn(null).when(logbookOperations).findLastLifecycleTraceabilityOperation(
-            anyString(), eq(false));
+        doReturn(null).when(logbookOperations).findLastLifecycleTraceabilityOperation(anyString(), eq(false));
 
-        LogbookLFCAdministration logbookAdministration =
-            new LogbookLFCAdministration(logbookOperations, logbookLifeCycles, processingManagementClientFactory,
-                workspaceClientFactory, TEMPORIZATION_DELAY, MAX_RENEWAL_DELAY, MAX_RENEWAL_DELAY_UNIT, MAX_ENTRIES);
+        LogbookLFCAdministration logbookAdministration = new LogbookLFCAdministration(
+            logbookOperations,
+            logbookLifeCycles,
+            processingManagementClientFactory,
+            workspaceClientFactory,
+            TEMPORIZATION_DELAY,
+            MAX_RENEWAL_DELAY,
+            MAX_RENEWAL_DELAY_UNIT,
+            MAX_ENTRIES
+        );
 
         // When
         GUID operationGuid = GUIDFactory.newOperationLogbookGUID(tenantId);
@@ -284,7 +316,9 @@ public class LogbookLFCAdministrationTest {
         assertThat(result).isTrue();
         verify(processingManagementClient).listOperationsDetails(any());
         verify(logbookOperations).findLastLifecycleTraceabilityOperation(
-            Contexts.OBJECTGROUP_LFC_TRACEABILITY.getEventType(), false);
+            Contexts.OBJECTGROUP_LFC_TRACEABILITY.getEventType(),
+            false
+        );
 
         verify(logbookOperations).create(any());
         verifyNoMoreInteractions(logbookOperations);
@@ -293,14 +327,19 @@ public class LogbookLFCAdministrationTest {
         ArgumentCaptor<ProcessingEntry> processingEntryArgumentCaptor = ArgumentCaptor.forClass(ProcessingEntry.class);
         verify(processingManagementClient).initVitamProcess(processingEntryArgumentCaptor.capture());
 
-        assertThat(processingEntryArgumentCaptor.getValue().getWorkflow())
-            .isEqualTo("OBJECTGROUP_LFC_TRACEABILITY");
-        assertThat(processingEntryArgumentCaptor.getValue().getExtraParams().
-            get(WorkerParameterName.lifecycleTraceabilityTemporizationDelayInSeconds.name())).isEqualTo(
-            TEMPORIZATION_DELAY.toString());
-        assertThat(processingEntryArgumentCaptor.getValue().getExtraParams().
-            get(WorkerParameterName.lifecycleTraceabilityMaxEntries.name())).isEqualTo(
-            MAX_ENTRIES.toString());
+        assertThat(processingEntryArgumentCaptor.getValue().getWorkflow()).isEqualTo("OBJECTGROUP_LFC_TRACEABILITY");
+        assertThat(
+            processingEntryArgumentCaptor
+                .getValue()
+                .getExtraParams()
+                .get(WorkerParameterName.lifecycleTraceabilityTemporizationDelayInSeconds.name())
+        ).isEqualTo(TEMPORIZATION_DELAY.toString());
+        assertThat(
+            processingEntryArgumentCaptor
+                .getValue()
+                .getExtraParams()
+                .get(WorkerParameterName.lifecycleTraceabilityMaxEntries.name())
+        ).isEqualTo(MAX_ENTRIES.toString());
     }
 
     @Test
@@ -318,20 +357,25 @@ public class LogbookLFCAdministrationTest {
         LogbookOperations logbookOperations = mock(LogbookOperations.class);
         LogbookLifeCyclesImpl logbookLifeCycles = mock(LogbookLifeCyclesImpl.class);
 
-        doReturn(new LogbookOperation(
-            PropertiesUtils.getResourceAsString("unit_lfc_traceability_with_zip.json")
-        )).when(logbookOperations).findLastLifecycleTraceabilityOperation(anyString(), eq(false));
+        doReturn(new LogbookOperation(PropertiesUtils.getResourceAsString("unit_lfc_traceability_with_zip.json")))
+            .when(logbookOperations)
+            .findLastLifecycleTraceabilityOperation(anyString(), eq(false));
 
         LocalDateTime lastTraceabilityDate = LocalDateUtil.parseMongoFormattedDate("2020-06-26T04:47:31.865");
         LocalDateTime now = LocalDateUtil.now();
-        long elapsedSeconds = now.toEpochSecond(ZoneOffset.UTC)
-            - lastTraceabilityDate.toEpochSecond(ZoneOffset.UTC);
+        long elapsedSeconds = now.toEpochSecond(ZoneOffset.UTC) - lastTraceabilityDate.toEpochSecond(ZoneOffset.UTC);
         int traceabilityExpirationDelayInSeconds = (int) elapsedSeconds - 60;
 
-        LogbookLFCAdministration logbookAdministration =
-            new LogbookLFCAdministration(logbookOperations, logbookLifeCycles, processingManagementClientFactory,
-                workspaceClientFactory, TEMPORIZATION_DELAY, traceabilityExpirationDelayInSeconds, ChronoUnit.SECONDS,
-                MAX_ENTRIES);
+        LogbookLFCAdministration logbookAdministration = new LogbookLFCAdministration(
+            logbookOperations,
+            logbookLifeCycles,
+            processingManagementClientFactory,
+            workspaceClientFactory,
+            TEMPORIZATION_DELAY,
+            traceabilityExpirationDelayInSeconds,
+            ChronoUnit.SECONDS,
+            MAX_ENTRIES
+        );
 
         // When
         GUID operationGuid = GUIDFactory.newOperationLogbookGUID(tenantId);
@@ -340,8 +384,10 @@ public class LogbookLFCAdministrationTest {
         // Then
         assertThat(result).isTrue();
         verify(processingManagementClient).listOperationsDetails(any());
-        verify(logbookOperations).findLastLifecycleTraceabilityOperation(Contexts.UNIT_LFC_TRACEABILITY.getEventType(),
-            false);
+        verify(logbookOperations).findLastLifecycleTraceabilityOperation(
+            Contexts.UNIT_LFC_TRACEABILITY.getEventType(),
+            false
+        );
         verify(logbookOperations).create(any());
         verifyNoMoreInteractions(logbookOperations);
         verifyNoMoreInteractions(logbookLifeCycles);
@@ -349,14 +395,19 @@ public class LogbookLFCAdministrationTest {
         ArgumentCaptor<ProcessingEntry> processingEntryArgumentCaptor = ArgumentCaptor.forClass(ProcessingEntry.class);
         verify(processingManagementClient).initVitamProcess(processingEntryArgumentCaptor.capture());
 
-        assertThat(processingEntryArgumentCaptor.getValue().getWorkflow())
-            .isEqualTo("UNIT_LFC_TRACEABILITY");
-        assertThat(processingEntryArgumentCaptor.getValue().getExtraParams().
-            get(WorkerParameterName.lifecycleTraceabilityTemporizationDelayInSeconds.name())).isEqualTo(
-            TEMPORIZATION_DELAY.toString());
-        assertThat(processingEntryArgumentCaptor.getValue().getExtraParams().
-            get(WorkerParameterName.lifecycleTraceabilityMaxEntries.name())).isEqualTo(
-            MAX_ENTRIES.toString());
+        assertThat(processingEntryArgumentCaptor.getValue().getWorkflow()).isEqualTo("UNIT_LFC_TRACEABILITY");
+        assertThat(
+            processingEntryArgumentCaptor
+                .getValue()
+                .getExtraParams()
+                .get(WorkerParameterName.lifecycleTraceabilityTemporizationDelayInSeconds.name())
+        ).isEqualTo(TEMPORIZATION_DELAY.toString());
+        assertThat(
+            processingEntryArgumentCaptor
+                .getValue()
+                .getExtraParams()
+                .get(WorkerParameterName.lifecycleTraceabilityMaxEntries.name())
+        ).isEqualTo(MAX_ENTRIES.toString());
     }
 
     @Test
@@ -374,20 +425,27 @@ public class LogbookLFCAdministrationTest {
         LogbookOperations logbookOperations = mock(LogbookOperations.class);
         LogbookLifeCyclesImpl logbookLifeCycles = mock(LogbookLifeCyclesImpl.class);
 
-        doReturn(new LogbookOperation(
-            PropertiesUtils.getResourceAsString("objectgroup_lfc_traceability_with_zip.json")
-        )).when(logbookOperations).findLastLifecycleTraceabilityOperation(anyString(), eq(false));
+        doReturn(
+            new LogbookOperation(PropertiesUtils.getResourceAsString("objectgroup_lfc_traceability_with_zip.json"))
+        )
+            .when(logbookOperations)
+            .findLastLifecycleTraceabilityOperation(anyString(), eq(false));
 
         LocalDateTime lastTraceabilityDate = LocalDateUtil.parseMongoFormattedDate("2020-06-26T04:00:19.016");
         LocalDateTime now = LocalDateUtil.now();
-        long elapsedSeconds = now.toEpochSecond(ZoneOffset.UTC)
-            - lastTraceabilityDate.toEpochSecond(ZoneOffset.UTC);
+        long elapsedSeconds = now.toEpochSecond(ZoneOffset.UTC) - lastTraceabilityDate.toEpochSecond(ZoneOffset.UTC);
         int traceabilityExpirationDelayInSeconds = (int) elapsedSeconds - 60;
 
-        LogbookLFCAdministration logbookAdministration =
-            new LogbookLFCAdministration(logbookOperations, logbookLifeCycles, processingManagementClientFactory,
-                workspaceClientFactory, TEMPORIZATION_DELAY, traceabilityExpirationDelayInSeconds, ChronoUnit.SECONDS,
-                MAX_ENTRIES);
+        LogbookLFCAdministration logbookAdministration = new LogbookLFCAdministration(
+            logbookOperations,
+            logbookLifeCycles,
+            processingManagementClientFactory,
+            workspaceClientFactory,
+            TEMPORIZATION_DELAY,
+            traceabilityExpirationDelayInSeconds,
+            ChronoUnit.SECONDS,
+            MAX_ENTRIES
+        );
 
         // When
         GUID operationGuid = GUIDFactory.newOperationLogbookGUID(tenantId);
@@ -399,7 +457,8 @@ public class LogbookLFCAdministrationTest {
         verify(processingManagementClient).listOperationsDetails(any());
         verify(logbookOperations).findLastLifecycleTraceabilityOperation(
             Contexts.OBJECTGROUP_LFC_TRACEABILITY.getEventType(),
-            false);
+            false
+        );
         verify(logbookOperations).create(any());
         verifyNoMoreInteractions(logbookOperations);
         verifyNoMoreInteractions(logbookLifeCycles);
@@ -407,20 +466,24 @@ public class LogbookLFCAdministrationTest {
         ArgumentCaptor<ProcessingEntry> processingEntryArgumentCaptor = ArgumentCaptor.forClass(ProcessingEntry.class);
         verify(processingManagementClient).initVitamProcess(processingEntryArgumentCaptor.capture());
 
-        assertThat(processingEntryArgumentCaptor.getValue().getWorkflow())
-            .isEqualTo("OBJECTGROUP_LFC_TRACEABILITY");
-        assertThat(processingEntryArgumentCaptor.getValue().getExtraParams().
-            get(WorkerParameterName.lifecycleTraceabilityTemporizationDelayInSeconds.name())).isEqualTo(
-            TEMPORIZATION_DELAY.toString());
-        assertThat(processingEntryArgumentCaptor.getValue().getExtraParams().
-            get(WorkerParameterName.lifecycleTraceabilityMaxEntries.name())).isEqualTo(
-            MAX_ENTRIES.toString());
+        assertThat(processingEntryArgumentCaptor.getValue().getWorkflow()).isEqualTo("OBJECTGROUP_LFC_TRACEABILITY");
+        assertThat(
+            processingEntryArgumentCaptor
+                .getValue()
+                .getExtraParams()
+                .get(WorkerParameterName.lifecycleTraceabilityTemporizationDelayInSeconds.name())
+        ).isEqualTo(TEMPORIZATION_DELAY.toString());
+        assertThat(
+            processingEntryArgumentCaptor
+                .getValue()
+                .getExtraParams()
+                .get(WorkerParameterName.lifecycleTraceabilityMaxEntries.name())
+        ).isEqualTo(MAX_ENTRIES.toString());
     }
 
     @Test
     @RunWithCustomExecutor
-    public void givenRecentTraceabilityWithZipAndNoNewDataSinceThenSkipUnitLfcTraceability()
-        throws Exception {
+    public void givenRecentTraceabilityWithZipAndNoNewDataSinceThenSkipUnitLfcTraceability() throws Exception {
         VitamThreadUtils.getVitamSession().setTenantId(tenantId);
 
         doNothing().when(workspaceClient).createContainer(anyString());
@@ -433,24 +496,29 @@ public class LogbookLFCAdministrationTest {
         LogbookOperations logbookOperations = mock(LogbookOperations.class);
         LogbookLifeCyclesImpl logbookLifeCycles = mock(LogbookLifeCyclesImpl.class);
 
-        doReturn(new LogbookOperation(
-            PropertiesUtils.getResourceAsString("unit_lfc_traceability_with_zip.json")
-        )).when(logbookOperations).findLastLifecycleTraceabilityOperation(anyString(), eq(false));
+        doReturn(new LogbookOperation(PropertiesUtils.getResourceAsString("unit_lfc_traceability_with_zip.json")))
+            .when(logbookOperations)
+            .findLastLifecycleTraceabilityOperation(anyString(), eq(false));
 
         doReturn(false)
-            .when(logbookLifeCycles).checkUnitLifecycleEntriesExistenceByLastPersistedDate(
-                eq("2020-06-26T04:42:32.308"), anyString());
+            .when(logbookLifeCycles)
+            .checkUnitLifecycleEntriesExistenceByLastPersistedDate(eq("2020-06-26T04:42:32.308"), anyString());
 
         LocalDateTime lastTraceabilityDate = LocalDateUtil.parseMongoFormattedDate("2020-06-26T04:47:31.865");
         LocalDateTime now = LocalDateUtil.now();
-        long elapsedSeconds = now.toEpochSecond(ZoneOffset.UTC)
-            - lastTraceabilityDate.toEpochSecond(ZoneOffset.UTC);
+        long elapsedSeconds = now.toEpochSecond(ZoneOffset.UTC) - lastTraceabilityDate.toEpochSecond(ZoneOffset.UTC);
         int traceabilityExpirationDelayInSeconds = (int) elapsedSeconds + 60;
 
-        LogbookLFCAdministration logbookAdministration =
-            new LogbookLFCAdministration(logbookOperations, logbookLifeCycles, processingManagementClientFactory,
-                workspaceClientFactory, TEMPORIZATION_DELAY, traceabilityExpirationDelayInSeconds, ChronoUnit.SECONDS,
-                MAX_ENTRIES);
+        LogbookLFCAdministration logbookAdministration = new LogbookLFCAdministration(
+            logbookOperations,
+            logbookLifeCycles,
+            processingManagementClientFactory,
+            workspaceClientFactory,
+            TEMPORIZATION_DELAY,
+            traceabilityExpirationDelayInSeconds,
+            ChronoUnit.SECONDS,
+            MAX_ENTRIES
+        );
 
         // When
         GUID operationGuid = GUIDFactory.newOperationLogbookGUID(tenantId);
@@ -460,11 +528,15 @@ public class LogbookLFCAdministrationTest {
         assertThat(result).isFalse();
         verify(processingManagementClient).listOperationsDetails(any());
         verify(processingManagementClient).close();
-        verify(logbookOperations).findLastLifecycleTraceabilityOperation(Contexts.UNIT_LFC_TRACEABILITY.getEventType(),
-            false);
+        verify(logbookOperations).findLastLifecycleTraceabilityOperation(
+            Contexts.UNIT_LFC_TRACEABILITY.getEventType(),
+            false
+        );
 
         verify(logbookLifeCycles).checkUnitLifecycleEntriesExistenceByLastPersistedDate(
-            eq("2020-06-26T04:42:32.308"), anyString());
+            eq("2020-06-26T04:42:32.308"),
+            anyString()
+        );
 
         verifyNoMoreInteractions(logbookLifeCycles);
         verifyNoMoreInteractions(processingManagementClient);
@@ -475,8 +547,7 @@ public class LogbookLFCAdministrationTest {
 
     @Test
     @RunWithCustomExecutor
-    public void givenRecentTraceabilityWithZipAndNoNewDataSinceThenSkipObjectGroupTraceability()
-        throws Exception {
+    public void givenRecentTraceabilityWithZipAndNoNewDataSinceThenSkipObjectGroupTraceability() throws Exception {
         VitamThreadUtils.getVitamSession().setTenantId(tenantId);
 
         doNothing().when(workspaceClient).createContainer(anyString());
@@ -489,24 +560,31 @@ public class LogbookLFCAdministrationTest {
         LogbookOperations logbookOperations = mock(LogbookOperations.class);
         LogbookLifeCyclesImpl logbookLifeCycles = mock(LogbookLifeCyclesImpl.class);
 
-        doReturn(new LogbookOperation(
-            PropertiesUtils.getResourceAsString("objectgroup_lfc_traceability_with_zip.json")
-        )).when(logbookOperations).findLastLifecycleTraceabilityOperation(anyString(), eq(false));
+        doReturn(
+            new LogbookOperation(PropertiesUtils.getResourceAsString("objectgroup_lfc_traceability_with_zip.json"))
+        )
+            .when(logbookOperations)
+            .findLastLifecycleTraceabilityOperation(anyString(), eq(false));
 
         doReturn(false)
-            .when(logbookLifeCycles).checkUnitLifecycleEntriesExistenceByLastPersistedDate(
-                eq("2020-06-26T03:55:19.525"), anyString());
+            .when(logbookLifeCycles)
+            .checkUnitLifecycleEntriesExistenceByLastPersistedDate(eq("2020-06-26T03:55:19.525"), anyString());
 
         LocalDateTime lastTraceabilityDate = LocalDateUtil.parseMongoFormattedDate("2020-06-26T04:00:19.016");
         LocalDateTime now = LocalDateUtil.now();
-        long elapsedSeconds = now.toEpochSecond(ZoneOffset.UTC)
-            - lastTraceabilityDate.toEpochSecond(ZoneOffset.UTC);
+        long elapsedSeconds = now.toEpochSecond(ZoneOffset.UTC) - lastTraceabilityDate.toEpochSecond(ZoneOffset.UTC);
         int traceabilityExpirationDelayInSeconds = (int) elapsedSeconds + 60;
 
-        LogbookLFCAdministration logbookAdministration =
-            new LogbookLFCAdministration(logbookOperations, logbookLifeCycles, processingManagementClientFactory,
-                workspaceClientFactory, TEMPORIZATION_DELAY, traceabilityExpirationDelayInSeconds, ChronoUnit.SECONDS,
-                MAX_ENTRIES);
+        LogbookLFCAdministration logbookAdministration = new LogbookLFCAdministration(
+            logbookOperations,
+            logbookLifeCycles,
+            processingManagementClientFactory,
+            workspaceClientFactory,
+            TEMPORIZATION_DELAY,
+            traceabilityExpirationDelayInSeconds,
+            ChronoUnit.SECONDS,
+            MAX_ENTRIES
+        );
 
         // When
         GUID operationGuid = GUIDFactory.newOperationLogbookGUID(tenantId);
@@ -517,10 +595,14 @@ public class LogbookLFCAdministrationTest {
         verify(processingManagementClient).listOperationsDetails(any());
         verify(processingManagementClient).close();
         verify(logbookOperations).findLastLifecycleTraceabilityOperation(
-            Contexts.OBJECTGROUP_LFC_TRACEABILITY.getEventType(), false);
+            Contexts.OBJECTGROUP_LFC_TRACEABILITY.getEventType(),
+            false
+        );
 
         verify(logbookLifeCycles).checkObjectGroupLifecycleEntriesExistenceByLastPersistedDate(
-            eq("2020-06-26T03:55:19.525"), anyString());
+            eq("2020-06-26T03:55:19.525"),
+            anyString()
+        );
 
         verifyNoMoreInteractions(logbookLifeCycles);
         verifyNoMoreInteractions(processingManagementClient);
@@ -545,27 +627,32 @@ public class LogbookLFCAdministrationTest {
         LogbookOperations logbookOperations = mock(LogbookOperations.class);
         LogbookLifeCyclesImpl logbookLifeCycles = mock(LogbookLifeCyclesImpl.class);
 
-        doReturn(new LogbookOperation(
-            PropertiesUtils.getResourceAsString("unit_lfc_traceability_no_zip.json")
-        )).when(logbookOperations).findLastLifecycleTraceabilityOperation(anyString(), eq(false));
-        doReturn(new LogbookOperation(
-            PropertiesUtils.getResourceAsString("unit_lfc_traceability_with_zip.json")
-        )).when(logbookOperations).findLastLifecycleTraceabilityOperation(anyString(), eq(true));
+        doReturn(new LogbookOperation(PropertiesUtils.getResourceAsString("unit_lfc_traceability_no_zip.json")))
+            .when(logbookOperations)
+            .findLastLifecycleTraceabilityOperation(anyString(), eq(false));
+        doReturn(new LogbookOperation(PropertiesUtils.getResourceAsString("unit_lfc_traceability_with_zip.json")))
+            .when(logbookOperations)
+            .findLastLifecycleTraceabilityOperation(anyString(), eq(true));
 
         doReturn(false)
-            .when(logbookLifeCycles).checkUnitLifecycleEntriesExistenceByLastPersistedDate(
-                eq("2020-06-26T04:42:32.308"), anyString());
+            .when(logbookLifeCycles)
+            .checkUnitLifecycleEntriesExistenceByLastPersistedDate(eq("2020-06-26T04:42:32.308"), anyString());
 
         LocalDateTime lastTraceabilityDate = LocalDateUtil.parseMongoFormattedDate("2020-06-27T05:01:16.878");
         LocalDateTime now = LocalDateUtil.now();
-        long elapsedSeconds = now.toEpochSecond(ZoneOffset.UTC)
-            - lastTraceabilityDate.toEpochSecond(ZoneOffset.UTC);
+        long elapsedSeconds = now.toEpochSecond(ZoneOffset.UTC) - lastTraceabilityDate.toEpochSecond(ZoneOffset.UTC);
         int traceabilityExpirationDelayInSeconds = (int) elapsedSeconds + 60;
 
-        LogbookLFCAdministration logbookAdministration =
-            new LogbookLFCAdministration(logbookOperations, logbookLifeCycles, processingManagementClientFactory,
-                workspaceClientFactory, TEMPORIZATION_DELAY, traceabilityExpirationDelayInSeconds, ChronoUnit.SECONDS,
-                MAX_ENTRIES);
+        LogbookLFCAdministration logbookAdministration = new LogbookLFCAdministration(
+            logbookOperations,
+            logbookLifeCycles,
+            processingManagementClientFactory,
+            workspaceClientFactory,
+            TEMPORIZATION_DELAY,
+            traceabilityExpirationDelayInSeconds,
+            ChronoUnit.SECONDS,
+            MAX_ENTRIES
+        );
 
         // When
         GUID operationGuid = GUIDFactory.newOperationLogbookGUID(tenantId);
@@ -575,13 +662,19 @@ public class LogbookLFCAdministrationTest {
         assertThat(result).isFalse();
         verify(processingManagementClient).listOperationsDetails(any());
         verify(processingManagementClient).close();
-        verify(logbookOperations).findLastLifecycleTraceabilityOperation(Contexts.UNIT_LFC_TRACEABILITY.getEventType(),
-            false);
-        verify(logbookOperations).findLastLifecycleTraceabilityOperation(Contexts.UNIT_LFC_TRACEABILITY.getEventType(),
-            true);
+        verify(logbookOperations).findLastLifecycleTraceabilityOperation(
+            Contexts.UNIT_LFC_TRACEABILITY.getEventType(),
+            false
+        );
+        verify(logbookOperations).findLastLifecycleTraceabilityOperation(
+            Contexts.UNIT_LFC_TRACEABILITY.getEventType(),
+            true
+        );
 
         verify(logbookLifeCycles).checkUnitLifecycleEntriesExistenceByLastPersistedDate(
-            eq("2020-06-26T04:42:32.308"), anyString());
+            eq("2020-06-26T04:42:32.308"),
+            anyString()
+        );
 
         verifyNoMoreInteractions(logbookLifeCycles);
         verifyNoMoreInteractions(processingManagementClient);
@@ -606,27 +699,34 @@ public class LogbookLFCAdministrationTest {
         LogbookOperations logbookOperations = mock(LogbookOperations.class);
         LogbookLifeCyclesImpl logbookLifeCycles = mock(LogbookLifeCyclesImpl.class);
 
-        doReturn(new LogbookOperation(
-            PropertiesUtils.getResourceAsString("objectgroup_lfc_traceability_no_zip.json")
-        )).when(logbookOperations).findLastLifecycleTraceabilityOperation(anyString(), eq(false));
-        doReturn(new LogbookOperation(
-            PropertiesUtils.getResourceAsString("objectgroup_lfc_traceability_with_zip.json")
-        )).when(logbookOperations).findLastLifecycleTraceabilityOperation(anyString(), eq(true));
+        doReturn(new LogbookOperation(PropertiesUtils.getResourceAsString("objectgroup_lfc_traceability_no_zip.json")))
+            .when(logbookOperations)
+            .findLastLifecycleTraceabilityOperation(anyString(), eq(false));
+        doReturn(
+            new LogbookOperation(PropertiesUtils.getResourceAsString("objectgroup_lfc_traceability_with_zip.json"))
+        )
+            .when(logbookOperations)
+            .findLastLifecycleTraceabilityOperation(anyString(), eq(true));
 
         doReturn(false)
-            .when(logbookLifeCycles).checkObjectGroupLifecycleEntriesExistenceByLastPersistedDate(
-                eq("2020-06-26T03:55:19.525"), anyString());
+            .when(logbookLifeCycles)
+            .checkObjectGroupLifecycleEntriesExistenceByLastPersistedDate(eq("2020-06-26T03:55:19.525"), anyString());
 
         LocalDateTime lastTraceabilityDate = LocalDateUtil.parseMongoFormattedDate("2020-06-27T04:00:35.190");
         LocalDateTime now = LocalDateUtil.now();
-        long elapsedSeconds = now.toEpochSecond(ZoneOffset.UTC)
-            - lastTraceabilityDate.toEpochSecond(ZoneOffset.UTC);
+        long elapsedSeconds = now.toEpochSecond(ZoneOffset.UTC) - lastTraceabilityDate.toEpochSecond(ZoneOffset.UTC);
         int traceabilityExpirationDelayInSeconds = (int) elapsedSeconds + 60;
 
-        LogbookLFCAdministration logbookAdministration =
-            new LogbookLFCAdministration(logbookOperations, logbookLifeCycles, processingManagementClientFactory,
-                workspaceClientFactory, TEMPORIZATION_DELAY, traceabilityExpirationDelayInSeconds, ChronoUnit.SECONDS,
-                MAX_ENTRIES);
+        LogbookLFCAdministration logbookAdministration = new LogbookLFCAdministration(
+            logbookOperations,
+            logbookLifeCycles,
+            processingManagementClientFactory,
+            workspaceClientFactory,
+            TEMPORIZATION_DELAY,
+            traceabilityExpirationDelayInSeconds,
+            ChronoUnit.SECONDS,
+            MAX_ENTRIES
+        );
 
         // When
         GUID operationGuid = GUIDFactory.newOperationLogbookGUID(tenantId);
@@ -637,12 +737,18 @@ public class LogbookLFCAdministrationTest {
         verify(processingManagementClient).listOperationsDetails(any());
         verify(processingManagementClient).close();
         verify(logbookOperations).findLastLifecycleTraceabilityOperation(
-            Contexts.OBJECTGROUP_LFC_TRACEABILITY.getEventType(), false);
+            Contexts.OBJECTGROUP_LFC_TRACEABILITY.getEventType(),
+            false
+        );
         verify(logbookOperations).findLastLifecycleTraceabilityOperation(
-            Contexts.OBJECTGROUP_LFC_TRACEABILITY.getEventType(), true);
+            Contexts.OBJECTGROUP_LFC_TRACEABILITY.getEventType(),
+            true
+        );
 
         verify(logbookLifeCycles).checkObjectGroupLifecycleEntriesExistenceByLastPersistedDate(
-            eq("2020-06-26T03:55:19.525"), anyString());
+            eq("2020-06-26T03:55:19.525"),
+            anyString()
+        );
 
         verifyNoMoreInteractions(logbookLifeCycles);
         verifyNoMoreInteractions(processingManagementClient);
@@ -667,25 +773,30 @@ public class LogbookLFCAdministrationTest {
         LogbookOperations logbookOperations = mock(LogbookOperations.class);
         LogbookLifeCyclesImpl logbookLifeCycles = mock(LogbookLifeCyclesImpl.class);
 
-        doReturn(new LogbookOperation(
-            PropertiesUtils.getResourceAsString("unit_lfc_traceability_no_zip.json")
-        )).when(logbookOperations).findLastLifecycleTraceabilityOperation(anyString(), eq(false));
+        doReturn(new LogbookOperation(PropertiesUtils.getResourceAsString("unit_lfc_traceability_no_zip.json")))
+            .when(logbookOperations)
+            .findLastLifecycleTraceabilityOperation(anyString(), eq(false));
         doReturn(null).when(logbookOperations).findLastLifecycleTraceabilityOperation(anyString(), eq(true));
 
         doReturn(false)
-            .when(logbookLifeCycles).checkUnitLifecycleEntriesExistenceByLastPersistedDate(
-                eq("1970-01-01T00:00:00.000"), anyString());
+            .when(logbookLifeCycles)
+            .checkUnitLifecycleEntriesExistenceByLastPersistedDate(eq("1970-01-01T00:00:00.000"), anyString());
 
         LocalDateTime lastTraceabilityDate = LocalDateUtil.parseMongoFormattedDate("2020-06-27T05:01:16.878");
         LocalDateTime now = LocalDateUtil.now();
-        long elapsedSeconds = now.toEpochSecond(ZoneOffset.UTC)
-            - lastTraceabilityDate.toEpochSecond(ZoneOffset.UTC);
+        long elapsedSeconds = now.toEpochSecond(ZoneOffset.UTC) - lastTraceabilityDate.toEpochSecond(ZoneOffset.UTC);
         int traceabilityExpirationDelayInSeconds = (int) elapsedSeconds + 60;
 
-        LogbookLFCAdministration logbookAdministration =
-            new LogbookLFCAdministration(logbookOperations, logbookLifeCycles, processingManagementClientFactory,
-                workspaceClientFactory, TEMPORIZATION_DELAY, traceabilityExpirationDelayInSeconds, ChronoUnit.SECONDS,
-                MAX_ENTRIES);
+        LogbookLFCAdministration logbookAdministration = new LogbookLFCAdministration(
+            logbookOperations,
+            logbookLifeCycles,
+            processingManagementClientFactory,
+            workspaceClientFactory,
+            TEMPORIZATION_DELAY,
+            traceabilityExpirationDelayInSeconds,
+            ChronoUnit.SECONDS,
+            MAX_ENTRIES
+        );
 
         // When
         GUID operationGuid = GUIDFactory.newOperationLogbookGUID(tenantId);
@@ -695,13 +806,19 @@ public class LogbookLFCAdministrationTest {
         assertThat(result).isFalse();
         verify(processingManagementClient).listOperationsDetails(any());
         verify(processingManagementClient).close();
-        verify(logbookOperations).findLastLifecycleTraceabilityOperation(Contexts.UNIT_LFC_TRACEABILITY.getEventType(),
-            false);
-        verify(logbookOperations).findLastLifecycleTraceabilityOperation(Contexts.UNIT_LFC_TRACEABILITY.getEventType(),
-            true);
+        verify(logbookOperations).findLastLifecycleTraceabilityOperation(
+            Contexts.UNIT_LFC_TRACEABILITY.getEventType(),
+            false
+        );
+        verify(logbookOperations).findLastLifecycleTraceabilityOperation(
+            Contexts.UNIT_LFC_TRACEABILITY.getEventType(),
+            true
+        );
 
         verify(logbookLifeCycles).checkUnitLifecycleEntriesExistenceByLastPersistedDate(
-            eq("1970-01-01T00:00:00.000"), anyString());
+            eq("1970-01-01T00:00:00.000"),
+            anyString()
+        );
 
         verifyNoMoreInteractions(logbookLifeCycles);
         verifyNoMoreInteractions(processingManagementClient);
@@ -726,25 +843,30 @@ public class LogbookLFCAdministrationTest {
         LogbookOperations logbookOperations = mock(LogbookOperations.class);
         LogbookLifeCyclesImpl logbookLifeCycles = mock(LogbookLifeCyclesImpl.class);
 
-        doReturn(new LogbookOperation(
-            PropertiesUtils.getResourceAsString("objectgroup_lfc_traceability_no_zip.json")
-        )).when(logbookOperations).findLastLifecycleTraceabilityOperation(anyString(), eq(false));
+        doReturn(new LogbookOperation(PropertiesUtils.getResourceAsString("objectgroup_lfc_traceability_no_zip.json")))
+            .when(logbookOperations)
+            .findLastLifecycleTraceabilityOperation(anyString(), eq(false));
         doReturn(null).when(logbookOperations).findLastLifecycleTraceabilityOperation(anyString(), eq(true));
 
         doReturn(false)
-            .when(logbookLifeCycles).checkObjectGroupLifecycleEntriesExistenceByLastPersistedDate(
-                eq("1970-01-01T00:00:00.000"), anyString());
+            .when(logbookLifeCycles)
+            .checkObjectGroupLifecycleEntriesExistenceByLastPersistedDate(eq("1970-01-01T00:00:00.000"), anyString());
 
         LocalDateTime lastTraceabilityDate = LocalDateUtil.parseMongoFormattedDate("2020-06-27T04:00:35.190");
         LocalDateTime now = LocalDateUtil.now();
-        long elapsedSeconds = now.toEpochSecond(ZoneOffset.UTC)
-            - lastTraceabilityDate.toEpochSecond(ZoneOffset.UTC);
+        long elapsedSeconds = now.toEpochSecond(ZoneOffset.UTC) - lastTraceabilityDate.toEpochSecond(ZoneOffset.UTC);
         int traceabilityExpirationDelayInSeconds = (int) elapsedSeconds + 60;
 
-        LogbookLFCAdministration logbookAdministration =
-            new LogbookLFCAdministration(logbookOperations, logbookLifeCycles, processingManagementClientFactory,
-                workspaceClientFactory, TEMPORIZATION_DELAY, traceabilityExpirationDelayInSeconds, ChronoUnit.SECONDS,
-                MAX_ENTRIES);
+        LogbookLFCAdministration logbookAdministration = new LogbookLFCAdministration(
+            logbookOperations,
+            logbookLifeCycles,
+            processingManagementClientFactory,
+            workspaceClientFactory,
+            TEMPORIZATION_DELAY,
+            traceabilityExpirationDelayInSeconds,
+            ChronoUnit.SECONDS,
+            MAX_ENTRIES
+        );
 
         // When
         GUID operationGuid = GUIDFactory.newOperationLogbookGUID(tenantId);
@@ -755,12 +877,18 @@ public class LogbookLFCAdministrationTest {
         verify(processingManagementClient).listOperationsDetails(any());
         verify(processingManagementClient).close();
         verify(logbookOperations).findLastLifecycleTraceabilityOperation(
-            Contexts.OBJECTGROUP_LFC_TRACEABILITY.getEventType(), false);
+            Contexts.OBJECTGROUP_LFC_TRACEABILITY.getEventType(),
+            false
+        );
         verify(logbookOperations).findLastLifecycleTraceabilityOperation(
-            Contexts.OBJECTGROUP_LFC_TRACEABILITY.getEventType(), true);
+            Contexts.OBJECTGROUP_LFC_TRACEABILITY.getEventType(),
+            true
+        );
 
         verify(logbookLifeCycles).checkObjectGroupLifecycleEntriesExistenceByLastPersistedDate(
-            eq("1970-01-01T00:00:00.000"), anyString());
+            eq("1970-01-01T00:00:00.000"),
+            anyString()
+        );
 
         verifyNoMoreInteractions(logbookLifeCycles);
         verifyNoMoreInteractions(processingManagementClient);
@@ -784,24 +912,29 @@ public class LogbookLFCAdministrationTest {
         LogbookOperations logbookOperations = mock(LogbookOperations.class);
         LogbookLifeCyclesImpl logbookLifeCycles = mock(LogbookLifeCyclesImpl.class);
 
-        doReturn(new LogbookOperation(
-            PropertiesUtils.getResourceAsString("unit_lfc_traceability_with_zip.json")
-        )).when(logbookOperations).findLastLifecycleTraceabilityOperation(anyString(), eq(false));
+        doReturn(new LogbookOperation(PropertiesUtils.getResourceAsString("unit_lfc_traceability_with_zip.json")))
+            .when(logbookOperations)
+            .findLastLifecycleTraceabilityOperation(anyString(), eq(false));
 
         doReturn(true)
-            .when(logbookLifeCycles).checkUnitLifecycleEntriesExistenceByLastPersistedDate(
-                eq("2020-06-26T04:42:32.308"), anyString());
+            .when(logbookLifeCycles)
+            .checkUnitLifecycleEntriesExistenceByLastPersistedDate(eq("2020-06-26T04:42:32.308"), anyString());
 
         LocalDateTime lastTraceabilityDate = LocalDateUtil.parseMongoFormattedDate("2020-06-26T04:47:31.865");
         LocalDateTime now = LocalDateUtil.now();
-        long elapsedSeconds = now.toEpochSecond(ZoneOffset.UTC)
-            - lastTraceabilityDate.toEpochSecond(ZoneOffset.UTC);
+        long elapsedSeconds = now.toEpochSecond(ZoneOffset.UTC) - lastTraceabilityDate.toEpochSecond(ZoneOffset.UTC);
         int traceabilityExpirationDelayInSeconds = (int) elapsedSeconds + 60;
 
-        LogbookLFCAdministration logbookAdministration =
-            new LogbookLFCAdministration(logbookOperations, logbookLifeCycles, processingManagementClientFactory,
-                workspaceClientFactory, TEMPORIZATION_DELAY, traceabilityExpirationDelayInSeconds, ChronoUnit.SECONDS,
-                MAX_ENTRIES);
+        LogbookLFCAdministration logbookAdministration = new LogbookLFCAdministration(
+            logbookOperations,
+            logbookLifeCycles,
+            processingManagementClientFactory,
+            workspaceClientFactory,
+            TEMPORIZATION_DELAY,
+            traceabilityExpirationDelayInSeconds,
+            ChronoUnit.SECONDS,
+            MAX_ENTRIES
+        );
 
         // When
         GUID operationGuid = GUIDFactory.newOperationLogbookGUID(tenantId);
@@ -810,11 +943,15 @@ public class LogbookLFCAdministrationTest {
         // Then
         assertThat(result).isTrue();
         verify(processingManagementClient).listOperationsDetails(any());
-        verify(logbookOperations).findLastLifecycleTraceabilityOperation(Contexts.UNIT_LFC_TRACEABILITY.getEventType(),
-            false);
+        verify(logbookOperations).findLastLifecycleTraceabilityOperation(
+            Contexts.UNIT_LFC_TRACEABILITY.getEventType(),
+            false
+        );
 
         verify(logbookLifeCycles).checkUnitLifecycleEntriesExistenceByLastPersistedDate(
-            eq("2020-06-26T04:42:32.308"), anyString());
+            eq("2020-06-26T04:42:32.308"),
+            anyString()
+        );
 
         verify(logbookOperations).create(any());
         verifyNoMoreInteractions(logbookOperations);
@@ -823,14 +960,19 @@ public class LogbookLFCAdministrationTest {
         ArgumentCaptor<ProcessingEntry> processingEntryArgumentCaptor = ArgumentCaptor.forClass(ProcessingEntry.class);
         verify(processingManagementClient).initVitamProcess(processingEntryArgumentCaptor.capture());
 
-        assertThat(processingEntryArgumentCaptor.getValue().getWorkflow())
-            .isEqualTo("UNIT_LFC_TRACEABILITY");
-        assertThat(processingEntryArgumentCaptor.getValue().getExtraParams().
-            get(WorkerParameterName.lifecycleTraceabilityTemporizationDelayInSeconds.name())).isEqualTo(
-            TEMPORIZATION_DELAY.toString());
-        assertThat(processingEntryArgumentCaptor.getValue().getExtraParams().
-            get(WorkerParameterName.lifecycleTraceabilityMaxEntries.name())).isEqualTo(
-            MAX_ENTRIES.toString());
+        assertThat(processingEntryArgumentCaptor.getValue().getWorkflow()).isEqualTo("UNIT_LFC_TRACEABILITY");
+        assertThat(
+            processingEntryArgumentCaptor
+                .getValue()
+                .getExtraParams()
+                .get(WorkerParameterName.lifecycleTraceabilityTemporizationDelayInSeconds.name())
+        ).isEqualTo(TEMPORIZATION_DELAY.toString());
+        assertThat(
+            processingEntryArgumentCaptor
+                .getValue()
+                .getExtraParams()
+                .get(WorkerParameterName.lifecycleTraceabilityMaxEntries.name())
+        ).isEqualTo(MAX_ENTRIES.toString());
     }
 
     @Test
@@ -848,24 +990,31 @@ public class LogbookLFCAdministrationTest {
         LogbookOperations logbookOperations = mock(LogbookOperations.class);
         LogbookLifeCyclesImpl logbookLifeCycles = mock(LogbookLifeCyclesImpl.class);
 
-        doReturn(new LogbookOperation(
-            PropertiesUtils.getResourceAsString("objectgroup_lfc_traceability_with_zip.json")
-        )).when(logbookOperations).findLastLifecycleTraceabilityOperation(anyString(), eq(false));
+        doReturn(
+            new LogbookOperation(PropertiesUtils.getResourceAsString("objectgroup_lfc_traceability_with_zip.json"))
+        )
+            .when(logbookOperations)
+            .findLastLifecycleTraceabilityOperation(anyString(), eq(false));
 
         doReturn(true)
-            .when(logbookLifeCycles).checkObjectGroupLifecycleEntriesExistenceByLastPersistedDate(
-                eq("2020-06-26T03:55:19.525"), anyString());
+            .when(logbookLifeCycles)
+            .checkObjectGroupLifecycleEntriesExistenceByLastPersistedDate(eq("2020-06-26T03:55:19.525"), anyString());
 
         LocalDateTime lastTraceabilityDate = LocalDateUtil.parseMongoFormattedDate("2020-06-26T04:00:19.016");
         LocalDateTime now = LocalDateUtil.now();
-        long elapsedSeconds = now.toEpochSecond(ZoneOffset.UTC)
-            - lastTraceabilityDate.toEpochSecond(ZoneOffset.UTC);
+        long elapsedSeconds = now.toEpochSecond(ZoneOffset.UTC) - lastTraceabilityDate.toEpochSecond(ZoneOffset.UTC);
         int traceabilityExpirationDelayInSeconds = (int) elapsedSeconds + 60;
 
-        LogbookLFCAdministration logbookAdministration =
-            new LogbookLFCAdministration(logbookOperations, logbookLifeCycles, processingManagementClientFactory,
-                workspaceClientFactory, TEMPORIZATION_DELAY, traceabilityExpirationDelayInSeconds, ChronoUnit.SECONDS,
-                MAX_ENTRIES);
+        LogbookLFCAdministration logbookAdministration = new LogbookLFCAdministration(
+            logbookOperations,
+            logbookLifeCycles,
+            processingManagementClientFactory,
+            workspaceClientFactory,
+            TEMPORIZATION_DELAY,
+            traceabilityExpirationDelayInSeconds,
+            ChronoUnit.SECONDS,
+            MAX_ENTRIES
+        );
 
         // When
         GUID operationGuid = GUIDFactory.newOperationLogbookGUID(tenantId);
@@ -875,10 +1024,14 @@ public class LogbookLFCAdministrationTest {
         assertThat(result).isTrue();
         verify(processingManagementClient).listOperationsDetails(any());
         verify(logbookOperations).findLastLifecycleTraceabilityOperation(
-            Contexts.OBJECTGROUP_LFC_TRACEABILITY.getEventType(), false);
+            Contexts.OBJECTGROUP_LFC_TRACEABILITY.getEventType(),
+            false
+        );
 
         verify(logbookLifeCycles).checkObjectGroupLifecycleEntriesExistenceByLastPersistedDate(
-            eq("2020-06-26T03:55:19.525"), anyString());
+            eq("2020-06-26T03:55:19.525"),
+            anyString()
+        );
 
         verify(logbookOperations).create(any());
         verifyNoMoreInteractions(logbookOperations);
@@ -887,14 +1040,19 @@ public class LogbookLFCAdministrationTest {
         ArgumentCaptor<ProcessingEntry> processingEntryArgumentCaptor = ArgumentCaptor.forClass(ProcessingEntry.class);
         verify(processingManagementClient).initVitamProcess(processingEntryArgumentCaptor.capture());
 
-        assertThat(processingEntryArgumentCaptor.getValue().getWorkflow())
-            .isEqualTo("OBJECTGROUP_LFC_TRACEABILITY");
-        assertThat(processingEntryArgumentCaptor.getValue().getExtraParams().
-            get(WorkerParameterName.lifecycleTraceabilityTemporizationDelayInSeconds.name())).isEqualTo(
-            TEMPORIZATION_DELAY.toString());
-        assertThat(processingEntryArgumentCaptor.getValue().getExtraParams().
-            get(WorkerParameterName.lifecycleTraceabilityMaxEntries.name())).isEqualTo(
-            MAX_ENTRIES.toString());
+        assertThat(processingEntryArgumentCaptor.getValue().getWorkflow()).isEqualTo("OBJECTGROUP_LFC_TRACEABILITY");
+        assertThat(
+            processingEntryArgumentCaptor
+                .getValue()
+                .getExtraParams()
+                .get(WorkerParameterName.lifecycleTraceabilityTemporizationDelayInSeconds.name())
+        ).isEqualTo(TEMPORIZATION_DELAY.toString());
+        assertThat(
+            processingEntryArgumentCaptor
+                .getValue()
+                .getExtraParams()
+                .get(WorkerParameterName.lifecycleTraceabilityMaxEntries.name())
+        ).isEqualTo(MAX_ENTRIES.toString());
     }
 
     @Test
@@ -913,27 +1071,32 @@ public class LogbookLFCAdministrationTest {
         LogbookOperations logbookOperations = mock(LogbookOperations.class);
         LogbookLifeCyclesImpl logbookLifeCycles = mock(LogbookLifeCyclesImpl.class);
 
-        doReturn(new LogbookOperation(
-            PropertiesUtils.getResourceAsString("unit_lfc_traceability_no_zip.json")
-        )).when(logbookOperations).findLastLifecycleTraceabilityOperation(anyString(), eq(false));
-        doReturn(new LogbookOperation(
-            PropertiesUtils.getResourceAsString("unit_lfc_traceability_with_zip.json")
-        )).when(logbookOperations).findLastLifecycleTraceabilityOperation(anyString(), eq(true));
+        doReturn(new LogbookOperation(PropertiesUtils.getResourceAsString("unit_lfc_traceability_no_zip.json")))
+            .when(logbookOperations)
+            .findLastLifecycleTraceabilityOperation(anyString(), eq(false));
+        doReturn(new LogbookOperation(PropertiesUtils.getResourceAsString("unit_lfc_traceability_with_zip.json")))
+            .when(logbookOperations)
+            .findLastLifecycleTraceabilityOperation(anyString(), eq(true));
 
         doReturn(true)
-            .when(logbookLifeCycles).checkUnitLifecycleEntriesExistenceByLastPersistedDate(
-                eq("2020-06-26T04:42:32.308"), anyString());
+            .when(logbookLifeCycles)
+            .checkUnitLifecycleEntriesExistenceByLastPersistedDate(eq("2020-06-26T04:42:32.308"), anyString());
 
         LocalDateTime lastTraceabilityDate = LocalDateUtil.parseMongoFormattedDate("2020-06-27T05:01:16.878");
         LocalDateTime now = LocalDateUtil.now();
-        long elapsedSeconds = now.toEpochSecond(ZoneOffset.UTC)
-            - lastTraceabilityDate.toEpochSecond(ZoneOffset.UTC);
+        long elapsedSeconds = now.toEpochSecond(ZoneOffset.UTC) - lastTraceabilityDate.toEpochSecond(ZoneOffset.UTC);
         int traceabilityExpirationDelayInSeconds = (int) elapsedSeconds + 60;
 
-        LogbookLFCAdministration logbookAdministration =
-            new LogbookLFCAdministration(logbookOperations, logbookLifeCycles, processingManagementClientFactory,
-                workspaceClientFactory, TEMPORIZATION_DELAY, traceabilityExpirationDelayInSeconds, ChronoUnit.SECONDS,
-                MAX_ENTRIES);
+        LogbookLFCAdministration logbookAdministration = new LogbookLFCAdministration(
+            logbookOperations,
+            logbookLifeCycles,
+            processingManagementClientFactory,
+            workspaceClientFactory,
+            TEMPORIZATION_DELAY,
+            traceabilityExpirationDelayInSeconds,
+            ChronoUnit.SECONDS,
+            MAX_ENTRIES
+        );
 
         // When
         GUID operationGuid = GUIDFactory.newOperationLogbookGUID(tenantId);
@@ -943,13 +1106,19 @@ public class LogbookLFCAdministrationTest {
         assertThat(result).isTrue();
         verify(processingManagementClient).listOperationsDetails(any());
         verify(processingManagementClient).listOperationsDetails(any());
-        verify(logbookOperations).findLastLifecycleTraceabilityOperation(Contexts.UNIT_LFC_TRACEABILITY.getEventType(),
-            false);
-        verify(logbookOperations).findLastLifecycleTraceabilityOperation(Contexts.UNIT_LFC_TRACEABILITY.getEventType(),
-            true);
+        verify(logbookOperations).findLastLifecycleTraceabilityOperation(
+            Contexts.UNIT_LFC_TRACEABILITY.getEventType(),
+            false
+        );
+        verify(logbookOperations).findLastLifecycleTraceabilityOperation(
+            Contexts.UNIT_LFC_TRACEABILITY.getEventType(),
+            true
+        );
 
         verify(logbookLifeCycles).checkUnitLifecycleEntriesExistenceByLastPersistedDate(
-            eq("2020-06-26T04:42:32.308"), anyString());
+            eq("2020-06-26T04:42:32.308"),
+            anyString()
+        );
 
         verify(logbookOperations).create(any());
         verifyNoMoreInteractions(logbookOperations);
@@ -958,14 +1127,19 @@ public class LogbookLFCAdministrationTest {
         ArgumentCaptor<ProcessingEntry> processingEntryArgumentCaptor = ArgumentCaptor.forClass(ProcessingEntry.class);
         verify(processingManagementClient).initVitamProcess(processingEntryArgumentCaptor.capture());
 
-        assertThat(processingEntryArgumentCaptor.getValue().getWorkflow())
-            .isEqualTo("UNIT_LFC_TRACEABILITY");
-        assertThat(processingEntryArgumentCaptor.getValue().getExtraParams().
-            get(WorkerParameterName.lifecycleTraceabilityTemporizationDelayInSeconds.name())).isEqualTo(
-            TEMPORIZATION_DELAY.toString());
-        assertThat(processingEntryArgumentCaptor.getValue().getExtraParams().
-            get(WorkerParameterName.lifecycleTraceabilityMaxEntries.name())).isEqualTo(
-            MAX_ENTRIES.toString());
+        assertThat(processingEntryArgumentCaptor.getValue().getWorkflow()).isEqualTo("UNIT_LFC_TRACEABILITY");
+        assertThat(
+            processingEntryArgumentCaptor
+                .getValue()
+                .getExtraParams()
+                .get(WorkerParameterName.lifecycleTraceabilityTemporizationDelayInSeconds.name())
+        ).isEqualTo(TEMPORIZATION_DELAY.toString());
+        assertThat(
+            processingEntryArgumentCaptor
+                .getValue()
+                .getExtraParams()
+                .get(WorkerParameterName.lifecycleTraceabilityMaxEntries.name())
+        ).isEqualTo(MAX_ENTRIES.toString());
     }
 
     @Test
@@ -984,27 +1158,34 @@ public class LogbookLFCAdministrationTest {
         LogbookOperations logbookOperations = mock(LogbookOperations.class);
         LogbookLifeCyclesImpl logbookLifeCycles = mock(LogbookLifeCyclesImpl.class);
 
-        doReturn(new LogbookOperation(
-            PropertiesUtils.getResourceAsString("objectgroup_lfc_traceability_no_zip.json")
-        )).when(logbookOperations).findLastLifecycleTraceabilityOperation(anyString(), eq(false));
-        doReturn(new LogbookOperation(
-            PropertiesUtils.getResourceAsString("objectgroup_lfc_traceability_with_zip.json")
-        )).when(logbookOperations).findLastLifecycleTraceabilityOperation(anyString(), eq(true));
+        doReturn(new LogbookOperation(PropertiesUtils.getResourceAsString("objectgroup_lfc_traceability_no_zip.json")))
+            .when(logbookOperations)
+            .findLastLifecycleTraceabilityOperation(anyString(), eq(false));
+        doReturn(
+            new LogbookOperation(PropertiesUtils.getResourceAsString("objectgroup_lfc_traceability_with_zip.json"))
+        )
+            .when(logbookOperations)
+            .findLastLifecycleTraceabilityOperation(anyString(), eq(true));
 
         doReturn(true)
-            .when(logbookLifeCycles).checkObjectGroupLifecycleEntriesExistenceByLastPersistedDate(
-                eq("2020-06-26T03:55:19.525"), anyString());
+            .when(logbookLifeCycles)
+            .checkObjectGroupLifecycleEntriesExistenceByLastPersistedDate(eq("2020-06-26T03:55:19.525"), anyString());
 
         LocalDateTime lastTraceabilityDate = LocalDateUtil.parseMongoFormattedDate("2020-06-27T04:00:35.190");
         LocalDateTime now = LocalDateUtil.now();
-        long elapsedSeconds = now.toEpochSecond(ZoneOffset.UTC)
-            - lastTraceabilityDate.toEpochSecond(ZoneOffset.UTC);
+        long elapsedSeconds = now.toEpochSecond(ZoneOffset.UTC) - lastTraceabilityDate.toEpochSecond(ZoneOffset.UTC);
         int traceabilityExpirationDelayInSeconds = (int) elapsedSeconds + 60;
 
-        LogbookLFCAdministration logbookAdministration =
-            new LogbookLFCAdministration(logbookOperations, logbookLifeCycles, processingManagementClientFactory,
-                workspaceClientFactory, TEMPORIZATION_DELAY, traceabilityExpirationDelayInSeconds, ChronoUnit.SECONDS,
-                MAX_ENTRIES);
+        LogbookLFCAdministration logbookAdministration = new LogbookLFCAdministration(
+            logbookOperations,
+            logbookLifeCycles,
+            processingManagementClientFactory,
+            workspaceClientFactory,
+            TEMPORIZATION_DELAY,
+            traceabilityExpirationDelayInSeconds,
+            ChronoUnit.SECONDS,
+            MAX_ENTRIES
+        );
 
         // When
         GUID operationGuid = GUIDFactory.newOperationLogbookGUID(tenantId);
@@ -1014,12 +1195,18 @@ public class LogbookLFCAdministrationTest {
         assertThat(result).isTrue();
         verify(processingManagementClient).listOperationsDetails(any());
         verify(logbookOperations).findLastLifecycleTraceabilityOperation(
-            Contexts.OBJECTGROUP_LFC_TRACEABILITY.getEventType(), false);
+            Contexts.OBJECTGROUP_LFC_TRACEABILITY.getEventType(),
+            false
+        );
         verify(logbookOperations).findLastLifecycleTraceabilityOperation(
-            Contexts.OBJECTGROUP_LFC_TRACEABILITY.getEventType(), true);
+            Contexts.OBJECTGROUP_LFC_TRACEABILITY.getEventType(),
+            true
+        );
 
         verify(logbookLifeCycles).checkObjectGroupLifecycleEntriesExistenceByLastPersistedDate(
-            eq("2020-06-26T03:55:19.525"), anyString());
+            eq("2020-06-26T03:55:19.525"),
+            anyString()
+        );
 
         verify(logbookOperations).create(any());
         verifyNoMoreInteractions(logbookOperations);
@@ -1028,14 +1215,19 @@ public class LogbookLFCAdministrationTest {
         ArgumentCaptor<ProcessingEntry> processingEntryArgumentCaptor = ArgumentCaptor.forClass(ProcessingEntry.class);
         verify(processingManagementClient).initVitamProcess(processingEntryArgumentCaptor.capture());
 
-        assertThat(processingEntryArgumentCaptor.getValue().getWorkflow())
-            .isEqualTo("OBJECTGROUP_LFC_TRACEABILITY");
-        assertThat(processingEntryArgumentCaptor.getValue().getExtraParams().
-            get(WorkerParameterName.lifecycleTraceabilityTemporizationDelayInSeconds.name())).isEqualTo(
-            TEMPORIZATION_DELAY.toString());
-        assertThat(processingEntryArgumentCaptor.getValue().getExtraParams().
-            get(WorkerParameterName.lifecycleTraceabilityMaxEntries.name())).isEqualTo(
-            MAX_ENTRIES.toString());
+        assertThat(processingEntryArgumentCaptor.getValue().getWorkflow()).isEqualTo("OBJECTGROUP_LFC_TRACEABILITY");
+        assertThat(
+            processingEntryArgumentCaptor
+                .getValue()
+                .getExtraParams()
+                .get(WorkerParameterName.lifecycleTraceabilityTemporizationDelayInSeconds.name())
+        ).isEqualTo(TEMPORIZATION_DELAY.toString());
+        assertThat(
+            processingEntryArgumentCaptor
+                .getValue()
+                .getExtraParams()
+                .get(WorkerParameterName.lifecycleTraceabilityMaxEntries.name())
+        ).isEqualTo(MAX_ENTRIES.toString());
     }
 
     @Test
@@ -1054,26 +1246,30 @@ public class LogbookLFCAdministrationTest {
         LogbookOperations logbookOperations = mock(LogbookOperations.class);
         LogbookLifeCyclesImpl logbookLifeCycles = mock(LogbookLifeCyclesImpl.class);
 
-        doReturn(new LogbookOperation(
-            PropertiesUtils.getResourceAsString("unit_lfc_traceability_no_zip.json")
-        )).when(logbookOperations).findLastLifecycleTraceabilityOperation(anyString(), eq(false));
-        doReturn(null)
-            .when(logbookOperations).findLastLifecycleTraceabilityOperation(anyString(), eq(true));
+        doReturn(new LogbookOperation(PropertiesUtils.getResourceAsString("unit_lfc_traceability_no_zip.json")))
+            .when(logbookOperations)
+            .findLastLifecycleTraceabilityOperation(anyString(), eq(false));
+        doReturn(null).when(logbookOperations).findLastLifecycleTraceabilityOperation(anyString(), eq(true));
 
         doReturn(true)
-            .when(logbookLifeCycles).checkUnitLifecycleEntriesExistenceByLastPersistedDate(
-                eq("1970-01-01T00:00:00.000"), anyString());
+            .when(logbookLifeCycles)
+            .checkUnitLifecycleEntriesExistenceByLastPersistedDate(eq("1970-01-01T00:00:00.000"), anyString());
 
         LocalDateTime lastTraceabilityDate = LocalDateUtil.parseMongoFormattedDate("2020-06-27T05:01:16.878");
         LocalDateTime now = LocalDateUtil.now();
-        long elapsedSeconds = now.toEpochSecond(ZoneOffset.UTC)
-            - lastTraceabilityDate.toEpochSecond(ZoneOffset.UTC);
+        long elapsedSeconds = now.toEpochSecond(ZoneOffset.UTC) - lastTraceabilityDate.toEpochSecond(ZoneOffset.UTC);
         int traceabilityExpirationDelayInSeconds = (int) elapsedSeconds + 60;
 
-        LogbookLFCAdministration logbookAdministration =
-            new LogbookLFCAdministration(logbookOperations, logbookLifeCycles, processingManagementClientFactory,
-                workspaceClientFactory, TEMPORIZATION_DELAY, traceabilityExpirationDelayInSeconds, ChronoUnit.SECONDS,
-                MAX_ENTRIES);
+        LogbookLFCAdministration logbookAdministration = new LogbookLFCAdministration(
+            logbookOperations,
+            logbookLifeCycles,
+            processingManagementClientFactory,
+            workspaceClientFactory,
+            TEMPORIZATION_DELAY,
+            traceabilityExpirationDelayInSeconds,
+            ChronoUnit.SECONDS,
+            MAX_ENTRIES
+        );
 
         // When
         GUID operationGuid = GUIDFactory.newOperationLogbookGUID(tenantId);
@@ -1082,13 +1278,19 @@ public class LogbookLFCAdministrationTest {
         // Then
         assertThat(result).isTrue();
         verify(processingManagementClient).listOperationsDetails(any());
-        verify(logbookOperations).findLastLifecycleTraceabilityOperation(Contexts.UNIT_LFC_TRACEABILITY.getEventType(),
-            false);
-        verify(logbookOperations).findLastLifecycleTraceabilityOperation(Contexts.UNIT_LFC_TRACEABILITY.getEventType(),
-            true);
+        verify(logbookOperations).findLastLifecycleTraceabilityOperation(
+            Contexts.UNIT_LFC_TRACEABILITY.getEventType(),
+            false
+        );
+        verify(logbookOperations).findLastLifecycleTraceabilityOperation(
+            Contexts.UNIT_LFC_TRACEABILITY.getEventType(),
+            true
+        );
 
         verify(logbookLifeCycles).checkUnitLifecycleEntriesExistenceByLastPersistedDate(
-            eq("1970-01-01T00:00:00.000"), anyString());
+            eq("1970-01-01T00:00:00.000"),
+            anyString()
+        );
 
         verify(logbookOperations).create(any());
         verifyNoMoreInteractions(logbookOperations);
@@ -1097,14 +1299,19 @@ public class LogbookLFCAdministrationTest {
         ArgumentCaptor<ProcessingEntry> processingEntryArgumentCaptor = ArgumentCaptor.forClass(ProcessingEntry.class);
         verify(processingManagementClient).initVitamProcess(processingEntryArgumentCaptor.capture());
 
-        assertThat(processingEntryArgumentCaptor.getValue().getWorkflow())
-            .isEqualTo("UNIT_LFC_TRACEABILITY");
-        assertThat(processingEntryArgumentCaptor.getValue().getExtraParams().
-            get(WorkerParameterName.lifecycleTraceabilityTemporizationDelayInSeconds.name())).isEqualTo(
-            TEMPORIZATION_DELAY.toString());
-        assertThat(processingEntryArgumentCaptor.getValue().getExtraParams().
-            get(WorkerParameterName.lifecycleTraceabilityMaxEntries.name())).isEqualTo(
-            MAX_ENTRIES.toString());
+        assertThat(processingEntryArgumentCaptor.getValue().getWorkflow()).isEqualTo("UNIT_LFC_TRACEABILITY");
+        assertThat(
+            processingEntryArgumentCaptor
+                .getValue()
+                .getExtraParams()
+                .get(WorkerParameterName.lifecycleTraceabilityTemporizationDelayInSeconds.name())
+        ).isEqualTo(TEMPORIZATION_DELAY.toString());
+        assertThat(
+            processingEntryArgumentCaptor
+                .getValue()
+                .getExtraParams()
+                .get(WorkerParameterName.lifecycleTraceabilityMaxEntries.name())
+        ).isEqualTo(MAX_ENTRIES.toString());
     }
 
     @Test
@@ -1123,26 +1330,30 @@ public class LogbookLFCAdministrationTest {
         LogbookOperations logbookOperations = mock(LogbookOperations.class);
         LogbookLifeCyclesImpl logbookLifeCycles = mock(LogbookLifeCyclesImpl.class);
 
-        doReturn(new LogbookOperation(
-            PropertiesUtils.getResourceAsString("objectgroup_lfc_traceability_no_zip.json")
-        )).when(logbookOperations).findLastLifecycleTraceabilityOperation(anyString(), eq(false));
-        doReturn(null)
-            .when(logbookOperations).findLastLifecycleTraceabilityOperation(anyString(), eq(true));
+        doReturn(new LogbookOperation(PropertiesUtils.getResourceAsString("objectgroup_lfc_traceability_no_zip.json")))
+            .when(logbookOperations)
+            .findLastLifecycleTraceabilityOperation(anyString(), eq(false));
+        doReturn(null).when(logbookOperations).findLastLifecycleTraceabilityOperation(anyString(), eq(true));
 
         doReturn(true)
-            .when(logbookLifeCycles).checkObjectGroupLifecycleEntriesExistenceByLastPersistedDate(
-                eq("1970-01-01T00:00:00.000"), anyString());
+            .when(logbookLifeCycles)
+            .checkObjectGroupLifecycleEntriesExistenceByLastPersistedDate(eq("1970-01-01T00:00:00.000"), anyString());
 
         LocalDateTime lastTraceabilityDate = LocalDateUtil.parseMongoFormattedDate("2020-06-27T04:00:35.190");
         LocalDateTime now = LocalDateUtil.now();
-        long elapsedSeconds = now.toEpochSecond(ZoneOffset.UTC)
-            - lastTraceabilityDate.toEpochSecond(ZoneOffset.UTC);
+        long elapsedSeconds = now.toEpochSecond(ZoneOffset.UTC) - lastTraceabilityDate.toEpochSecond(ZoneOffset.UTC);
         int traceabilityExpirationDelayInSeconds = (int) elapsedSeconds + 60;
 
-        LogbookLFCAdministration logbookAdministration =
-            new LogbookLFCAdministration(logbookOperations, logbookLifeCycles, processingManagementClientFactory,
-                workspaceClientFactory, TEMPORIZATION_DELAY, traceabilityExpirationDelayInSeconds, ChronoUnit.SECONDS,
-                MAX_ENTRIES);
+        LogbookLFCAdministration logbookAdministration = new LogbookLFCAdministration(
+            logbookOperations,
+            logbookLifeCycles,
+            processingManagementClientFactory,
+            workspaceClientFactory,
+            TEMPORIZATION_DELAY,
+            traceabilityExpirationDelayInSeconds,
+            ChronoUnit.SECONDS,
+            MAX_ENTRIES
+        );
 
         // When
         GUID operationGuid = GUIDFactory.newOperationLogbookGUID(tenantId);
@@ -1152,12 +1363,18 @@ public class LogbookLFCAdministrationTest {
         assertThat(result).isTrue();
         verify(processingManagementClient).listOperationsDetails(any());
         verify(logbookOperations).findLastLifecycleTraceabilityOperation(
-            Contexts.OBJECTGROUP_LFC_TRACEABILITY.getEventType(), false);
+            Contexts.OBJECTGROUP_LFC_TRACEABILITY.getEventType(),
+            false
+        );
         verify(logbookOperations).findLastLifecycleTraceabilityOperation(
-            Contexts.OBJECTGROUP_LFC_TRACEABILITY.getEventType(), true);
+            Contexts.OBJECTGROUP_LFC_TRACEABILITY.getEventType(),
+            true
+        );
 
         verify(logbookLifeCycles).checkObjectGroupLifecycleEntriesExistenceByLastPersistedDate(
-            eq("1970-01-01T00:00:00.000"), anyString());
+            eq("1970-01-01T00:00:00.000"),
+            anyString()
+        );
 
         verify(logbookOperations).create(any());
         verifyNoMoreInteractions(logbookOperations);
@@ -1166,20 +1383,24 @@ public class LogbookLFCAdministrationTest {
         ArgumentCaptor<ProcessingEntry> processingEntryArgumentCaptor = ArgumentCaptor.forClass(ProcessingEntry.class);
         verify(processingManagementClient).initVitamProcess(processingEntryArgumentCaptor.capture());
 
-        assertThat(processingEntryArgumentCaptor.getValue().getWorkflow())
-            .isEqualTo("OBJECTGROUP_LFC_TRACEABILITY");
-        assertThat(processingEntryArgumentCaptor.getValue().getExtraParams().
-            get(WorkerParameterName.lifecycleTraceabilityTemporizationDelayInSeconds.name())).isEqualTo(
-            TEMPORIZATION_DELAY.toString());
-        assertThat(processingEntryArgumentCaptor.getValue().getExtraParams().
-            get(WorkerParameterName.lifecycleTraceabilityMaxEntries.name())).isEqualTo(
-            MAX_ENTRIES.toString());
+        assertThat(processingEntryArgumentCaptor.getValue().getWorkflow()).isEqualTo("OBJECTGROUP_LFC_TRACEABILITY");
+        assertThat(
+            processingEntryArgumentCaptor
+                .getValue()
+                .getExtraParams()
+                .get(WorkerParameterName.lifecycleTraceabilityTemporizationDelayInSeconds.name())
+        ).isEqualTo(TEMPORIZATION_DELAY.toString());
+        assertThat(
+            processingEntryArgumentCaptor
+                .getValue()
+                .getExtraParams()
+                .get(WorkerParameterName.lifecycleTraceabilityMaxEntries.name())
+        ).isEqualTo(MAX_ENTRIES.toString());
     }
 
     @Test
     @RunWithCustomExecutor
-    public void givenTraceabilityOperationInProgressThenSkipUnitLfcTraceability()
-        throws Exception {
+    public void givenTraceabilityOperationInProgressThenSkipUnitLfcTraceability() throws Exception {
         VitamThreadUtils.getVitamSession().setTenantId(tenantId);
 
         RequestResponseOK<ProcessDetail> response = new RequestResponseOK<>(null, List.of(new ProcessDetail()), 1);
@@ -1188,10 +1409,16 @@ public class LogbookLFCAdministrationTest {
         LogbookOperations logbookOperations = mock(LogbookOperations.class);
         LogbookLifeCyclesImpl logbookLifeCycles = mock(LogbookLifeCyclesImpl.class);
 
-        LogbookLFCAdministration logbookAdministration =
-            new LogbookLFCAdministration(logbookOperations, logbookLifeCycles, processingManagementClientFactory,
-                workspaceClientFactory, TEMPORIZATION_DELAY, 10, ChronoUnit.SECONDS,
-                MAX_ENTRIES);
+        LogbookLFCAdministration logbookAdministration = new LogbookLFCAdministration(
+            logbookOperations,
+            logbookLifeCycles,
+            processingManagementClientFactory,
+            workspaceClientFactory,
+            TEMPORIZATION_DELAY,
+            10,
+            ChronoUnit.SECONDS,
+            MAX_ENTRIES
+        );
 
         // When
         GUID operationGuid = GUIDFactory.newOperationLogbookGUID(tenantId);
@@ -1214,28 +1441,33 @@ public class LogbookLFCAdministrationTest {
     public void shouldGetExceptionWhenWorkspaceIsDown() throws Exception {
         VitamThreadUtils.getVitamSession().setTenantId(tenantId);
 
-        doThrow(new ContentAddressableStorageServerException(""))
-            .when(workspaceClient).createContainer(anyString());
+        doThrow(new ContentAddressableStorageServerException("")).when(workspaceClient).createContainer(anyString());
 
         LogbookOperations logbookOperations = mock(LogbookOperations.class);
         LogbookLifeCyclesImpl logbookLifeCycles = mock(LogbookLifeCyclesImpl.class);
         doReturn(null).when(logbookOperations).findLastLifecycleTraceabilityOperation(anyString(), eq(false));
 
-        LogbookLFCAdministration logbookAdministration =
-            new LogbookLFCAdministration(logbookOperations, logbookLifeCycles, processingManagementClientFactory,
-                workspaceClientFactory, TEMPORIZATION_DELAY, MAX_RENEWAL_DELAY, MAX_RENEWAL_DELAY_UNIT, MAX_ENTRIES);
+        LogbookLFCAdministration logbookAdministration = new LogbookLFCAdministration(
+            logbookOperations,
+            logbookLifeCycles,
+            processingManagementClientFactory,
+            workspaceClientFactory,
+            TEMPORIZATION_DELAY,
+            MAX_RENEWAL_DELAY,
+            MAX_RENEWAL_DELAY_UNIT,
+            MAX_ENTRIES
+        );
 
         // When
         GUID operationGuid = GUIDFactory.newOperationLogbookGUID(tenantId);
         assertThatThrownBy(
-            () -> logbookAdministration.generateSecureLogbookLFC(operationGuid, LfcTraceabilityType.Unit))
-            .isInstanceOf(VitamClientException.class);
+            () -> logbookAdministration.generateSecureLogbookLFC(operationGuid, LfcTraceabilityType.Unit)
+        ).isInstanceOf(VitamClientException.class);
     }
 
     @Test
     @RunWithCustomExecutor
     public void traceabilityAuditTestWhenNoTraceabilityThenKO() throws Exception {
-
         // Given
         VitamThreadUtils.getVitamSession().setTenantId(tenantId);
 
@@ -1247,15 +1479,23 @@ public class LogbookLFCAdministrationTest {
         req.setHttpCode(Status.ACCEPTED.getStatusCode());
         when(processingManagementClient.updateOperationActionProcess(anyString(), anyString())).thenReturn(req);
 
-        LogbookAuditAdministration logbookAuditAdministration =
-            new LogbookAuditAdministration(logbookOperations, alertService);
+        LogbookAuditAdministration logbookAuditAdministration = new LogbookAuditAdministration(
+            logbookOperations,
+            alertService
+        );
 
         // When
-        int nbUnitLfcTraceabilityOperations = logbookAuditAdministration
-            .auditTraceability(Contexts.UNIT_LFC_TRACEABILITY.getEventType(), 12, ChronoUnit.HOURS);
+        int nbUnitLfcTraceabilityOperations = logbookAuditAdministration.auditTraceability(
+            Contexts.UNIT_LFC_TRACEABILITY.getEventType(),
+            12,
+            ChronoUnit.HOURS
+        );
 
-        int nbObjectGroupLfcTraceabilityOperations = logbookAuditAdministration
-            .auditTraceability(Contexts.OBJECTGROUP_LFC_TRACEABILITY.getEventType(), 12, ChronoUnit.HOURS);
+        int nbObjectGroupLfcTraceabilityOperations = logbookAuditAdministration.auditTraceability(
+            Contexts.OBJECTGROUP_LFC_TRACEABILITY.getEventType(),
+            12,
+            ChronoUnit.HOURS
+        );
 
         // Then
         assertEquals(0, nbUnitLfcTraceabilityOperations);
@@ -1266,7 +1506,6 @@ public class LogbookLFCAdministrationTest {
     @Test
     @RunWithCustomExecutor
     public void traceabilityAuditTestWhenTraceabilityThenOK() throws Exception {
-
         // Given
         VitamThreadUtils.getVitamSession().setTenantId(tenantId);
 
@@ -1278,12 +1517,21 @@ public class LogbookLFCAdministrationTest {
         req.setHttpCode(Status.ACCEPTED.getStatusCode());
         when(processingManagementClient.updateOperationActionProcess(anyString(), anyString())).thenReturn(req);
 
-        LogbookLFCAdministration logbookAdministration =
-            new LogbookLFCAdministration(logbookOperations, logbookLifeCycles, processingManagementClientFactory,
-                workspaceClientFactory, TEMPORIZATION_DELAY, 12, ChronoUnit.HOURS, MAX_ENTRIES);
+        LogbookLFCAdministration logbookAdministration = new LogbookLFCAdministration(
+            logbookOperations,
+            logbookLifeCycles,
+            processingManagementClientFactory,
+            workspaceClientFactory,
+            TEMPORIZATION_DELAY,
+            12,
+            ChronoUnit.HOURS,
+            MAX_ENTRIES
+        );
 
-        LogbookAuditAdministration logbookAuditAdministration =
-            new LogbookAuditAdministration(logbookOperations, alertService);
+        LogbookAuditAdministration logbookAuditAdministration = new LogbookAuditAdministration(
+            logbookOperations,
+            alertService
+        );
 
         logbookAdministration.generateSecureLogbookLFC(GUIDFactory.newGUID(), LfcTraceabilityType.Unit);
         logbookAdministration.generateSecureLogbookLFC(GUIDFactory.newGUID(), LfcTraceabilityType.ObjectGroup);
@@ -1292,11 +1540,17 @@ public class LogbookLFCAdministrationTest {
         for (int i = 0; i < 11; i++) {
             logicalClock.logicalSleep(60, ChronoUnit.MINUTES);
 
-            int nbUnitLfcTraceabilityOperations = logbookAuditAdministration
-                .auditTraceability(Contexts.UNIT_LFC_TRACEABILITY.getEventType(), 12, ChronoUnit.HOURS);
+            int nbUnitLfcTraceabilityOperations = logbookAuditAdministration.auditTraceability(
+                Contexts.UNIT_LFC_TRACEABILITY.getEventType(),
+                12,
+                ChronoUnit.HOURS
+            );
 
-            int nbObjectGroupLfcTraceabilityOperations = logbookAuditAdministration
-                .auditTraceability(Contexts.OBJECTGROUP_LFC_TRACEABILITY.getEventType(), 12, ChronoUnit.HOURS);
+            int nbObjectGroupLfcTraceabilityOperations = logbookAuditAdministration.auditTraceability(
+                Contexts.OBJECTGROUP_LFC_TRACEABILITY.getEventType(),
+                12,
+                ChronoUnit.HOURS
+            );
 
             // Then
             assertEquals(1, nbUnitLfcTraceabilityOperations);
@@ -1309,7 +1563,6 @@ public class LogbookLFCAdministrationTest {
     @Test
     @RunWithCustomExecutor
     public void traceabilityAuditTestWhenTraceabilityIsTooOldThenKO() throws Exception {
-
         // Given
         VitamThreadUtils.getVitamSession().setTenantId(tenantId);
 
@@ -1321,12 +1574,21 @@ public class LogbookLFCAdministrationTest {
         req.setHttpCode(Status.ACCEPTED.getStatusCode());
         when(processingManagementClient.updateOperationActionProcess(anyString(), anyString())).thenReturn(req);
 
-        LogbookLFCAdministration logbookAdministration =
-            new LogbookLFCAdministration(logbookOperations, logbookLifeCycles, processingManagementClientFactory,
-                workspaceClientFactory, TEMPORIZATION_DELAY, 12, ChronoUnit.HOURS, MAX_ENTRIES);
+        LogbookLFCAdministration logbookAdministration = new LogbookLFCAdministration(
+            logbookOperations,
+            logbookLifeCycles,
+            processingManagementClientFactory,
+            workspaceClientFactory,
+            TEMPORIZATION_DELAY,
+            12,
+            ChronoUnit.HOURS,
+            MAX_ENTRIES
+        );
 
-        LogbookAuditAdministration logbookAuditAdministration =
-            new LogbookAuditAdministration(logbookOperations, alertService);
+        LogbookAuditAdministration logbookAuditAdministration = new LogbookAuditAdministration(
+            logbookOperations,
+            alertService
+        );
 
         logbookAdministration.generateSecureLogbookLFC(GUIDFactory.newGUID(), LfcTraceabilityType.Unit);
         logbookAdministration.generateSecureLogbookLFC(GUIDFactory.newGUID(), LfcTraceabilityType.ObjectGroup);
@@ -1334,11 +1596,17 @@ public class LogbookLFCAdministrationTest {
         logicalClock.logicalSleep(12, ChronoUnit.HOURS);
 
         // When
-        int nbUnitLfcTraceabilityOperations = logbookAuditAdministration
-            .auditTraceability(Contexts.UNIT_LFC_TRACEABILITY.getEventType(), 12, ChronoUnit.HOURS);
+        int nbUnitLfcTraceabilityOperations = logbookAuditAdministration.auditTraceability(
+            Contexts.UNIT_LFC_TRACEABILITY.getEventType(),
+            12,
+            ChronoUnit.HOURS
+        );
 
-        int nbObjectGroupLfcTraceabilityOperations = logbookAuditAdministration
-            .auditTraceability(Contexts.OBJECTGROUP_LFC_TRACEABILITY.getEventType(), 12, ChronoUnit.HOURS);
+        int nbObjectGroupLfcTraceabilityOperations = logbookAuditAdministration.auditTraceability(
+            Contexts.OBJECTGROUP_LFC_TRACEABILITY.getEventType(),
+            12,
+            ChronoUnit.HOURS
+        );
 
         // Then
         assertEquals(0, nbUnitLfcTraceabilityOperations);

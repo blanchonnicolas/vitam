@@ -32,6 +32,7 @@ public class SignedObjectDigestModel {
 
     @JsonProperty("MessageDigest")
     protected String value;
+
     @JsonProperty("Algorithm")
     protected String algorithm;
 

@@ -72,7 +72,6 @@ public class RunWithCustomExecutorRule implements TestRule, ClassRule {
         this.executor = executor;
     }
 
-
     @Override
     public Statement apply(Statement base, Description description) {
         // Restricts the rule application to the tests annotated with the relevant annotation

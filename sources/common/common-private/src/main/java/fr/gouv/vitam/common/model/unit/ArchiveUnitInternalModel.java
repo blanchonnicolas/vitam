@@ -29,7 +29,6 @@ package fr.gouv.vitam.common.model.unit;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonUnwrapped;
 
-import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -131,7 +130,6 @@ public class ArchiveUnitInternalModel {
     public void setManagement(ManagementModel management) {
         this.management = management;
     }
-
 
     public List<ArchiveUnitHistoryModel> getHistory() {
         return history;

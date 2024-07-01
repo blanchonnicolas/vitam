@@ -85,6 +85,7 @@ import static javax.ws.rs.core.Response.Status.OK;
 
 @Path("/collect-internal/v1/transactions")
 public class TransactionInternalResource {
+
     public static final String SIP_GENERATED_MANIFEST_CAN_T_BE_NULL = "SIP generated manifest can't be null";
     private static final VitamLogger LOGGER = VitamLoggerFactory.getInstance(TransactionInternalResource.class);
     private static final String TRANSACTION_NOT_FOUND = "Unable to find transaction Id or invalid status";
@@ -102,8 +103,13 @@ public class TransactionInternalResource {
     private final FluxService fluxService;
     private final ProjectService projectService;
 
-    public TransactionInternalResource(TransactionService transactionService, SipService sipService,
-        MetadataService metadataService, FluxService fluxService, ProjectService projectService) {
+    public TransactionInternalResource(
+        TransactionService transactionService,
+        SipService sipService,
+        MetadataService metadataService,
+        FluxService fluxService,
+        ProjectService projectService
+    ) {
         this.transactionService = transactionService;
         this.sipService = sipService;
         this.metadataService = metadataService;
@@ -125,9 +131,9 @@ public class TransactionInternalResource {
                 return CollectRequestResponse.toVitamError(BAD_REQUEST, TRANSACTION_NOT_FOUND);
             }
 
-            TransactionDto transactionDto =
-                CollectHelper.convertTransactionModelToTransactionDto(transactionModel.get());
-
+            TransactionDto transactionDto = CollectHelper.convertTransactionModelToTransactionDto(
+                transactionModel.get()
+            );
 
             return CollectRequestResponse.toResponseOK(transactionDto);
         } catch (CollectInternalException e) {
@@ -170,7 +176,6 @@ public class TransactionInternalResource {
         }
     }
 
-
     @Path("/{transactionId}")
     @DELETE
     @Produces(APPLICATION_JSON)
@@ -201,15 +206,16 @@ public class TransactionInternalResource {
     @Consumes(APPLICATION_JSON)
     @Produces(APPLICATION_JSON)
     public Response uploadArchiveUnit(@PathParam("transactionId") String transactionId, JsonNode unitJsonNode) {
-
         try {
             SanityChecker.checkParameter(transactionId);
             SanityChecker.checkJsonAll(unitJsonNode);
 
             Optional<TransactionModel> transactionModel = transactionService.findTransaction(transactionId);
 
-            if (transactionModel.isEmpty() ||
-                !transactionService.checkStatus(transactionModel.get(), TransactionStatus.OPEN)) {
+            if (
+                transactionModel.isEmpty() ||
+                !transactionService.checkStatus(transactionModel.get(), TransactionStatus.OPEN)
+            ) {
                 LOGGER.error(TRANSACTION_NOT_FOUND);
                 return CollectRequestResponse.toVitamError(BAD_REQUEST, TRANSACTION_NOT_FOUND);
             }
@@ -233,10 +239,11 @@ public class TransactionInternalResource {
     @Produces(APPLICATION_JSON)
     public Response selectUnits(@PathParam("transactionId") String transactionId, JsonNode jsonQuery) {
         try {
-            final RequestResponseOK<JsonNode>
-                units = metadataService.selectUnitsByTransactionId(jsonQuery, transactionId);
-            return Response.status(Response.Status.OK).entity(units)
-                .build();
+            final RequestResponseOK<JsonNode> units = metadataService.selectUnitsByTransactionId(
+                jsonQuery,
+                transactionId
+            );
+            return Response.status(Response.Status.OK).entity(units).build();
         } catch (CollectInternalException e) {
             LOGGER.error("Error when getting units in metadata : {}", e);
             return CollectRequestResponse.toVitamError(INTERNAL_SERVER_ERROR, e.getLocalizedMessage());
@@ -306,8 +313,10 @@ public class TransactionInternalResource {
         try {
             SanityChecker.checkParameter(transactionId);
             Optional<TransactionModel> transactionModel = transactionService.findTransaction(transactionId);
-            if (transactionModel.isEmpty() ||
-                !transactionService.checkStatus(transactionModel.get(), TransactionStatus.READY)) {
+            if (
+                transactionModel.isEmpty() ||
+                !transactionService.checkStatus(transactionModel.get(), TransactionStatus.READY)
+            ) {
                 LOGGER.error(TRANSACTION_NOT_FOUND);
                 return Response.status(BAD_REQUEST).build();
             }
@@ -338,7 +347,6 @@ public class TransactionInternalResource {
         }
     }
 
-
     @Path("/{transactionId}/units")
     @PUT
     @Consumes(APPLICATION_OCTET_STREAM)
@@ -349,8 +357,10 @@ public class TransactionInternalResource {
             SanityChecker.checkParameter(transactionId);
 
             Optional<TransactionModel> transactionModel = transactionService.findTransaction(transactionId);
-            if (transactionModel.isEmpty() ||
-                !transactionService.checkStatus(transactionModel.get(), TransactionStatus.OPEN)) {
+            if (
+                transactionModel.isEmpty() ||
+                !transactionService.checkStatus(transactionModel.get(), TransactionStatus.OPEN)
+            ) {
                 LOGGER.error(TRANSACTION_NOT_FOUND);
                 return CollectRequestResponse.toVitamError(BAD_REQUEST, TRANSACTION_NOT_FOUND);
             }
@@ -373,7 +383,6 @@ public class TransactionInternalResource {
                 }
                 SanityChecker.checkHTMLFile(file);
 
-
                 try (InputStream sanityStream = new FileInputStream(file)) {
                     metadataService.updateUnits(transaction, sanityStream);
                 }
@@ -393,15 +402,19 @@ public class TransactionInternalResource {
 
     @Path("/{transactionId}/upload")
     @POST
-    @Consumes({CommonMediaType.ZIP})
+    @Consumes({ CommonMediaType.ZIP })
     @Produces(APPLICATION_JSON)
-    public Response uploadTransactionZip(@PathParam("transactionId") String transactionId,
-        InputStream inputStreamObject) {
+    public Response uploadTransactionZip(
+        @PathParam("transactionId") String transactionId,
+        InputStream inputStreamObject
+    ) {
         try {
             ParametersChecker.checkParameter("You must supply a file!", inputStreamObject);
             Optional<TransactionModel> transactionModel = transactionService.findTransaction(transactionId);
-            if (transactionModel.isEmpty() ||
-                !transactionService.checkStatus(transactionModel.get(), TransactionStatus.OPEN)) {
+            if (
+                transactionModel.isEmpty() ||
+                !transactionService.checkStatus(transactionModel.get(), TransactionStatus.OPEN)
+            ) {
                 LOGGER.error(TRANSACTION_NOT_FOUND);
                 return CollectRequestResponse.toVitamError(NOT_FOUND, TRANSACTION_NOT_FOUND);
             }
@@ -420,8 +433,10 @@ public class TransactionInternalResource {
     @PUT
     @Consumes(APPLICATION_JSON)
     @Produces(APPLICATION_JSON)
-    public Response changeTransactionStatus(@PathParam("transactionId") String transactionId,
-        @PathParam("transactionStatus") TransactionStatus transactionStatus) {
+    public Response changeTransactionStatus(
+        @PathParam("transactionId") String transactionId,
+        @PathParam("transactionStatus") TransactionStatus transactionStatus
+    ) {
         try {
             SanityChecker.checkParameter(transactionId);
             transactionService.changeTransactionStatus(transactionStatus, transactionId);
@@ -439,8 +454,10 @@ public class TransactionInternalResource {
     @PUT
     @Consumes(APPLICATION_JSON)
     @Produces(APPLICATION_JSON)
-    public Response attachVitamOperationId(@PathParam("transactionId") String transactionId,
-        @PathParam("operationId") String operationId) {
+    public Response attachVitamOperationId(
+        @PathParam("transactionId") String transactionId,
+        @PathParam("operationId") String operationId
+    ) {
         try {
             SanityChecker.checkParameter(transactionId);
             SanityChecker.checkParameter(operationId);
@@ -455,8 +472,7 @@ public class TransactionInternalResource {
         }
     }
 
-    private void checkEmptyQuery(JsonNode queryDsl)
-        throws InvalidParseOperationException, BadRequestException {
+    private void checkEmptyQuery(JsonNode queryDsl) throws InvalidParseOperationException, BadRequestException {
         final SelectParserMultiple parser = new SelectParserMultiple();
         parser.parse(queryDsl.deepCopy());
         if (parser.getRequest().getNbQueries() == 0 && parser.getRequest().getRoots().isEmpty()) {
@@ -491,15 +507,20 @@ public class TransactionInternalResource {
             return CollectRequestResponse.toVitamError(Response.Status.BAD_REQUEST, EMPTY_QUERY_IS_IMPOSSIBLE);
         } catch (BadRequestException e) {
             LOGGER.error(EMPTY_QUERY_IS_IMPOSSIBLE, e);
-            return CollectRequestResponse.toVitamError(VitamCode.GLOBAL_EMPTY_QUERY.getStatus(),
-                EMPTY_QUERY_IS_IMPOSSIBLE);
+            return CollectRequestResponse.toVitamError(
+                VitamCode.GLOBAL_EMPTY_QUERY.getStatus(),
+                EMPTY_QUERY_IS_IMPOSSIBLE
+            );
         } catch (final Exception ve) {
             LOGGER.error(ve);
             status = Response.Status.INTERNAL_SERVER_ERROR;
             return Response.status(status)
-                .entity(new VitamError(status.name()).setHttpCode(status.getStatusCode())
-                    .setMessage(ve.getMessage())
-                    .setDescription(status.getReasonPhrase()))
+                .entity(
+                    new VitamError(status.name())
+                        .setHttpCode(status.getStatusCode())
+                        .setMessage(ve.getMessage())
+                        .setDescription(status.getReasonPhrase())
+                )
                 .build();
         }
         return Response.status(Response.Status.OK).entity(result).build();

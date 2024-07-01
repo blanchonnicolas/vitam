@@ -89,32 +89,36 @@ public class ObjectGroupDipServiceImpl implements DipService {
                 return Response.status(Status.OK).entity(writer.toString()).build();
             } else {
                 return Response.status(Status.BAD_REQUEST.getStatusCode())
-                    .entity(JsonHandler.unprettyPrint(
-                        new VitamError(VitamCode.ACCESS_EXTERNAL_SELECT_UNIT_BY_ID_ERROR.getItem())
-                            .setHttpCode(Status.BAD_REQUEST.getStatusCode())
-                            .setMessage(VitamCode.ACCESS_EXTERNAL_SELECT_UNIT_BY_ID_ERROR.getMessage())
-                            .setState(StatusCode.KO.name())
-                            .setContext(ACCESS_EXTERNAL_MODULE)
-                            .setDescription(VitamCode.ACCESS_EXTERNAL_SELECT_UNIT_BY_ID_ERROR.getMessage()))).build();
+                    .entity(
+                        JsonHandler.unprettyPrint(
+                            new VitamError(VitamCode.ACCESS_EXTERNAL_SELECT_UNIT_BY_ID_ERROR.getItem())
+                                .setHttpCode(Status.BAD_REQUEST.getStatusCode())
+                                .setMessage(VitamCode.ACCESS_EXTERNAL_SELECT_UNIT_BY_ID_ERROR.getMessage())
+                                .setState(StatusCode.KO.name())
+                                .setContext(ACCESS_EXTERNAL_MODULE)
+                                .setDescription(VitamCode.ACCESS_EXTERNAL_SELECT_UNIT_BY_ID_ERROR.getMessage())
+                        )
+                    )
+                    .build();
             }
-
         } catch (JsonProcessingException | JAXBException e) {
             LOGGER.error(BAD_REQUEST_EXCEPTION, e);
             status = Response.Status.BAD_REQUEST;
-            return Response.status(status).entity(JsonHandler.unprettyPrint(getErrorEntity(status, e.getMessage())))
+            return Response.status(status)
+                .entity(JsonHandler.unprettyPrint(getErrorEntity(status, e.getMessage())))
                 .build();
         } catch (InternalServerException e) {
             status = Status.BAD_REQUEST;
-            return Response.status(status).entity(JsonHandler.unprettyPrint(getErrorEntity(status, e.getMessage())))
+            return Response.status(status)
+                .entity(JsonHandler.unprettyPrint(getErrorEntity(status, e.getMessage())))
                 .build();
         }
-
     }
 
     private VitamError getErrorEntity(Status status, String message) {
-        String aMessage =
-            (message != null && !message.trim().isEmpty()) ? message
-                : (status.getReasonPhrase() != null ? status.getReasonPhrase() : status.name());
+        String aMessage = (message != null && !message.trim().isEmpty())
+            ? message
+            : (status.getReasonPhrase() != null ? status.getReasonPhrase() : status.name());
 
         return new VitamError(VitamCode.ACCESS_INTERNAL_DIP_ERROR.getItem())
             .setHttpCode(VitamCode.ACCESS_INTERNAL_DIP_ERROR.getStatus().getStatusCode())
@@ -123,5 +127,4 @@ public class ObjectGroupDipServiceImpl implements DipService {
             .setMessage(VitamCode.ACCESS_INTERNAL_DIP_ERROR.getMessage())
             .setDescription(aMessage);
     }
-
 }

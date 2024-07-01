@@ -96,19 +96,21 @@ import static org.mockito.Mockito.when;
 
 @RunWithCustomExecutor
 public class LogbookOperationsClientRestTest extends ResteasyTestApplication {
+
     protected static LogbookOperationsClientRest client;
 
     @ClassRule
-    public static RunWithCustomExecutorRule runInThread =
-        new RunWithCustomExecutorRule(VitamThreadPoolExecutor.getDefaultExecutor());
+    public static RunWithCustomExecutorRule runInThread = new RunWithCustomExecutorRule(
+        VitamThreadPoolExecutor.getDefaultExecutor()
+    );
 
-
-    protected final static ExpectedResults mock = mock(ExpectedResults.class);
+    protected static final ExpectedResults mock = mock(ExpectedResults.class);
 
     static LogbookOperationsClientFactory factory = LogbookOperationsClientFactory.getInstance();
-    public static VitamServerTestRunner
-        vitamServerTestRunner =
-        new VitamServerTestRunner(LogbookOperationsClientRestTest.class, factory);
+    public static VitamServerTestRunner vitamServerTestRunner = new VitamServerTestRunner(
+        LogbookOperationsClientRestTest.class,
+        factory
+    );
 
     @BeforeClass
     public static void setUpBeforeClass() throws Throwable {
@@ -134,6 +136,7 @@ public class LogbookOperationsClientRestTest extends ResteasyTestApplication {
     @Path("/logbook/v1")
     @javax.ws.rs.ApplicationPath("webresources")
     public static class MockResource extends ApplicationStatusResource {
+
         private final ExpectedResults mock;
 
         public MockResource(ExpectedResults expectedResponse) {
@@ -159,8 +162,7 @@ public class LogbookOperationsClientRestTest extends ResteasyTestApplication {
         @Path("/operations/{id_op}")
         @Consumes(MediaType.APPLICATION_JSON)
         @Produces(MediaType.APPLICATION_JSON)
-        public Response createOperation(@PathParam("id_op") String operationId,
-            LogbookOperationParameters operation) {
+        public Response createOperation(@PathParam("id_op") String operationId, LogbookOperationParameters operation) {
             return mock.post();
         }
 
@@ -172,13 +174,11 @@ public class LogbookOperationsClientRestTest extends ResteasyTestApplication {
             return mock.put();
         }
 
-
         @POST
         @Path("/operations/traceability")
         @Consumes(MediaType.APPLICATION_JSON)
         @Produces(MediaType.APPLICATION_JSON)
-        public Response traceability(@HeaderParam(GlobalDataRest.X_TENANT_ID) String xTenantId,
-            List<Integer> tenants) {
+        public Response traceability(@HeaderParam(GlobalDataRest.X_TENANT_ID) String xTenantId, List<Integer> tenants) {
             return mock.post();
         }
 
@@ -210,8 +210,11 @@ public class LogbookOperationsClientRestTest extends ResteasyTestApplication {
         @Path("/operations/{id_op}/unitlifecycles")
         @Consumes(MediaType.APPLICATION_JSON)
         @Produces(MediaType.APPLICATION_JSON)
-        public Response getUnitLifeCyclesByOperation(@PathParam("id_op") String operationId,
-            @HeaderParam(GlobalDataRest.X_EVENT_STATUS) String evtStatus, JsonNode query) {
+        public Response getUnitLifeCyclesByOperation(
+            @PathParam("id_op") String operationId,
+            @HeaderParam(GlobalDataRest.X_EVENT_STATUS) String evtStatus,
+            JsonNode query
+        ) {
             return mock.get();
         }
 
@@ -219,18 +222,22 @@ public class LogbookOperationsClientRestTest extends ResteasyTestApplication {
         @Path("/operations/{id_op}/unitlifecycles/{id_lc}")
         @Consumes(MediaType.APPLICATION_JSON)
         @Produces(MediaType.APPLICATION_JSON)
-        public Response createUnitLifeCyclesByOperation(@PathParam("id_op") String operationId,
-            @PathParam("id_lc") String unitLcId, LogbookLifeCycleUnitParameters parameters) {
+        public Response createUnitLifeCyclesByOperation(
+            @PathParam("id_op") String operationId,
+            @PathParam("id_lc") String unitLcId,
+            LogbookLifeCycleUnitParameters parameters
+        ) {
             return mock.post();
-
         }
 
         @POST
         @Path("/operations/{id_op}/bulklifecycles/unit/temporary")
         @Consumes(MediaType.APPLICATION_JSON)
         @Produces(MediaType.APPLICATION_JSON)
-        public Response updateUnitLifeCyclesUnitTemporaryByOperation(@PathParam("id_op") String operationId,
-            List<LogbookLifeCycleParametersBulk> logbookLifeCycleParametersBulk) {
+        public Response updateUnitLifeCyclesUnitTemporaryByOperation(
+            @PathParam("id_op") String operationId,
+            List<LogbookLifeCycleParametersBulk> logbookLifeCycleParametersBulk
+        ) {
             return mock.post();
         }
 
@@ -238,8 +245,10 @@ public class LogbookOperationsClientRestTest extends ResteasyTestApplication {
         @Path("/operations/{id_op}/bulklifecycles/got/temporary")
         @Consumes(MediaType.APPLICATION_JSON)
         @Produces(MediaType.APPLICATION_JSON)
-        public Response updateUnitLifeCyclesGOTTemporaryByOperation(@PathParam("id_op") String operationId,
-            List<LogbookLifeCycleParametersBulk> logbookLifeCycleParametersBulk) {
+        public Response updateUnitLifeCyclesGOTTemporaryByOperation(
+            @PathParam("id_op") String operationId,
+            List<LogbookLifeCycleParametersBulk> logbookLifeCycleParametersBulk
+        ) {
             return mock.post();
         }
 
@@ -247,8 +256,10 @@ public class LogbookOperationsClientRestTest extends ResteasyTestApplication {
         @Path("/operations/{id_op}/bulklifecycles/unit")
         @Consumes(MediaType.APPLICATION_JSON)
         @Produces(MediaType.APPLICATION_JSON)
-        public Response updateUnitLifeCyclesUnitByOperation(@PathParam("id_op") String operationId,
-            List<LogbookLifeCycleParametersBulk> logbookLifeCycleParametersBulk) {
+        public Response updateUnitLifeCyclesUnitByOperation(
+            @PathParam("id_op") String operationId,
+            List<LogbookLifeCycleParametersBulk> logbookLifeCycleParametersBulk
+        ) {
             return mock.post();
         }
 
@@ -256,8 +267,10 @@ public class LogbookOperationsClientRestTest extends ResteasyTestApplication {
         @Path("/operations/{id_op}/bulklifecycles/got")
         @Consumes(MediaType.APPLICATION_JSON)
         @Produces(MediaType.APPLICATION_JSON)
-        public Response updateUnitLifeCyclesGOTByOperation(@PathParam("id_op") String operationId,
-            List<LogbookLifeCycleParametersBulk> logbookLifeCycleParametersBulk) {
+        public Response updateUnitLifeCyclesGOTByOperation(
+            @PathParam("id_op") String operationId,
+            List<LogbookLifeCycleParametersBulk> logbookLifeCycleParametersBulk
+        ) {
             return mock.post();
         }
 
@@ -265,9 +278,12 @@ public class LogbookOperationsClientRestTest extends ResteasyTestApplication {
         @Path("/operations/{id_op}/unitlifecycles/{id_lc}")
         @Consumes(MediaType.APPLICATION_JSON)
         @Produces(MediaType.APPLICATION_JSON)
-        public Response updateUnitLifeCyclesUnitTemporaryByOperation(@PathParam("id_op") String operationId,
-            @PathParam("id_lc") String unitLcId, @HeaderParam(GlobalDataRest.X_EVENT_STATUS) String evtStatus,
-            LogbookLifeCycleUnitParameters parameters) {
+        public Response updateUnitLifeCyclesUnitTemporaryByOperation(
+            @PathParam("id_op") String operationId,
+            @PathParam("id_lc") String unitLcId,
+            @HeaderParam(GlobalDataRest.X_EVENT_STATUS) String evtStatus,
+            LogbookLifeCycleUnitParameters parameters
+        ) {
             return mock.put();
         }
 
@@ -275,19 +291,22 @@ public class LogbookOperationsClientRestTest extends ResteasyTestApplication {
         @Path("/operations/{id_op}/unitlifecycles/{id_lc}")
         @Consumes(MediaType.APPLICATION_JSON)
         @Produces(MediaType.APPLICATION_JSON)
-        public Response deleteUnitLifeCyclesByOperation(@PathParam("id_op") String operationId,
-            @PathParam("id_lc") String unitLcId) {
+        public Response deleteUnitLifeCyclesByOperation(
+            @PathParam("id_op") String operationId,
+            @PathParam("id_lc") String unitLcId
+        ) {
             return mock.delete();
         }
-
 
         @Deprecated
         @PUT
         @Path("/operations/{id_op}/unitlifecycles/{id_lc}/commit")
         @Consumes(MediaType.APPLICATION_JSON)
         @Produces(MediaType.APPLICATION_JSON)
-        public Response commitUnitLifeCyclesByOperation(@PathParam("id_op") String operationId,
-            @PathParam("id_lc") String unitLcId) {
+        public Response commitUnitLifeCyclesByOperation(
+            @PathParam("id_op") String operationId,
+            @PathParam("id_lc") String unitLcId
+        ) {
             return mock.put();
         }
 
@@ -302,16 +321,20 @@ public class LogbookOperationsClientRestTest extends ResteasyTestApplication {
         @PUT
         @Path("/operations/{id_op}/lifecycles/objectgroup/bulk")
         @Consumes(MediaType.APPLICATION_JSON)
-        public Response createLifeCycleObjectGroupBulk(@PathParam("id_op") String idOp,
-            List<LogbookLifeCycleObjectGroupModel> logbookLifeCycleModels) {
+        public Response createLifeCycleObjectGroupBulk(
+            @PathParam("id_op") String idOp,
+            List<LogbookLifeCycleObjectGroupModel> logbookLifeCycleModels
+        ) {
             return mock.put();
         }
 
         @PUT
         @Path("/operations/{id_op}/lifecycles/unit/bulk")
         @Consumes(MediaType.APPLICATION_JSON)
-        public Response createLifeCycleUnitBulk(@PathParam("id_op") String idOp,
-            List<LogbookLifeCycleUnitModel> logbookLifeCycleModels) {
+        public Response createLifeCycleUnitBulk(
+            @PathParam("id_op") String idOp,
+            List<LogbookLifeCycleUnitModel> logbookLifeCycleModels
+        ) {
             return mock.put();
         }
 
@@ -326,8 +349,11 @@ public class LogbookOperationsClientRestTest extends ResteasyTestApplication {
         @GET
         @Path("/unitlifecycles/{id_lc}")
         @Produces(MediaType.APPLICATION_JSON)
-        public Response getUnitLifeCycleById(@PathParam("id_lc") String unitLifeCycleId,
-            @HeaderParam(GlobalDataRest.X_EVENT_STATUS) String evtStatus, JsonNode queryDsl) {
+        public Response getUnitLifeCycleById(
+            @PathParam("id_lc") String unitLifeCycleId,
+            @HeaderParam(GlobalDataRest.X_EVENT_STATUS) String evtStatus,
+            JsonNode queryDsl
+        ) {
             return mock.get();
         }
 
@@ -337,13 +363,14 @@ public class LogbookOperationsClientRestTest extends ResteasyTestApplication {
             return mock.head();
         }
 
-
         @GET
         @Path("/unitlifecycles")
         @Produces(MediaType.APPLICATION_JSON)
         @Consumes(MediaType.APPLICATION_JSON)
-        public Response getUnitLifeCycle(JsonNode queryDsl,
-            @HeaderParam(GlobalDataRest.X_EVENT_STATUS) String evtStatus) {
+        public Response getUnitLifeCycle(
+            JsonNode queryDsl,
+            @HeaderParam(GlobalDataRest.X_EVENT_STATUS) String evtStatus
+        ) {
             return mock.get();
         }
 
@@ -367,8 +394,11 @@ public class LogbookOperationsClientRestTest extends ResteasyTestApplication {
         @Path("/operations/{id_op}/objectgrouplifecycles")
         @Consumes(MediaType.APPLICATION_JSON)
         @Produces(MediaType.APPLICATION_JSON)
-        public Response getObjectGroupLifeCyclesByOperation(@PathParam("id_op") String operationId,
-            @HeaderParam(GlobalDataRest.X_EVENT_STATUS) String evtStatus, JsonNode query) {
+        public Response getObjectGroupLifeCyclesByOperation(
+            @PathParam("id_op") String operationId,
+            @HeaderParam(GlobalDataRest.X_EVENT_STATUS) String evtStatus,
+            JsonNode query
+        ) {
             return mock.get();
         }
 
@@ -376,8 +406,11 @@ public class LogbookOperationsClientRestTest extends ResteasyTestApplication {
         @Path("/operations/{id_op}/objectgrouplifecycles/{id_lc}")
         @Consumes(MediaType.APPLICATION_JSON)
         @Produces(MediaType.APPLICATION_JSON)
-        public Response createObjectGroupLifeCyclesByOperation(@PathParam("id_op") String operationId,
-            @PathParam("id_lc") String objGrpId, LogbookLifeCycleObjectGroupParameters parameters) {
+        public Response createObjectGroupLifeCyclesByOperation(
+            @PathParam("id_op") String operationId,
+            @PathParam("id_lc") String objGrpId,
+            LogbookLifeCycleObjectGroupParameters parameters
+        ) {
             return mock.post();
         }
 
@@ -385,10 +418,12 @@ public class LogbookOperationsClientRestTest extends ResteasyTestApplication {
         @Path("/operations/{id_op}/objectgrouplifecycles/{id_lc}")
         @Consumes(MediaType.APPLICATION_JSON)
         @Produces(MediaType.APPLICATION_JSON)
-        public Response updateObjectGroupLifeCyclesByOperation(@PathParam("id_op") String operationId,
+        public Response updateObjectGroupLifeCyclesByOperation(
+            @PathParam("id_op") String operationId,
             @PathParam("id_lc") String objGrpId,
             @HeaderParam(GlobalDataRest.X_EVENT_STATUS) String evtStatus,
-            LogbookLifeCycleObjectGroupParameters parameters) {
+            LogbookLifeCycleObjectGroupParameters parameters
+        ) {
             return mock.put();
         }
 
@@ -396,8 +431,10 @@ public class LogbookOperationsClientRestTest extends ResteasyTestApplication {
         @Path("/operations/{id_op}/objectgrouplifecycles/{id_lc}")
         @Consumes(MediaType.APPLICATION_JSON)
         @Produces(MediaType.APPLICATION_JSON)
-        public Response deleteObjectGroupLifeCyclesByOperation(@PathParam("id_op") String operationId,
-            @PathParam("id_lc") String objGrpId) {
+        public Response deleteObjectGroupLifeCyclesByOperation(
+            @PathParam("id_op") String operationId,
+            @PathParam("id_lc") String objGrpId
+        ) {
             return mock.delete();
         }
 
@@ -406,8 +443,10 @@ public class LogbookOperationsClientRestTest extends ResteasyTestApplication {
         @Path("/operations/{id_op}/objectgrouplifecycles/{id_lc}/commit")
         @Consumes(MediaType.APPLICATION_JSON)
         @Produces(MediaType.APPLICATION_JSON)
-        public Response commitObjectGroupLifeCyclesByOperation(@PathParam("id_op") String operationId,
-            @PathParam("id_lc") String objGrpId) {
+        public Response commitObjectGroupLifeCyclesByOperation(
+            @PathParam("id_op") String operationId,
+            @PathParam("id_lc") String objGrpId
+        ) {
             return mock.put();
         }
 
@@ -438,16 +477,21 @@ public class LogbookOperationsClientRestTest extends ResteasyTestApplication {
         @GET
         @Path("/objectgrouplifecycles/{id_lc}")
         @Produces(MediaType.APPLICATION_JSON)
-        public Response getObjectGroupLifeCycleById(@PathParam("id_lc") String objectGroupLifeCycleId,
-            @HeaderParam(GlobalDataRest.X_EVENT_STATUS) String evtStatus, JsonNode queryDsl) {
+        public Response getObjectGroupLifeCycleById(
+            @PathParam("id_lc") String objectGroupLifeCycleId,
+            @HeaderParam(GlobalDataRest.X_EVENT_STATUS) String evtStatus,
+            JsonNode queryDsl
+        ) {
             return mock.get();
         }
 
         @GET
         @Path("/objectgrouplifecycles")
         @Produces(MediaType.APPLICATION_JSON)
-        public Response getObjectGroupLifeCycle(@HeaderParam(GlobalDataRest.X_EVENT_STATUS) String evtStatus,
-            JsonNode queryDsl) {
+        public Response getObjectGroupLifeCycle(
+            @HeaderParam(GlobalDataRest.X_EVENT_STATUS) String evtStatus,
+            JsonNode queryDsl
+        ) {
             return mock.get();
         }
 
@@ -499,7 +543,6 @@ public class LogbookOperationsClientRestTest extends ResteasyTestApplication {
             return mock.post();
         }
 
-
         @GET
         @Path("/lifecycles/traceability/check/{id}")
         @Produces(MediaType.APPLICATION_JSON)
@@ -529,7 +572,6 @@ public class LogbookOperationsClientRestTest extends ResteasyTestApplication {
         @Produces(MediaType.APPLICATION_JSON)
         public Response launchTraceabilityAudit(AuditLogbookOptions options) {
             return mock.post();
-
         }
 
         @DELETE
@@ -546,7 +588,6 @@ public class LogbookOperationsClientRestTest extends ResteasyTestApplication {
             return mock.delete();
         }
 
-
         @POST
         @Path("raw/unitlifecycles/bulk")
         @Consumes(MediaType.APPLICATION_JSON)
@@ -560,13 +601,18 @@ public class LogbookOperationsClientRestTest extends ResteasyTestApplication {
         public Response createLifeCycleObjectGroupBulkRaw(List<JsonNode> logbookLifecycles) {
             return mock.post();
         }
-
     }
 
     private static final LogbookOperationParameters getComplete() {
-        return LogbookParameterHelper.newLogbookOperationParameters(GUIDFactory.newRequestIdGUID(0), "eventType",
-            GUIDFactory.newEventGUID(0), LogbookTypeProcess.INGEST, StatusCode.OK, "outcomeDetailMessage",
-            GUIDFactory.newRequestIdGUID(0));
+        return LogbookParameterHelper.newLogbookOperationParameters(
+            GUIDFactory.newRequestIdGUID(0),
+            "eventType",
+            GUIDFactory.newEventGUID(0),
+            LogbookTypeProcess.INGEST,
+            StatusCode.OK,
+            "outcomeDetailMessage",
+            GUIDFactory.newRequestIdGUID(0)
+        );
     }
 
     @Test(expected = IllegalArgumentException.class)
@@ -607,47 +653,53 @@ public class LogbookOperationsClientRestTest extends ResteasyTestApplication {
     @Test
     public void traceability() throws Exception {
         VitamThreadUtils.getVitamSession().setTenantId(1);
-        when(mock.post())
-            .thenReturn(
-                Response.status(Status.OK).entity(
-                        new RequestResponseOK<TenantLogbookOperationTraceabilityResult>()
-                            .setHttpCode(Status.OK.getStatusCode()))
-                    .build());
+        when(mock.post()).thenReturn(
+            Response.status(Status.OK)
+                .entity(
+                    new RequestResponseOK<TenantLogbookOperationTraceabilityResult>().setHttpCode(
+                        Status.OK.getStatusCode()
+                    )
+                )
+                .build()
+        );
         client.traceability(Collections.singletonList(0));
     }
 
     @Test
     public void traceabilityLfcUnit() throws Exception {
         VitamThreadUtils.getVitamSession().setTenantId(0);
-        when(mock.post())
-            .thenReturn(Response.status(Status.OK).entity(
-                new RequestResponseOK<String>().addResult("guid1")).build());
+        when(mock.post()).thenReturn(
+            Response.status(Status.OK).entity(new RequestResponseOK<String>().addResult("guid1")).build()
+        );
         client.traceabilityLfcObjectGroup();
     }
 
     @Test
     public void traceabilityLfcObjectGroup() throws Exception {
         VitamThreadUtils.getVitamSession().setTenantId(0);
-        when(mock.post())
-            .thenReturn(Response.status(Status.OK).entity(
-                new RequestResponseOK<String>().addResult("guid1")).build());
+        when(mock.post()).thenReturn(
+            Response.status(Status.OK).entity(new RequestResponseOK<String>().addResult("guid1")).build()
+        );
         client.traceabilityLfcObjectGroup();
     }
 
     @Test
     public void checkLifecycleTraceabilityWorkflowStatus() throws Exception {
         VitamThreadUtils.getVitamSession().setTenantId(0);
-        when(mock.get())
-            .thenReturn(Response.status(Status.OK).entity(
-                new RequestResponseOK<LifecycleTraceabilityStatus>().addResult(
-                    new LifecycleTraceabilityStatus(true, false, "MY_STATUS", true)
-                )).build());
+        when(mock.get()).thenReturn(
+            Response.status(Status.OK)
+                .entity(
+                    new RequestResponseOK<LifecycleTraceabilityStatus>().addResult(
+                        new LifecycleTraceabilityStatus(true, false, "MY_STATUS", true)
+                    )
+                )
+                .build()
+        );
         LifecycleTraceabilityStatus lifecycleTraceabilityStatus = client.checkLifecycleTraceabilityWorkflowStatus("id");
         assertTrue(lifecycleTraceabilityStatus.isCompleted());
         assertEquals(lifecycleTraceabilityStatus.getOutcome(), "MY_STATUS");
         assertTrue(lifecycleTraceabilityStatus.isMaxEntriesReached());
     }
-
 
     @Test(expected = IllegalArgumentException.class)
     public void givenIllegalArgumentWhenUpdateThenReturnIllegalArgumentException() throws Exception {
@@ -698,9 +750,9 @@ public class LogbookOperationsClientRestTest extends ResteasyTestApplication {
 
     @Test
     public void statusExecutionWithBody() throws Exception {
-        when(mock.get()).thenReturn(Response.status(Status.OK).entity("{\"name\":\"logbook\",\"role\":\"myRole\"," +
-                "\"pid\":123}")
-            .build());
+        when(mock.get()).thenReturn(
+            Response.status(Status.OK).entity("{\"name\":\"logbook\",\"role\":\"myRole\"," + "\"pid\":123}").build()
+        );
         client.checkStatus();
     }
 
@@ -710,29 +762,29 @@ public class LogbookOperationsClientRestTest extends ResteasyTestApplication {
         try {
             client.selectOperationById("id");
             fail("Should raized an exception");
-        } catch (final LogbookClientNotFoundException e) {
-
-        }
+        } catch (final LogbookClientNotFoundException e) {}
         reset(mock);
         when(mock.get()).thenReturn(Response.status(Response.Status.PRECONDITION_FAILED).build());
         try {
             client.selectOperationById("id");
             fail("Should raized an exception");
-        } catch (final LogbookClientException e) {
-
-        }
+        } catch (final LogbookClientException e) {}
         reset(mock);
         when(mock.get()).thenReturn(Response.status(Response.Status.PRECONDITION_FAILED).build());
         try {
             client.selectOperation(JsonHandler.createObjectNode());
             fail("Should raized an exception");
-        } catch (final LogbookClientException e) {
-
-        }
+        } catch (final LogbookClientException e) {}
         final GUID eip = GUIDFactory.newEventGUID(0);
         final LogbookOperationParameters logbookParameters = LogbookParameterHelper.newLogbookOperationParameters(
-            eip, "eventTypeValue1", eip, LogbookTypeProcess.INGEST,
-            StatusCode.STARTED, "start ingest", eip);
+            eip,
+            "eventTypeValue1",
+            eip,
+            LogbookTypeProcess.INGEST,
+            StatusCode.STARTED,
+            "start ingest",
+            eip
+        );
         client.createDelegate(logbookParameters);
         client.updateDelegate(logbookParameters);
         reset(mock);
@@ -753,67 +805,53 @@ public class LogbookOperationsClientRestTest extends ResteasyTestApplication {
         try {
             client.bulkCreate(LogbookParameterName.eventIdentifierProcess.name(), list);
             fail("Should raized an exception");
-        } catch (final LogbookClientAlreadyExistsException e) {
-        }
+        } catch (final LogbookClientAlreadyExistsException e) {}
         reset(mock);
         when(mock.post()).thenReturn(Response.status(Response.Status.BAD_REQUEST).build());
         try {
             client.bulkCreate(LogbookParameterName.eventIdentifierProcess.name(), list);
             fail("Should raized an exception");
-        } catch (final LogbookClientBadRequestException e) {
-        }
+        } catch (final LogbookClientBadRequestException e) {}
         try {
             client.bulkCreate(LogbookParameterName.eventIdentifierProcess.name(), null);
             fail("Should raized an exception");
-        } catch (final LogbookClientBadRequestException e) {
-        }
+        } catch (final LogbookClientBadRequestException e) {}
         reset(mock);
         when(mock.put()).thenReturn(Response.status(Response.Status.NOT_FOUND).build());
         try {
             client.bulkUpdate(LogbookParameterName.eventIdentifierProcess.name(), list);
             fail("Should raized an exception");
-        } catch (final LogbookClientNotFoundException e) {
-        }
+        } catch (final LogbookClientNotFoundException e) {}
         reset(mock);
         when(mock.put()).thenReturn(Response.status(Response.Status.BAD_REQUEST).build());
         try {
             client.bulkUpdate(LogbookParameterName.eventIdentifierProcess.name(), list);
             fail("Should raized an exception");
-        } catch (final LogbookClientBadRequestException e) {
-        }
+        } catch (final LogbookClientBadRequestException e) {}
         try {
             client.bulkUpdate(LogbookParameterName.eventIdentifierProcess.name(), null);
             fail("Should raized an exception");
-        } catch (final LogbookClientBadRequestException e) {
-        }
-
+        } catch (final LogbookClientBadRequestException e) {}
     }
-
 
     @Test
     @RunWithCustomExecutor
-    public void launchReindexationTest()
-        throws InvalidParseOperationException, LogbookClientServerException {
-        when(mock.post()).thenReturn(Response.status(Status.CREATED).entity(JsonHandler.createObjectNode())
-            .build());
+    public void launchReindexationTest() throws InvalidParseOperationException, LogbookClientServerException {
+        when(mock.post()).thenReturn(Response.status(Status.CREATED).entity(JsonHandler.createObjectNode()).build());
         assertNotNull(client.reindex(new IndexParameters()));
     }
 
     @Test
     @RunWithCustomExecutor
-    public void switchIndexesTest()
-        throws InvalidParseOperationException, LogbookClientServerException {
-        when(mock.post()).thenReturn(Response.status(Status.OK).entity(JsonHandler.createObjectNode())
-            .build());
+    public void switchIndexesTest() throws InvalidParseOperationException, LogbookClientServerException {
+        when(mock.post()).thenReturn(Response.status(Status.OK).entity(JsonHandler.createObjectNode()).build());
         assertNotNull(client.switchIndexes(new SwitchIndexParameters()));
     }
 
     @Test
     @RunWithCustomExecutor
-    public void traceabilityAuditTest()
-        throws InvalidParseOperationException, LogbookClientServerException {
-        when(mock.post()).thenReturn(Response.status(Status.OK).entity(JsonHandler.createObjectNode())
-            .build());
+    public void traceabilityAuditTest() throws InvalidParseOperationException, LogbookClientServerException {
+        when(mock.post()).thenReturn(Response.status(Status.OK).entity(JsonHandler.createObjectNode()).build());
         client.traceabilityAudit(0, new AuditLogbookOptions());
     }
 

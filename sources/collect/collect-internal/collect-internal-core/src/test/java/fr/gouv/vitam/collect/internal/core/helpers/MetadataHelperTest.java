@@ -41,6 +41,7 @@ import java.util.Map;
 import static fr.gouv.vitam.collect.internal.core.helpers.MetadataHelper.DYNAMIC_ATTACHEMENT;
 
 public class MetadataHelperTest {
+
     private static final String UNIT_UP = "UNIT_UP";
     private static final String UNIT_GUID = "UNIT_GUID";
     private static final String COMPLEX_PATH = "Keyword.KeywordContent";
@@ -52,9 +53,11 @@ public class MetadataHelperTest {
         try (InputStream is = PropertiesUtils.getResourceAsStream("collect_unit.json")) {
             ObjectNode unit = (ObjectNode) JsonHandler.getFromInputStream(is);
             unit.put(VitamFieldsHelper.id(), "ID");
-            Map.Entry<String, String> unitParent = MetadataHelper.findUnitParent(unit,
+            Map.Entry<String, String> unitParent = MetadataHelper.findUnitParent(
+                unit,
                 List.of(new MetadataUnitUp(UNIT_UP, COMPLEX_PATH, "Aisne (departement)")),
-                Map.of(DYNAMIC_ATTACHEMENT + "_" + UNIT_UP, UNIT_GUID));
+                Map.of(DYNAMIC_ATTACHEMENT + "_" + UNIT_UP, UNIT_GUID)
+            );
 
             Assert.assertEquals(UNIT_GUID, unitParent.getValue());
         }
@@ -65,23 +68,26 @@ public class MetadataHelperTest {
         try (InputStream is = PropertiesUtils.getResourceAsStream("collect_unit.json")) {
             ObjectNode unit = (ObjectNode) JsonHandler.getFromInputStream(is);
             unit.put(VitamFieldsHelper.id(), "ID");
-            Map.Entry<String, String> unitParent =
-                MetadataHelper.findUnitParent(unit, List.of(new MetadataUnitUp(UNIT_UP, SIMPLE_PATH, "My title")),
-                    Map.of(DYNAMIC_ATTACHEMENT + "_" + UNIT_UP, UNIT_GUID));
+            Map.Entry<String, String> unitParent = MetadataHelper.findUnitParent(
+                unit,
+                List.of(new MetadataUnitUp(UNIT_UP, SIMPLE_PATH, "My title")),
+                Map.of(DYNAMIC_ATTACHEMENT + "_" + UNIT_UP, UNIT_GUID)
+            );
 
             Assert.assertEquals(UNIT_GUID, unitParent.getValue());
         }
     }
-
 
     @Test
     public void findUnitParentWithSimplePathButValueIsArray() throws Exception {
         try (InputStream is = PropertiesUtils.getResourceAsStream("collect_unit.json")) {
             ObjectNode unit = (ObjectNode) JsonHandler.getFromInputStream(is);
             unit.put(VitamFieldsHelper.id(), "ID");
-            Map.Entry<String, String> unitParent = MetadataHelper.findUnitParent(unit,
+            Map.Entry<String, String> unitParent = MetadataHelper.findUnitParent(
+                unit,
                 List.of(new MetadataUnitUp(UNIT_UP, SIMPLE_PATH_ARRAY_VALUE, "ID01")),
-                Map.of(DYNAMIC_ATTACHEMENT + "_" + UNIT_UP, UNIT_GUID));
+                Map.of(DYNAMIC_ATTACHEMENT + "_" + UNIT_UP, UNIT_GUID)
+            );
 
             Assert.assertEquals(UNIT_GUID, unitParent.getValue());
         }

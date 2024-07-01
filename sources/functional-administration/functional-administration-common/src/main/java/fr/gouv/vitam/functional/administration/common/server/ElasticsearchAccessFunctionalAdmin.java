@@ -46,7 +46,6 @@ import java.util.List;
 
 // FIXME refactor with metadata
 
-
 /**
  * ElasticSearch model with MongoDB as main database
  */
@@ -60,9 +59,11 @@ public class ElasticsearchAccessFunctionalAdmin extends ElasticsearchAccess {
      * @param indexManager
      * @throws VitamException
      */
-    public ElasticsearchAccessFunctionalAdmin(final String clusterName, List<ElasticsearchNode> nodes,
-        ElasticsearchFunctionalAdminIndexManager indexManager)
-        throws VitamException {
+    public ElasticsearchAccessFunctionalAdmin(
+        final String clusterName,
+        List<ElasticsearchNode> nodes,
+        ElasticsearchFunctionalAdminIndexManager indexManager
+    ) throws VitamException {
         super(clusterName, nodes);
         this.indexManager = indexManager;
     }
@@ -75,10 +76,10 @@ public class ElasticsearchAccessFunctionalAdmin extends ElasticsearchAccess {
      */
     public final void addIndex(final FunctionalAdminCollections collection) throws ReferentialException {
         try {
-            super
-                .createIndexAndAliasIfAliasNotExists(
-                    indexManager.getElasticsearchIndexAliasResolver(collection).resolveIndexName(null),
-                    indexManager.getElasticsearchIndexSettings(collection));
+            super.createIndexAndAliasIfAliasNotExists(
+                indexManager.getElasticsearchIndexAliasResolver(collection).resolveIndexName(null),
+                indexManager.getElasticsearchIndexSettings(collection)
+            );
         } catch (final Exception e) {
             throw new ReferentialException(e);
         }
@@ -92,32 +93,38 @@ public class ElasticsearchAccessFunctionalAdmin extends ElasticsearchAccess {
      * @return a structure as ResultInterface
      * @throws ReferentialException
      */
-    protected final SearchResponse search(final FunctionalAdminCollections collection, final QueryBuilder query,
-        final QueryBuilder filter)
-        throws ReferentialException, BadRequestException {
-
+    protected final SearchResponse search(
+        final FunctionalAdminCollections collection,
+        final QueryBuilder query,
+        final QueryBuilder filter
+    ) throws ReferentialException, BadRequestException {
         try {
-            return super
-                .search(
-                    indexManager.getElasticsearchIndexAliasResolver(collection).resolveIndexName(null), query, filter,
-                    VitamDocument.ES_FILTER_OUT,
-                    null,
-                    0,
-                    GlobalDatas.LIMIT_LOAD, null, null, null, false);
+            return super.search(
+                indexManager.getElasticsearchIndexAliasResolver(collection).resolveIndexName(null),
+                query,
+                filter,
+                VitamDocument.ES_FILTER_OUT,
+                null,
+                0,
+                GlobalDatas.LIMIT_LOAD,
+                null,
+                null,
+                null,
+                false
+            );
         } catch (DatabaseException e) {
             throw new ReferentialException(e);
         }
-
     }
 
-
     private static final BasicDBObject[] accessionRegisterSummaryIndexes = {
-        new BasicDBObject(AccessionRegisterSummary.ORIGINATING_AGENCY, 1).append(AccessionRegisterSummary.TENANT_ID, 1)
+        new BasicDBObject(AccessionRegisterSummary.ORIGINATING_AGENCY, 1).append(AccessionRegisterSummary.TENANT_ID, 1),
     };
 
     private static final BasicDBObject[] accessionRegisterDetailIndexes = {
-        new BasicDBObject(AccessionRegisterDetail.ORIGINATING_AGENCY, 1).append(AccessionRegisterDetail.OPI, 1).append(
-            AccessionRegisterDetail.TENANT_ID, 1)
+        new BasicDBObject(AccessionRegisterDetail.ORIGINATING_AGENCY, 1)
+            .append(AccessionRegisterDetail.OPI, 1)
+            .append(AccessionRegisterDetail.TENANT_ID, 1),
     };
 
     /**
@@ -127,14 +134,14 @@ public class ElasticsearchAccessFunctionalAdmin extends ElasticsearchAccess {
     public static void ensureIndex() {
         FunctionalAdminCollections.ACCESSION_REGISTER_SUMMARY.getCollection().dropIndexes();
         for (final BasicDBObject index : accessionRegisterSummaryIndexes) {
-            FunctionalAdminCollections.ACCESSION_REGISTER_SUMMARY.getCollection().createIndex(index,
-                new IndexOptions().unique(true));
+            FunctionalAdminCollections.ACCESSION_REGISTER_SUMMARY.getCollection()
+                .createIndex(index, new IndexOptions().unique(true));
         }
 
         FunctionalAdminCollections.ACCESSION_REGISTER_DETAIL.getCollection().dropIndexes();
         for (final BasicDBObject index : accessionRegisterDetailIndexes) {
-            FunctionalAdminCollections.ACCESSION_REGISTER_DETAIL.getCollection().createIndex(index,
-                new IndexOptions().unique(true));
+            FunctionalAdminCollections.ACCESSION_REGISTER_DETAIL.getCollection()
+                .createIndex(index, new IndexOptions().unique(true));
         }
     }
 }
