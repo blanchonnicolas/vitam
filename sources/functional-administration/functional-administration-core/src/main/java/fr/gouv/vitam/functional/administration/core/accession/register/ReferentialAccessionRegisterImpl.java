@@ -375,12 +375,7 @@ public class ReferentialAccessionRegisterImpl implements VitamAutoCloseable {
 
             List<Action> actions = new ArrayList<>();
 
-            actions.add(
-                new SetAction(
-                    AccessionRegisterDetail.LAST_UPDATE,
-                    LocalDateUtil.getFormattedDateForMongo(LocalDateUtil.now())
-                )
-            );
+            actions.add(new SetAction(AccessionRegisterDetail.LAST_UPDATE, LocalDateUtil.nowFormatted()));
 
             actions.add(
                 new IncAction(
@@ -467,7 +462,7 @@ public class ReferentialAccessionRegisterImpl implements VitamAutoCloseable {
                 .setTotalGots(registerDetail.getTotalObjectsGroups().getRemained())
                 .setTotalObjects(registerDetail.getTotalObjects().getRemained())
                 .setObjectSize(registerDetail.getObjectSize().getRemained())
-                .setCreationdate(LocalDateUtil.getFormattedDateForMongo(LocalDateUtil.now()));
+                .setCreationdate(LocalDateUtil.nowFormatted());
 
             actions.add(new PushAction(AccessionRegisterDetail.EVENTS, JsonHandler.toJsonNode(registerValueEvent)));
             // TODO : to check if update is needed after resolving US#8038

@@ -180,7 +180,7 @@ public class LogbookMongoDbAccessTest {
         for (final LogbookParameterName name : LogbookParameterName.values()) {
             parameters.putParameterValue(name, GUIDFactory.newEventGUID(TENANT_ID).getId());
         }
-        parameters.putParameterValue(LogbookParameterName.eventDateTime, LocalDateUtil.now().toString());
+        parameters.putParameterValue(LogbookParameterName.eventDateTime, LocalDateUtil.nowFormatted());
 
         final LogbookOperation operation = new LogbookOperation(parameters);
         final LogbookOperation operation1 = new LogbookOperation(parameters, true);
@@ -309,7 +309,7 @@ public class LogbookMongoDbAccessTest {
 
         parameters.putParameterValue(LogbookParameterName.agIdExt, agidExt);
         parameters.putParameterValue(LogbookParameterName.rightsStatementIdentifier, rightsStatementIdentifier);
-        parameters.putParameterValue(LogbookParameterName.eventDateTime, LocalDateUtil.now().toString());
+        parameters.putParameterValue(LogbookParameterName.eventDateTime, LocalDateUtil.nowFormatted());
         final LogbookOperationParameters parameters2 = LogbookParameterHelper.newLogbookOperationParameters();
         for (final LogbookParameterName name : LogbookParameterName.values()) {
             if (LogbookParameterName.eventDetailData.equals(name)) {
@@ -330,7 +330,7 @@ public class LogbookMongoDbAccessTest {
             LogbookParameterName.eventIdentifierProcess,
             parameters.getMapParameters().get(LogbookParameterName.eventIdentifierProcess)
         );
-        parameters2.putParameterValue(LogbookParameterName.eventDateTime, LocalDateUtil.now().toString());
+        parameters2.putParameterValue(LogbookParameterName.eventDateTime, LocalDateUtil.nowFormatted());
         parameters2.putParameterValue(LogbookParameterName.agIdExt, agidExt);
         parameters2.putParameterValue(LogbookParameterName.rightsStatementIdentifier, rightsStatementIdentifier);
 
@@ -338,7 +338,7 @@ public class LogbookMongoDbAccessTest {
         for (final LogbookParameterName name : LogbookParameterName.values()) {
             parametersWrong.putParameterValue(name, GUIDFactory.newEventGUID(TENANT_ID).getId());
         }
-        parametersWrong.putParameterValue(LogbookParameterName.eventDateTime, LocalDateUtil.now().toString());
+        parametersWrong.putParameterValue(LogbookParameterName.eventDateTime, LocalDateUtil.nowFormatted());
         parametersWrong.putParameterValue(LogbookParameterName.rightsStatementIdentifier, rightsStatementIdentifier);
 
         try {
@@ -388,13 +388,13 @@ public class LogbookMongoDbAccessTest {
         } catch (final VitamException e) {}
 
         parameters.putParameterValue(LogbookParameterName.eventIdentifier, GUIDFactory.newEventGUID(TENANT_ID).getId());
-        parameters.putParameterValue(LogbookParameterName.eventDateTime, LocalDateUtil.now().toString());
+        parameters.putParameterValue(LogbookParameterName.eventDateTime, LocalDateUtil.nowFormatted());
 
         parameters2.putParameterValue(
             LogbookParameterName.eventIdentifier,
             GUIDFactory.newEventGUID(TENANT_ID).getId()
         );
-        parameters2.putParameterValue(LogbookParameterName.eventDateTime, LocalDateUtil.now().toString());
+        parameters2.putParameterValue(LogbookParameterName.eventDateTime, LocalDateUtil.nowFormatted());
         mongoDbAccess.updateBulkLogbookOperation(parameters, parameters2);
         assertEquals(2, mongoDbAccess.getLogbookOperationById(eip).get(LogbookDocument.VERSION));
         assertEquals(nbl, mongoDbAccess.getLogbookLifeCyleUnitSize());
@@ -451,7 +451,7 @@ public class LogbookMongoDbAccessTest {
             LogbookParameterName.eventIdentifierProcess,
             GUIDFactory.newEventGUID(TENANT_ID).getId()
         );
-        parameters.putParameterValue(LogbookParameterName.eventDateTime, LocalDateUtil.now().toString());
+        parameters.putParameterValue(LogbookParameterName.eventDateTime, LocalDateUtil.nowFormatted());
         parameters2.putParameterValue(
             LogbookParameterName.eventIdentifier,
             GUIDFactory.newEventGUID(TENANT_ID).getId()
@@ -460,7 +460,7 @@ public class LogbookMongoDbAccessTest {
             LogbookParameterName.eventIdentifierProcess,
             parameters.getMapParameters().get(LogbookParameterName.eventIdentifierProcess)
         );
-        parameters2.putParameterValue(LogbookParameterName.eventDateTime, LocalDateUtil.now().toString());
+        parameters2.putParameterValue(LogbookParameterName.eventDateTime, LocalDateUtil.nowFormatted());
 
         try {
             mongoDbAccess.updateBulkLogbookOperation(parameters, parameters2);
@@ -507,7 +507,7 @@ public class LogbookMongoDbAccessTest {
             LogbookParameterName.eventIdentifierProcess,
             GUIDFactory.newEventGUID(TENANT_ID).getId()
         );
-        parameters.putParameterValue(LogbookParameterName.eventDateTime, LocalDateUtil.now().toString());
+        parameters.putParameterValue(LogbookParameterName.eventDateTime, LocalDateUtil.nowFormatted());
         parameters.putParameterValue(LogbookParameterName.eventTypeProcess, "TRACEABILITY");
         mongoDbAccess.createBulkLogbookOperation(parameters);
 
@@ -549,7 +549,7 @@ public class LogbookMongoDbAccessTest {
         for (final LogbookParameterName name : LogbookParameterName.values()) {
             parameters.putParameterValue(name, GUIDFactory.newEventGUID(TENANT_ID).getId());
         }
-        parameters.putParameterValue(LogbookParameterName.eventDateTime, LocalDateUtil.now().toString());
+        parameters.putParameterValue(LogbookParameterName.eventDateTime, LocalDateUtil.nowFormatted());
         parameters.setTypeProcess(LogbookTypeProcess.INGEST);
 
         final String oi = parameters.getParameterValue(LogbookParameterName.objectIdentifier);
@@ -562,7 +562,7 @@ public class LogbookMongoDbAccessTest {
             LogbookParameterName.objectIdentifier,
             parameters.getMapParameters().get(LogbookParameterName.objectIdentifier)
         );
-        parameters2.putParameterValue(LogbookParameterName.eventDateTime, LocalDateUtil.now().toString());
+        parameters2.putParameterValue(LogbookParameterName.eventDateTime, LocalDateUtil.nowFormatted());
         parameters2.setTypeProcess(LogbookTypeProcess.INGEST);
 
         final LogbookLifeCycleUnitParameters parametersWrong =
@@ -570,7 +570,7 @@ public class LogbookMongoDbAccessTest {
         for (final LogbookParameterName name : LogbookParameterName.values()) {
             parametersWrong.putParameterValue(name, GUIDFactory.newEventGUID(TENANT_ID).getId());
         }
-        parametersWrong.putParameterValue(LogbookParameterName.eventDateTime, LocalDateUtil.now().toString());
+        parametersWrong.putParameterValue(LogbookParameterName.eventDateTime, LocalDateUtil.nowFormatted());
         parametersWrong.setTypeProcess(LogbookTypeProcess.INGEST);
 
         assertThatThrownBy(
@@ -637,12 +637,12 @@ public class LogbookMongoDbAccessTest {
         } catch (final VitamException e) {}
 
         parameters.putParameterValue(LogbookParameterName.eventIdentifier, GUIDFactory.newEventGUID(TENANT_ID).getId());
-        parameters.putParameterValue(LogbookParameterName.eventDateTime, LocalDateUtil.now().toString());
+        parameters.putParameterValue(LogbookParameterName.eventDateTime, LocalDateUtil.nowFormatted());
         parameters2.putParameterValue(
             LogbookParameterName.eventIdentifier,
             GUIDFactory.newEventGUID(TENANT_ID).getId()
         );
-        parameters2.putParameterValue(LogbookParameterName.eventDateTime, LocalDateUtil.now().toString());
+        parameters2.putParameterValue(LogbookParameterName.eventDateTime, LocalDateUtil.nowFormatted());
         parameters.putParameterValue(LogbookParameterName.objectIdentifier, oi2);
         parameters2.putParameterValue(LogbookParameterName.objectIdentifier, oi2);
         mongoDbAccess.updateBulkLogbookLifeCycleUnit(parameters, parameters2);
@@ -726,7 +726,7 @@ public class LogbookMongoDbAccessTest {
             LogbookParameterName.objectIdentifier,
             GUIDFactory.newEventGUID(TENANT_ID).getId()
         );
-        parameters.putParameterValue(LogbookParameterName.eventDateTime, LocalDateUtil.now().toString());
+        parameters.putParameterValue(LogbookParameterName.eventDateTime, LocalDateUtil.nowFormatted());
         parameters2.putParameterValue(
             LogbookParameterName.eventIdentifier,
             GUIDFactory.newEventGUID(TENANT_ID).getId()
@@ -739,7 +739,7 @@ public class LogbookMongoDbAccessTest {
             LogbookParameterName.objectIdentifier,
             parameters.getMapParameters().get(LogbookParameterName.objectIdentifier)
         );
-        parameters2.putParameterValue(LogbookParameterName.eventDateTime, LocalDateUtil.now().toString());
+        parameters2.putParameterValue(LogbookParameterName.eventDateTime, LocalDateUtil.nowFormatted());
 
         final String oi3 = parameters.getMapParameters().get(LogbookParameterName.objectIdentifier);
         try {
@@ -876,7 +876,7 @@ public class LogbookMongoDbAccessTest {
         for (final LogbookParameterName name : LogbookParameterName.values()) {
             parameters.putParameterValue(name, GUIDFactory.newEventGUID(TENANT_ID).getId());
         }
-        parameters.putParameterValue(LogbookParameterName.eventDateTime, LocalDateUtil.now().toString());
+        parameters.putParameterValue(LogbookParameterName.eventDateTime, LocalDateUtil.nowFormatted());
         parameters.setTypeProcess(LogbookTypeProcess.INGEST);
 
         final String oi = parameters.getParameterValue(LogbookParameterName.objectIdentifier);
@@ -893,7 +893,7 @@ public class LogbookMongoDbAccessTest {
             LogbookParameterName.objectIdentifier,
             parameters.getMapParameters().get(LogbookParameterName.objectIdentifier)
         );
-        parameters2.putParameterValue(LogbookParameterName.eventDateTime, LocalDateUtil.now().toString());
+        parameters2.putParameterValue(LogbookParameterName.eventDateTime, LocalDateUtil.nowFormatted());
         parameters2.setTypeProcess(LogbookTypeProcess.INGEST);
 
         final LogbookLifeCycleObjectGroupParameters parametersWrong =
@@ -901,7 +901,7 @@ public class LogbookMongoDbAccessTest {
         for (final LogbookParameterName name : LogbookParameterName.values()) {
             parametersWrong.putParameterValue(name, GUIDFactory.newEventGUID(TENANT_ID).getId());
         }
-        parametersWrong.putParameterValue(LogbookParameterName.eventDateTime, LocalDateUtil.now().toString());
+        parametersWrong.putParameterValue(LogbookParameterName.eventDateTime, LocalDateUtil.nowFormatted());
         parametersWrong.setTypeProcess(LogbookTypeProcess.INGEST);
 
         try {
@@ -953,12 +953,12 @@ public class LogbookMongoDbAccessTest {
         } catch (final VitamException e) {}
 
         parameters.putParameterValue(LogbookParameterName.eventIdentifier, GUIDFactory.newEventGUID(TENANT_ID).getId());
-        parameters.putParameterValue(LogbookParameterName.eventDateTime, LocalDateUtil.now().toString());
+        parameters.putParameterValue(LogbookParameterName.eventDateTime, LocalDateUtil.nowFormatted());
         parameters2.putParameterValue(
             LogbookParameterName.eventIdentifier,
             GUIDFactory.newEventGUID(TENANT_ID).getId()
         );
-        parameters2.putParameterValue(LogbookParameterName.eventDateTime, LocalDateUtil.now().toString());
+        parameters2.putParameterValue(LogbookParameterName.eventDateTime, LocalDateUtil.nowFormatted());
         parameters.putParameterValue(LogbookParameterName.objectIdentifier, oi);
         parameters2.putParameterValue(LogbookParameterName.objectIdentifier, oi);
         mongoDbAccess.updateBulkLogbookLifeCycleObjectGroup(parameters, parameters2);
@@ -1010,7 +1010,7 @@ public class LogbookMongoDbAccessTest {
             LogbookParameterName.objectIdentifier,
             GUIDFactory.newEventGUID(TENANT_ID).getId()
         );
-        parameters.putParameterValue(LogbookParameterName.eventDateTime, LocalDateUtil.now().toString());
+        parameters.putParameterValue(LogbookParameterName.eventDateTime, LocalDateUtil.nowFormatted());
         parameters2.putParameterValue(
             LogbookParameterName.eventIdentifier,
             GUIDFactory.newEventGUID(TENANT_ID).getId()
@@ -1023,7 +1023,7 @@ public class LogbookMongoDbAccessTest {
             LogbookParameterName.objectIdentifier,
             parameters.getMapParameters().get(LogbookParameterName.objectIdentifier)
         );
-        parameters2.putParameterValue(LogbookParameterName.eventDateTime, LocalDateUtil.now().toString());
+        parameters2.putParameterValue(LogbookParameterName.eventDateTime, LocalDateUtil.nowFormatted());
 
         final String oi2 = parameters.getMapParameters().get(LogbookParameterName.objectIdentifier);
 

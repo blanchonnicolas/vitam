@@ -372,7 +372,7 @@ public class LogbookResourceTest {
     @Test
     public final void testOperation() {
         // Creation OK
-        logbookParametersStart.putParameterValue(LogbookParameterName.eventDateTime, LocalDateUtil.now().toString());
+        logbookParametersStart.putParameterValue(LogbookParameterName.eventDateTime, LocalDateUtil.nowFormatted());
         logbookParametersStart.putParameterValue(
             LogbookParameterName.agentIdentifier,
             ServerIdentity.getInstance().getJsonIdentity()
@@ -389,7 +389,7 @@ public class LogbookResourceTest {
             .then()
             .statusCode(Status.CREATED.getStatusCode());
         // Update OK
-        logbookParametersAppend.putParameterValue(LogbookParameterName.eventDateTime, LocalDateUtil.now().toString());
+        logbookParametersAppend.putParameterValue(LogbookParameterName.eventDateTime, LocalDateUtil.nowFormatted());
         logbookParametersAppend.putParameterValue(
             LogbookParameterName.agentIdentifier,
             ServerIdentity.getInstance().getJsonIdentity()
@@ -406,10 +406,7 @@ public class LogbookResourceTest {
             .then()
             .statusCode(Status.OK.getStatusCode());
         // Create KO since already exists
-        logbookParametersWrongStart.putParameterValue(
-            LogbookParameterName.eventDateTime,
-            LocalDateUtil.now().toString()
-        );
+        logbookParametersWrongStart.putParameterValue(LogbookParameterName.eventDateTime, LocalDateUtil.nowFormatted());
         logbookParametersWrongStart.putParameterValue(
             LogbookParameterName.agentIdentifier,
             ServerIdentity.getInstance().getJsonIdentity()
@@ -428,7 +425,7 @@ public class LogbookResourceTest {
         // Update KO since not found
         logbookParametersWrongAppend.putParameterValue(
             LogbookParameterName.eventDateTime,
-            LocalDateUtil.now().toString()
+            LocalDateUtil.nowFormatted()
         );
         logbookParametersWrongAppend.putParameterValue(
             LogbookParameterName.agentIdentifier,
@@ -639,7 +636,7 @@ public class LogbookResourceTest {
     @Test
     public void testOperationSelect() throws Exception {
         VitamThreadUtils.getVitamSession().setTenantId(TENANT_ID);
-        logbookParametersSelect.putParameterValue(LogbookParameterName.eventDateTime, LocalDateUtil.now().toString());
+        logbookParametersSelect.putParameterValue(LogbookParameterName.eventDateTime, LocalDateUtil.nowFormatted());
         logbookParametersSelect.putParameterValue(
             LogbookParameterName.agentIdentifier,
             ServerIdentity.getInstance().getJsonIdentity()
@@ -669,7 +666,7 @@ public class LogbookResourceTest {
     @Test
     public void testSelectOperationId() throws Exception {
         VitamThreadUtils.getVitamSession().setTenantId(TENANT_ID);
-        logbookParametersSelectId.putParameterValue(LogbookParameterName.eventDateTime, LocalDateUtil.now().toString());
+        logbookParametersSelectId.putParameterValue(LogbookParameterName.eventDateTime, LocalDateUtil.nowFormatted());
         logbookParametersSelectId.putParameterValue(
             LogbookParameterName.agentIdentifier,
             ServerIdentity.getInstance().getJsonIdentity()

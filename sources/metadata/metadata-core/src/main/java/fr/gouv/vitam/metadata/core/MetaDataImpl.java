@@ -163,7 +163,6 @@ import static fr.gouv.vitam.metadata.core.model.UpdateUnitKey.UNIT_METADATA_NO_C
 import static fr.gouv.vitam.metadata.core.model.UpdateUnitKey.UNIT_METADATA_NO_NEW_DATA;
 import static fr.gouv.vitam.metadata.core.model.UpdateUnitKey.UNIT_METADATA_UPDATE;
 import static fr.gouv.vitam.metadata.core.model.UpdateUnitKey.UNIT_UNKNOWN_OR_FORBIDDEN;
-import static java.time.format.DateTimeFormatter.ISO_LOCAL_DATE_TIME;
 import static java.util.Collections.singletonList;
 import static java.util.function.Predicate.not;
 
@@ -423,7 +422,7 @@ public class MetaDataImpl {
         Aggregations aUAccessionRegisterInfo = selectArchiveUnitAccessionRegisterInformation(tenant);
         Aggregations oGAccessionRegisterInfo = selectObjectGroupAccessionRegisterInformation(tenant);
 
-        String creationDate = ISO_LOCAL_DATE_TIME.format(LocalDateUtil.now());
+        String creationDate = LocalDateUtil.nowFormatted();
 
         return createWithInformations(aUAccessionRegisterInfo, oGAccessionRegisterInfo, creationDate, tenant);
     }
@@ -1261,7 +1260,7 @@ public class MetaDataImpl {
             scrollRequestDateFilter,
             Updates.combine(
                 Updates.setOnInsert(VitamDocument.ID, GUIDFactory.newGUID().getId()),
-                set(MetadataSnapshot.VALUE, LocalDateUtil.getFormattedDateForMongo(LocalDateUtil.now()))
+                set(MetadataSnapshot.VALUE, LocalDateUtil.nowFormatted())
             ),
             new UpdateOptions().upsert(true)
         );
